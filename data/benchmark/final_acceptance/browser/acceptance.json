@@ -1,0 +1,254 @@
+{
+  "started_at": "2026-11-21T04:41:38.975669+00:00",
+  "kind": "live_browser_end_to_end",
+  "checks": [
+    {
+      "name": "ui_document_upload_real_bge_postgresql",
+      "passed": true,
+      "document_id": "75d678a8-aa5b-4d25-8fbc-1076068561bd",
+      "dimensions": 1024
+    },
+    {
+      "name": "ui_research_creation_polling_completed_report",
+      "passed": true,
+      "task_id": "45e46086-ecc8-4e26-a777-4efbbbe13f21",
+      "coverage": 1.0
+    },
+    {
+      "name": "trace_actions_observations_mode_and_actual_model",
+      "passed": true,
+      "mode": "local",
+      "model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "steps": 2
+    },
+    {
+      "name": "click_evidence_id_displays_original_with_provenance",
+      "passed": true,
+      "evidence_id": "9c9ca6c3-a17a-576e-b760-3b814f677714"
+    },
+    {
+      "name": "report_download_and_evidence_index",
+      "passed": true
+    },
+    {
+      "name": "evaluation_dashboard_via_api",
+      "passed": true
+    },
+    {
+      "name": "history_after_browser_reload",
+      "passed": true
+    }
+  ],
+  "task_id": "45e46086-ecc8-4e26-a777-4efbbbe13f21",
+  "query": "根据内部文档，仅核对一个 Claim：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？",
+  "document_id": "75d678a8-aa5b-4d25-8fbc-1076068561bd",
+  "inference": {
+    "mode": "local",
+    "model": "/data0/liuxule/project/models/Qwen3.8-27B",
+    "version": "0.1.0"
+  },
+  "trace": {
+    "task_id": "45e46086-ecc8-4e26-a777-4efbbbe13f21",
+    "status": "completed",
+    "steps": [
+      {
+        "id": "efc96126-4200-4363-8ea1-a5494b5fbf73",
+        "step_index": 1,
+        "claim_id": "C1",
+        "tool_name": "rag_retrieve_tool",
+        "arguments": {
+          "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+          "top_k": 5
+        },
+        "observation": {
+          "ok": true,
+          "summary": "Retrieved 1 exact document excerpts.",
+          "evidence_ids": [
+            "9c9ca6c3-a17a-576e-b760-3b814f677714"
+          ],
+          "source_ids": [],
+          "chunk_ids": [
+            "d6eed2ad-1222-4941-8fc8-4602f982f81c"
+          ],
+          "error_category": null
+        },
+        "status": "success",
+        "elapsed_ms": 1144.7356194257736,
+        "error_category": null,
+        "trace": {
+          "inference": {
+            "operation": "agent_router",
+            "mode": "local",
+            "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "elapsed_ms": 1762.0933568105102,
+            "attempts": 1,
+            "error_category": null,
+            "prompt_tokens": 703,
+            "completion_tokens": 66,
+            "total_tokens": 769,
+            "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+          },
+          "mode": "local",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "policy": {
+            "proposed_action": "RETRIEVE_RAG",
+            "selected_action": "RETRIEVE_RAG",
+            "reason": "missing_internal_evidence"
+          }
+        }
+      },
+      {
+        "id": "f9365588-6883-4517-9cd9-2b0538fb0e8c",
+        "step_index": 2,
+        "claim_id": "C1",
+        "tool_name": "verify_claim_tool",
+        "arguments": {
+          "claim_id": "C1"
+        },
+        "observation": {
+          "ok": true,
+          "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly confirms the default Chunk Size (500 tokens) and Overlap (80 tokens) for EvidencePilot.",
+          "evidence_ids": [],
+          "source_ids": [],
+          "chunk_ids": [],
+          "error_category": null
+        },
+        "status": "success",
+        "elapsed_ms": 12456.613490357995,
+        "error_category": null,
+        "trace": {
+          "inference": {
+            "operation": "agent_router",
+            "mode": "local",
+            "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "elapsed_ms": 1251.7845490947366,
+            "attempts": 1,
+            "error_category": null,
+            "prompt_tokens": 885,
+            "completion_tokens": 42,
+            "total_tokens": 927,
+            "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+          },
+          "mode": "local",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "policy": {
+            "proposed_action": "VERIFY",
+            "selected_action": "VERIFY",
+            "reason": "verify_before_more_acquisition"
+          }
+        }
+      }
+    ],
+    "policy_decisions": [
+      {
+        "decision_index": 1,
+        "proposed_action": "RETRIEVE_RAG",
+        "selected_action": "RETRIEVE_RAG",
+        "target_claim_id": "C1",
+        "reason": "missing_internal_evidence",
+        "snapshot": {
+          "remaining_budget": 6,
+          "coverage": 0.0,
+          "retrieval_action_count": 0,
+          "claim_retrieval_counts": {},
+          "query_rewrite_count": 0,
+          "statuses": {
+            "C1": "NOT_RETRIEVED"
+          }
+        }
+      },
+      {
+        "decision_index": 2,
+        "proposed_action": "VERIFY",
+        "selected_action": "VERIFY",
+        "target_claim_id": "C1",
+        "reason": "verify_before_more_acquisition",
+        "snapshot": {
+          "remaining_budget": 5,
+          "coverage": 0.0,
+          "retrieval_action_count": 1,
+          "claim_retrieval_counts": {
+            "C1": 1
+          },
+          "query_rewrite_count": 0,
+          "statuses": {
+            "C1": "RETRIEVED"
+          }
+        }
+      }
+    ],
+    "reflections": [],
+    "checkpoints": [
+      {
+        "sequence": 1,
+        "next_node": "planner",
+        "created_at": "2026-11-21T04:41:50.753216+00:00"
+      },
+      {
+        "sequence": 2,
+        "next_node": "router",
+        "created_at": "2026-11-21T04:42:17.869975+00:00"
+      },
+      {
+        "sequence": 3,
+        "next_node": "tool_executor",
+        "created_at": "2026-11-21T04:42:19.673005+00:00"
+      },
+      {
+        "sequence": 4,
+        "next_node": "recover_tool",
+        "created_at": "2026-11-21T04:42:19.696200+00:00"
+      },
+      {
+        "sequence": 5,
+        "next_node": "state_updater",
+        "created_at": "2026-11-21T04:42:20.856588+00:00"
+      },
+      {
+        "sequence": 6,
+        "next_node": "verifier",
+        "created_at": "2026-11-21T04:42:20.884932+00:00"
+      },
+      {
+        "sequence": 7,
+        "next_node": "router",
+        "created_at": "2026-11-21T04:42:20.915983+00:00"
+      },
+      {
+        "sequence": 8,
+        "next_node": "tool_executor",
+        "created_at": "2026-11-21T04:42:22.196849+00:00"
+      },
+      {
+        "sequence": 9,
+        "next_node": "recover_tool",
+        "created_at": "2026-11-21T04:42:22.216866+00:00"
+      },
+      {
+        "sequence": 10,
+        "next_node": "state_updater",
+        "created_at": "2026-11-21T04:42:34.683167+00:00"
+      },
+      {
+        "sequence": 11,
+        "next_node": "verifier",
+        "created_at": "2026-11-21T04:42:34.696123+00:00"
+      },
+      {
+        "sequence": 12,
+        "next_node": "reporter",
+        "created_at": "2026-11-21T04:42:34.714866+00:00"
+      },
+      {
+        "sequence": 13,
+        "next_node": "END",
+        "created_at": "2026-11-21T04:42:34.727380+00:00"
+      }
+    ]
+  },
+  "status": "passed",
+  "finished_at": "2026-11-21T04:42:43.683347+00:00",
+  "browser_errors": []
+}

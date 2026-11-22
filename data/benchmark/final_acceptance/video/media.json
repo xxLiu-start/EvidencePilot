@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "path": "docs/demo/evidencepilot-demo.webm",
+  "duration_seconds": 220.04,
+  "bytes": 23285032,
+  "format": "webm",
+  "audio": "silent_screen_recording",
+  "recording": "real_chromium_streamlit_fastapi_postgresql_qwen_bge"
+}

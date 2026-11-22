@@ -1,0 +1,1658 @@
+{
+  "tasks": [
+    {
+      "task_id": "research_001",
+      "category": "single_source",
+      "query": "BAAI/bge-m3 的 Dense 向量维度是多少？",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 Dense 向量维度是多少？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "1024"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+              "quote_start": 4340,
+              "quote_end": 4580,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BGE-M3 Dense 向量维度"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+          "quote_start": 4340,
+          "quote_end": 4580,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_002",
+      "category": "single_source",
+      "query": "BAAI/bge-m3 模型卡给出的最大输入长度是多少 tokens？",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 最大输入长度是多少？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "8192|8,192"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeline in RAG**\n\nWe recommend to use the following pipeline: hybrid retrieval + re-ranking. \n- Hybrid retrieval leverages the strengths of various methods, offering",
+              "quote_start": 871,
+              "quote_end": 1111,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BGE-M3 最大输入长度"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeline in RAG**\n\nWe recommend to use the following pipeline: hybrid retrieval + re-ranking. \n- Hybrid retrieval leverages the strengths of various methods, offering",
+          "quote_start": 871,
+          "quote_end": 1111,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_003",
+      "category": "single_source",
+      "query": "pgvector v0.8.0 的 HNSW 是否必须先有训练数据才能建索引？",
+      "required_claims": [
+        {
+          "claim": "HNSW 建索引是否需要训练数据？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "不需要|无需|without|no training"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat.\n\nAdd an index for each distance function you want to use.\n\nL2 distance\n\n```sql\nCREATE INDEX ON items USING hnsw (embedding vector_l2",
+              "quote_start": 5729,
+              "quote_end": 5969,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "HNSW 不需要训练数据即可创建"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat.\n\nAdd an index for each distance function you want to use.\n\nL2 distance\n\n```sql\nCREATE INDEX ON items USING hnsw (embedding vector_l2",
+          "quote_start": 5729,
+          "quote_end": 5969,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_004",
+      "category": "single_source",
+      "query": "FastAPI BackgroundTasks 在响应返回前还是返回后运行？",
+      "required_claims": [
+        {
+          "claim": "BackgroundTasks 在响应前还是响应后执行？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "后|after"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "fastapi",
+              "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+              "supporting_text": "You can define background tasks to be run after returning a response.\nThis is useful for operations that need to happen after a request, but that the client doesn't really have to be waiting for the operation to complete before receiving th",
+              "quote_start": 174,
+              "quote_end": 414,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "fastapi"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "后台任务在响应返回后执行"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "fastapi",
+          "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+          "supporting_text": "You can define background tasks to be run after returning a response.\nThis is useful for operations that need to happen after a request, but that the client doesn't really have to be waiting for the operation to complete before receiving th",
+          "quote_start": 174,
+          "quote_end": 414,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_005",
+      "category": "multi_source",
+      "query": "依据两个官方模型卡，核对 BGE-M3 和 bge-reranker-v2-m3 是否都支持多语言。",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 是否支持多语言？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "多语|multilingual|100"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "It can support more than 100 working languages. \n- Multi-Granularity: It is able to process inputs of different granularities, spanning from short sentences to long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeli",
+              "quote_start": 711,
+              "quote_end": 951,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BGE-M3 支持多语言"
+        },
+        {
+          "claim": "bge-reranker-v2-m3 是否支持多语言？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "多语|multilingual"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "reranker",
+              "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+              "supporting_text": "[BAAI/bge-reranker-v2-m3](https://huggingface.co/BAAI/bge-reranker-v2-m3) | [bge-m3](https://huggingface.co/BAAI/bge-m3) |    Multilingual     |     -     | Lightweight reranker model, possesses strong multilingual capabilities, easy to dep",
+              "quote_start": 1867,
+              "quote_end": 2107,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "reranker"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "bge-reranker-v2-m3 支持多语言"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "It can support more than 100 working languages. \n- Multi-Granularity: It is able to process inputs of different granularities, spanning from short sentences to long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeli",
+          "quote_start": 711,
+          "quote_end": 951,
+          "relation": "supports"
+        },
+        {
+          "source_id": "reranker",
+          "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+          "supporting_text": "[BAAI/bge-reranker-v2-m3](https://huggingface.co/BAAI/bge-reranker-v2-m3) | [bge-m3](https://huggingface.co/BAAI/bge-m3) |    Multilingual     |     -     | Lightweight reranker model, possesses strong multilingual capabilities, easy to dep",
+          "quote_start": 1867,
+          "quote_end": 2107,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_006",
+      "category": "multi_source",
+      "query": "用 pgvector 存储 BGE-M3 Dense 向量应声明多少维？再核对 pgvector 是否支持余弦距离。",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 在 pgvector 中应使用多少维？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "1024"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+              "quote_start": 4340,
+              "quote_end": 4580,
+              "relation": "supports"
+            },
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Create a vector column with 3 dimensions\n\n```sql\nCREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));\n```\n\nInsert vectors\n\n```sql\nINSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]');\n```\n\nGet the nearest neighbors b",
+              "quote_start": 2354,
+              "quote_end": 2594,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ],
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BGE-M3 应存为 1024 维"
+        },
+        {
+          "claim": "pgvector 是否支持余弦距离？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "余弦|cosine|<=>"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Also supports inner product (`<#>`), cosine distance (`<=>`), and L1 distance (`<+>`, added in 0.7.0)\n\nNote: `<#>` returns the negative inner product since Postgres only supports `ASC` order index scans on operators\n\n## Storing\n\nCreate a ne",
+              "quote_start": 2683,
+              "quote_end": 2923,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "pgvector 支持余弦距离"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+          "quote_start": 4340,
+          "quote_end": 4580,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Create a vector column with 3 dimensions\n\n```sql\nCREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));\n```\n\nInsert vectors\n\n```sql\nINSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]');\n```\n\nGet the nearest neighbors b",
+          "quote_start": 2354,
+          "quote_end": 2594,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Also supports inner product (`<#>`), cosine distance (`<=>`), and L1 distance (`<+>`, added in 0.7.0)\n\nNote: `<#>` returns the negative inner product since Postgres only supports `ASC` order index scans on operators\n\n## Storing\n\nCreate a ne",
+          "quote_start": 2683,
+          "quote_end": 2923,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_007",
+      "category": "multi_source",
+      "query": "比较 FastAPI BackgroundTasks 与 LangGraph 的内存检查点：是否适合持久恢复，重启后内存检查点是否保留？",
+      "required_claims": [
+        {
+          "claim": "FastAPI 后台任务适用范围及复杂任务方案是什么？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "Celery|同.*进程|same process"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "fastapi",
+              "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+              "supporting_text": "you might benefit from using other bigger tools like Celery.\nThey tend to require more complex configurations, a message/job queue manager, like RabbitMQ or Redis, but they allow you to run background tasks in multiple processes, and especi",
+              "quote_start": 6568,
+              "quote_end": 6808,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "fastapi"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BackgroundTasks 同进程适用，小任务可用，复杂任务可选 Celery"
+        },
+        {
+          "claim": "LangGraph 内存 Checkpointer 重启后状态如何？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "丢失|不.*保留|lost|RAM|内存"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "langgraph",
+              "source_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+              "supporting_text": "MemorySaver and InMemorySaver store checkpoints in RAM. When the process restarts, all checkpoints are lost.\nFix: Use a persistent checkpointer for production:\n- PostgresSaver: PostgreSQL with async support\n- SqliteSaver: Local file-based s",
+              "quote_start": 1512,
+              "quote_end": 1752,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "langgraph"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "MemorySaver/InMemorySaver 重启会丢失"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "fastapi",
+          "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+          "supporting_text": "you might benefit from using other bigger tools like Celery.\nThey tend to require more complex configurations, a message/job queue manager, like RabbitMQ or Redis, but they allow you to run background tasks in multiple processes, and especi",
+          "quote_start": 6568,
+          "quote_end": 6808,
+          "relation": "supports"
+        },
+        {
+          "source_id": "langgraph",
+          "source_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "supporting_text": "MemorySaver and InMemorySaver store checkpoints in RAM. When the process restarts, all checkpoints are lost.\nFix: Use a persistent checkpointer for production:\n- PostgresSaver: PostgreSQL with async support\n- SqliteSaver: Local file-based s",
+          "quote_start": 1512,
+          "quote_end": 1752,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_008",
+      "category": "multi_source",
+      "query": "BGE-M3 建议的 RAG 检索流水线是什么？bge-reranker 输出向量还是相关性分数？",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 推荐什么检索流水线？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "hybrid|混合",
+            "rerank|重排|重排序"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "We recommend to use the following pipeline: hybrid retrieval + re-ranking. \n- Hybrid retrieval leverages the strengths of various methods, offering higher accuracy and stronger generalization capabilities. \nA classic example: using both emb",
+              "quote_start": 964,
+              "quote_end": 1204,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "建议 hybrid retrieval 加 reranking"
+        },
+        {
+          "claim": "reranker 的输出形式是什么？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "分数|score|similarity"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "reranker",
+              "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+              "supporting_text": "directly output similarity instead of embedding. \nYou can get a relevance score by inputting query and passage to the reranker. \nAnd the score can be mapped to a float value in [0,1] by sigmoid function.\n\n\n## Model List\n\n| Model            ",
+              "quote_start": 499,
+              "quote_end": 739,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "reranker"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "reranker 输出相关性分数而非 embedding"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "We recommend to use the following pipeline: hybrid retrieval + re-ranking. \n- Hybrid retrieval leverages the strengths of various methods, offering higher accuracy and stronger generalization capabilities. \nA classic example: using both emb",
+          "quote_start": 964,
+          "quote_end": 1204,
+          "relation": "supports"
+        },
+        {
+          "source_id": "reranker",
+          "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+          "supporting_text": "directly output similarity instead of embedding. \nYou can get a relevance score by inputting query and passage to the reranker. \nAnd the score can be mapped to a float value in [0,1] by sigmoid function.\n\n\n## Model List\n\n| Model            ",
+          "quote_start": 499,
+          "quote_end": 739,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_009",
+      "category": "multi_hop",
+      "query": "先查 BGE-M3 Dense 维度，再推导 pgvector 建表列类型并给出余弦距离运算符。",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 维度对应的 pgvector 列类型是什么？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "vector\\s*\\(\\s*1024\\s*\\)"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+              "quote_start": 4340,
+              "quote_end": 4580,
+              "relation": "supports"
+            },
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Create a vector column with 3 dimensions\n\n```sql\nCREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));\n```\n\nInsert vectors\n\n```sql\nINSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]');\n```\n\nGet the nearest neighbors b",
+              "quote_start": 2354,
+              "quote_end": 2594,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ],
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "维度对应 vector(1024)"
+        },
+        {
+          "claim": "余弦距离运算符是什么？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "<=>"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Also supports inner product (`<#>`), cosine distance (`<=>`), and L1 distance (`<+>`, added in 0.7.0)\n\nNote: `<#>` returns the negative inner product since Postgres only supports `ASC` order index scans on operators\n\n## Storing\n\nCreate a ne",
+              "quote_start": 2683,
+              "quote_end": 2923,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "余弦距离使用 <=>"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|\n| [BAAI/bge-m3-unsupervised](https://huggingface.co/BAAI/bge-m3-unsupervised) | 102",
+          "quote_start": 4340,
+          "quote_end": 4580,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Create a vector column with 3 dimensions\n\n```sql\nCREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));\n```\n\nInsert vectors\n\n```sql\nINSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]');\n```\n\nGet the nearest neighbors b",
+          "quote_start": 2354,
+          "quote_end": 2594,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Also supports inner product (`<#>`), cosine distance (`<=>`), and L1 distance (`<+>`, added in 0.7.0)\n\nNote: `<#>` returns the negative inner product since Postgres only supports `ASC` order index scans on operators\n\n## Storing\n\nCreate a ne",
+          "quote_start": 2683,
+          "quote_end": 2923,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_010",
+      "category": "multi_hop",
+      "query": "研究服务需响应后执行，并在进程重启后保留任务状态：FastAPI 怎么安排工作，LangGraph 的内存 Checkpointer 是否足够？",
+      "required_claims": [
+        {
+          "claim": "FastAPI 如何安排响应后的工作？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "后|after"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "fastapi",
+              "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+              "supporting_text": "You can define background tasks to be run after returning a response.\nThis is useful for operations that need to happen after a request, but that the client doesn't really have to be waiting for the operation to complete before receiving th",
+              "quote_start": 174,
+              "quote_end": 414,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "fastapi"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BackgroundTasks 响应后执行"
+        },
+        {
+          "claim": "如何让 LangGraph 状态在重启后保留？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "PostgresSaver|SqliteSaver|持久|persistent"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "langgraph",
+              "source_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+              "supporting_text": "MemorySaver and InMemorySaver store checkpoints in RAM. When the process restarts, all checkpoints are lost.\nFix: Use a persistent checkpointer for production:\n- PostgresSaver: PostgreSQL with async support\n- SqliteSaver: Local file-based s",
+              "quote_start": 1512,
+              "quote_end": 1752,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "langgraph"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "内存 Checkpointer 不够，需要持久化 Checkpointer"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "fastapi",
+          "source_url": "https://fastapi.tiangolo.com/tutorial/background-tasks/",
+          "supporting_text": "You can define background tasks to be run after returning a response.\nThis is useful for operations that need to happen after a request, but that the client doesn't really have to be waiting for the operation to complete before receiving th",
+          "quote_start": 174,
+          "quote_end": 414,
+          "relation": "supports"
+        },
+        {
+          "source_id": "langgraph",
+          "source_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "supporting_text": "MemorySaver and InMemorySaver store checkpoints in RAM. When the process restarts, all checkpoints are lost.\nFix: Use a persistent checkpointer for production:\n- PostgresSaver: PostgreSQL with async support\n- SqliteSaver: Local file-based s",
+          "quote_start": 1512,
+          "quote_end": 1752,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_011",
+      "category": "multi_hop",
+      "query": "为中文英文混合资料设计检索：BGE-M3 是否支持这类语言输入，召回后 bge-reranker 如何计算候选相关性？",
+      "required_claims": [
+        {
+          "claim": "BGE-M3 能否处理中文英文资料？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "多语|multilingual|100"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "bge",
+              "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+              "supporting_text": "It can support more than 100 working languages. \n- Multi-Granularity: It is able to process inputs of different granularities, spanning from short sentences to long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeli",
+              "quote_start": 711,
+              "quote_end": 951,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "bge"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "BGE-M3 多语言支持"
+        },
+        {
+          "claim": "reranker 如何使用查询与候选文本计算相关性？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "query|查询",
+            "passage|文本|文档|候选",
+            "分数|score|相关"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "reranker",
+              "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+              "supporting_text": "directly output similarity instead of embedding. \nYou can get a relevance score by inputting query and passage to the reranker. \nAnd the score can be mapped to a float value in [0,1] by sigmoid function.\n\n\n## Model List\n\n| Model            ",
+              "quote_start": 499,
+              "quote_end": 739,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "reranker"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "reranker 对 query 与 passage 输入输出分数"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "bge",
+          "source_url": "https://huggingface.co/BAAI/bge-m3/raw/main/README.md",
+          "supporting_text": "It can support more than 100 working languages. \n- Multi-Granularity: It is able to process inputs of different granularities, spanning from short sentences to long documents of up to 8192 tokens. \n\n\n\n**Some suggestions for retrieval pipeli",
+          "quote_start": 711,
+          "quote_end": 951,
+          "relation": "supports"
+        },
+        {
+          "source_id": "reranker",
+          "source_url": "https://huggingface.co/BAAI/bge-reranker-v2-m3/raw/main/README.md",
+          "supporting_text": "directly output similarity instead of embedding. \nYou can get a relevance score by inputting query and passage to the reranker. \nAnd the score can be mapped to a float value in [0,1] by sigmoid function.\n\n\n## Model List\n\n| Model            ",
+          "quote_start": 499,
+          "quote_end": 739,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_012",
+      "category": "multi_hop",
+      "query": "已提交任务状态需要崩溃安全：PostgreSQL 异步提交与 fsync=off 的风险相同吗，fsync 开启如何保护落盘？",
+      "required_claims": [
+        {
+          "claim": "异步提交在崩溃后有什么风险？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "丢失|loss",
+            "不.*损坏|not.*corruption|一致"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgasync",
+              "source_url": "https://www.postgresql.org/docs/16/wal-async-commit.html",
+              "supporting_text": "The risk that is taken by using asynchronous commit is of data loss, not data corruption. If the database should crash, it will recover by replaying WAL up to the last record that was flushed. The database will therefore be restored to a se",
+              "quote_start": 1604,
+              "quote_end": 1844,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgasync"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "异步提交可能丢近期事务但不会因此损坏数据库"
+        },
+        {
+          "claim": "fsync 开关如何影响崩溃安全和物理落盘？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "fsync",
+            "损坏|corrupt|落盘|disk"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgasync",
+              "source_url": "https://www.postgresql.org/docs/16/wal-async-commit.html",
+              "supporting_text": "Asynchronous commit provides behavior different from setting fsync = off. fsync is a server-wide setting that will alter the behavior of all transactions. It disables all logic within PostgreSQL that attempts to synchronize writes to differ",
+              "quote_start": 3810,
+              "quote_end": 4050,
+              "relation": "supports"
+            },
+            {
+              "source_id": "pgwal",
+              "source_url": "https://www.postgresql.org/docs/16/runtime-config-wal.html",
+              "supporting_text": "If this parameter is on, the PostgreSQL server will try to make sure that updates are physically written to disk, by issuing fsync() system calls or various equivalent methods (see wal_sync_method). This ensures that the database cluster ca",
+              "quote_start": 1882,
+              "quote_end": 2122,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgasync"
+            ],
+            [
+              "pgwal"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "fsync off 可能损坏，开启强制物理写盘"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "pgasync",
+          "source_url": "https://www.postgresql.org/docs/16/wal-async-commit.html",
+          "supporting_text": "The risk that is taken by using asynchronous commit is of data loss, not data corruption. If the database should crash, it will recover by replaying WAL up to the last record that was flushed. The database will therefore be restored to a se",
+          "quote_start": 1604,
+          "quote_end": 1844,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgasync",
+          "source_url": "https://www.postgresql.org/docs/16/wal-async-commit.html",
+          "supporting_text": "Asynchronous commit provides behavior different from setting fsync = off. fsync is a server-wide setting that will alter the behavior of all transactions. It disables all logic within PostgreSQL that attempts to synchronize writes to differ",
+          "quote_start": 3810,
+          "quote_end": 4050,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgwal",
+          "source_url": "https://www.postgresql.org/docs/16/runtime-config-wal.html",
+          "supporting_text": "If this parameter is on, the PostgreSQL server will try to make sure that updates are physically written to disk, by issuing fsync() system calls or various equivalent methods (see wal_sync_method). This ensures that the database cluster ca",
+          "quote_start": 1882,
+          "quote_end": 2122,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_013",
+      "category": "source_conflict",
+      "query": "两条官方资料分别写 131072 和 32768：核对 Qwen2.5-7B-Instruct 与 Qwen2.5-1.5B-Instruct 的完整上下文长度，解释是否同型号冲突。",
+      "required_claims": [
+        {
+          "claim": "Qwen2.5-7B-Instruct 完整上下文是多少？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "131.?072|128\\s*[kK]"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "qwen7",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+              "supporting_text": "Context Length: Full 131,072 tokens and generation 8192 tokens\n  - Please refer to [this section](#processing-long-texts) for detailed instructions on how to deploy Qwen2.5 for handling long texts.\n\nFor more details, please refer to our [bl",
+              "quote_start": 1927,
+              "quote_end": 2167,
+              "relation": "supports"
+            },
+            {
+              "source_id": "qwen7",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+              "supporting_text": "**Long-context Support** up to 128K tokens and can generate up to 8K tokens.\n- **Multilingual support** for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, ",
+              "quote_start": 1249,
+              "quote_end": 1489,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "qwen7"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "7B 完整上下文 131072"
+        },
+        {
+          "claim": "Qwen2.5-1.5B-Instruct 上下文是多少，与 7B 是否为同型号冲突？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "32.?768|32\\s*[kK]",
+            "不同|不.*冲突|different"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "qwen1",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/README.md",
+              "supporting_text": "Context Length: Full 32,768 tokens and generation 8192 tokens\n\nFor more details, please refer to our [blog](https://qwenlm.github.io/blog/qwen2.5/), [GitHub](https://github.com/QwenLM/Qwen2.5), and [Documentation](https://qwen.readthedocs.i",
+              "quote_start": 1721,
+              "quote_end": 1961,
+              "relation": "supports"
+            },
+            {
+              "source_id": "qwen7",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+              "supporting_text": "Context Length: Full 131,072 tokens and generation 8192 tokens\n  - Please refer to [this section](#processing-long-texts) for detailed instructions on how to deploy Qwen2.5 for handling long texts.\n\nFor more details, please refer to our [bl",
+              "quote_start": 1927,
+              "quote_end": 2167,
+              "relation": "supports"
+            },
+            {
+              "source_id": "qwen7",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+              "supporting_text": "**This repo contains the instruction-tuned 7B Qwen2.5 model**, which has the following features:\n- Type: Causal Language Models\n- Training Stage: Pretraining & Post-training\n- Architecture: transformers with RoPE, SwiGLU, RMSNorm, and Atten",
+              "quote_start": 1515,
+              "quote_end": 1755,
+              "relation": "supports"
+            },
+            {
+              "source_id": "qwen1",
+              "source_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/README.md",
+              "supporting_text": "**This repo contains the instruction-tuned 1.5B Qwen2.5 model**, which has the following features:\n- Type: Causal Language Models\n- Training Stage: Pretraining & Post-training\n- Architecture: transformers with RoPE, SwiGLU, RMSNorm, Attenti",
+              "quote_start": 1286,
+              "quote_end": 1526,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "qwen1"
+            ],
+            [
+              "qwen7"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "1.5B 完整上下文 32768，型号不同不构成同型号矛盾"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "qwen7",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+          "supporting_text": "Context Length: Full 131,072 tokens and generation 8192 tokens\n  - Please refer to [this section](#processing-long-texts) for detailed instructions on how to deploy Qwen2.5 for handling long texts.\n\nFor more details, please refer to our [bl",
+          "quote_start": 1927,
+          "quote_end": 2167,
+          "relation": "supports"
+        },
+        {
+          "source_id": "qwen7",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+          "supporting_text": "**Long-context Support** up to 128K tokens and can generate up to 8K tokens.\n- **Multilingual support** for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, ",
+          "quote_start": 1249,
+          "quote_end": 1489,
+          "relation": "supports"
+        },
+        {
+          "source_id": "qwen1",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/README.md",
+          "supporting_text": "Context Length: Full 32,768 tokens and generation 8192 tokens\n\nFor more details, please refer to our [blog](https://qwenlm.github.io/blog/qwen2.5/), [GitHub](https://github.com/QwenLM/Qwen2.5), and [Documentation](https://qwen.readthedocs.i",
+          "quote_start": 1721,
+          "quote_end": 1961,
+          "relation": "supports"
+        },
+        {
+          "source_id": "qwen7",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+          "supporting_text": "Context Length: Full 131,072 tokens and generation 8192 tokens\n  - Please refer to [this section](#processing-long-texts) for detailed instructions on how to deploy Qwen2.5 for handling long texts.\n\nFor more details, please refer to our [bl",
+          "quote_start": 1927,
+          "quote_end": 2167,
+          "relation": "supports"
+        },
+        {
+          "source_id": "qwen7",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/raw/main/README.md",
+          "supporting_text": "**This repo contains the instruction-tuned 7B Qwen2.5 model**, which has the following features:\n- Type: Causal Language Models\n- Training Stage: Pretraining & Post-training\n- Architecture: transformers with RoPE, SwiGLU, RMSNorm, and Atten",
+          "quote_start": 1515,
+          "quote_end": 1755,
+          "relation": "supports"
+        },
+        {
+          "source_id": "qwen1",
+          "source_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/raw/main/README.md",
+          "supporting_text": "**This repo contains the instruction-tuned 1.5B Qwen2.5 model**, which has the following features:\n- Type: Causal Language Models\n- Training Stage: Pretraining & Post-training\n- Architecture: transformers with RoPE, SwiGLU, RMSNorm, Attenti",
+          "quote_start": 1286,
+          "quote_end": 1526,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_014",
+      "category": "source_conflict",
+      "query": "同一份 pgvector 文档同时说不需训练和要训练，这矛盾吗？区分 HNSW 与 IVFFlat。",
+      "required_claims": [
+        {
+          "claim": "HNSW 是否有训练步骤？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "无需|不需要|without|no training"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat.\n\nAdd an index for each distance function you want to use.\n\nL2 distance\n\n```sql\nCREATE INDEX ON items USING hnsw (embedding vector_l2",
+              "quote_start": 5729,
+              "quote_end": 5969,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "HNSW 无训练步骤"
+        },
+        {
+          "claim": "IVFFlat 的训练要求与 HNSW 是否矛盾？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "训练|training",
+            "不同|different|IVFFlat"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pgvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+              "supporting_text": "An IVFFlat index divides vectors into lists, and then searches a subset of those lists that are closest to the query vector. It has faster build times and uses less memory than HNSW, but has lower query performance (in terms of speed-recall",
+              "quote_start": 8817,
+              "quote_end": 9057,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pgvector"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "IVFFlat 需要训练，属于不同索引类型"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat.\n\nAdd an index for each distance function you want to use.\n\nL2 distance\n\n```sql\nCREATE INDEX ON items USING hnsw (embedding vector_l2",
+          "quote_start": 5729,
+          "quote_end": 5969,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pgvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.8.0/README.md",
+          "supporting_text": "An IVFFlat index divides vectors into lists, and then searches a subset of those lists that are closest to the query vector. It has faster build times and uses less memory than HNSW, but has lower query performance (in terms of speed-recall",
+          "quote_start": 8817,
+          "quote_end": 9057,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_015",
+      "category": "source_conflict",
+      "query": "有人说 Optional[str] 可省略，也有人说必须提供。依据 Pydantic v2 迁移文档解释版本变化及添加 = None 后的行为。",
+      "required_claims": [
+        {
+          "claim": "Pydantic V2 Optional 无默认值的必填行为与 V1 有何区别？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "必填|required|必须",
+            "V1|版本|变化|breaking"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pydantic",
+              "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+              "supporting_text": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`.\n    It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_\n\n!!! note\n    Any default value if p",
+              "quote_start": 29136,
+              "quote_end": 29376,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pydantic"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "V2 Optional 无默认值仍必填，可取 None，与 V1 不同"
+        },
+        {
+          "claim": "添加显式默认 None 后能否省略字段？",
+          "expected_status": "SUPPORTED",
+          "answer_patterns": [
+            "None",
+            "省略|不.*必填|not required|可选|默认"
+          ],
+          "reference_evidence": [
+            {
+              "source_id": "pydantic",
+              "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+              "supporting_text": "Any default value if provided makes a field not required.\n\nHere is a code example demonstrating the above:\n```python\nfrom typing import Optional\n\nfrom pydantic import BaseModel, ValidationError\n\n\nclass Foo(BaseModel):\n    f1: str  # require",
+              "quote_start": 29354,
+              "quote_end": 29594,
+              "relation": "supports"
+            },
+            {
+              "source_id": "pydantic",
+              "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+              "supporting_text": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`.\n    It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_\n\n!!! note\n    Any default value if p",
+              "quote_start": 29136,
+              "quote_end": 29376,
+              "relation": "supports"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "pydantic"
+            ]
+          ],
+          "id": "C2",
+          "reference_statement": "显式默认 None 后可省略"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "pydantic",
+          "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+          "supporting_text": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`.\n    It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_\n\n!!! note\n    Any default value if p",
+          "quote_start": 29136,
+          "quote_end": 29376,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pydantic",
+          "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+          "supporting_text": "Any default value if provided makes a field not required.\n\nHere is a code example demonstrating the above:\n```python\nfrom typing import Optional\n\nfrom pydantic import BaseModel, ValidationError\n\n\nclass Foo(BaseModel):\n    f1: str  # require",
+          "quote_start": 29354,
+          "quote_end": 29594,
+          "relation": "supports"
+        },
+        {
+          "source_id": "pydantic",
+          "source_url": "https://raw.githubusercontent.com/pydantic/pydantic/v2.10.6/docs/migration.md",
+          "supporting_text": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`.\n    It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_\n\n!!! note\n    Any default value if p",
+          "quote_start": 29136,
+          "quote_end": 29376,
+          "relation": "supports"
+        }
+      ],
+      "expected_status": "answerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_016",
+      "category": "outdated",
+      "query": "仅依据所给 2024 年 Qwen2.5 发布公告，确认 2026 年 Qwen3.8 当前完整上下文长度。若依据过期应标 OUTDATED。",
+      "required_claims": [
+        {
+          "claim": "给定旧公告能否验证当前 Qwen3.8 上下文？",
+          "expected_status": "OUTDATED",
+          "answer_patterns": [],
+          "reference_evidence": [
+            {
+              "source_id": "oldqwen",
+              "source_url": "https://qwenlm.github.io/blog/qwen2.5/",
+              "supporting_text": "support up to 128K tokens and can generate up to 8K tokens. They also maintain multilingual support for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai",
+              "quote_start": 2383,
+              "quote_end": 2623,
+              "relation": "outdated"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "oldqwen"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "旧 Qwen2.5 公告不能验证当前 Qwen3.8 上下文"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "oldqwen",
+          "source_url": "https://qwenlm.github.io/blog/qwen2.5/",
+          "supporting_text": "support up to 128K tokens and can generate up to 8K tokens. They also maintain multilingual support for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai",
+          "quote_start": 2383,
+          "quote_end": 2623,
+          "relation": "outdated"
+        }
+      ],
+      "expected_status": "outdated",
+      "allowed_source_ids": [
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_017",
+      "category": "outdated",
+      "query": "仅依据 pgvector v0.7.0 历史 README，确认 v0.8.0 iterative_scan 配置行为。旧版本不足请标 OUTDATED。",
+      "required_claims": [
+        {
+          "claim": "给定旧版本能否确认目标版本 iterative_scan 行为？",
+          "expected_status": "OUTDATED",
+          "answer_patterns": [],
+          "reference_evidence": [
+            {
+              "source_id": "oldvector",
+              "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.7.0/README.md",
+              "supporting_text": "# pgvector\n\nOpen-source vector similarity search for Postgres\n\nStore your vectors with the rest of your data. Supports:\n\n- exact and approximate nearest neighbor search\n- single-precision, half-precision, binary, and sparse vectors\n- L2 dis",
+              "quote_start": 0,
+              "quote_end": 240,
+              "relation": "outdated"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "oldvector"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "0.7.0 快照不能确认 0.8.0 iterative_scan"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "oldvector",
+          "source_url": "https://raw.githubusercontent.com/pgvector/pgvector/v0.7.0/README.md",
+          "supporting_text": "# pgvector\n\nOpen-source vector similarity search for Postgres\n\nStore your vectors with the rest of your data. Supports:\n\n- exact and approximate nearest neighbor search\n- single-precision, half-precision, binary, and sparse vectors\n- L2 dis",
+          "quote_start": 0,
+          "quote_end": 240,
+          "relation": "outdated"
+        }
+      ],
+      "expected_status": "outdated",
+      "allowed_source_ids": [
+        "oldvector"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_018",
+      "category": "outdated",
+      "query": "仅依据 2024 年 Qwen2.5 发布公告，确认 2026 年当前 Qwen3.8 企业部署许可条款。请检查日期和型号，依据过期标 OUTDATED。",
+      "required_claims": [
+        {
+          "claim": "给定旧公告能否确认当前 Qwen3.8 部署许可？",
+          "expected_status": "OUTDATED",
+          "answer_patterns": [],
+          "reference_evidence": [
+            {
+              "source_id": "oldqwen",
+              "source_url": "https://qwenlm.github.io/blog/qwen2.5/",
+              "supporting_text": "support up to 128K tokens and can generate up to 8K tokens. They also maintain multilingual support for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai",
+              "quote_start": 2383,
+              "quote_end": 2623,
+              "relation": "outdated"
+            }
+          ],
+          "required_source_groups": [
+            [
+              "oldqwen"
+            ]
+          ],
+          "id": "C1",
+          "reference_statement": "旧版本公告不足以确认 Qwen3.8 当前许可"
+        }
+      ],
+      "reference_evidence": [
+        {
+          "source_id": "oldqwen",
+          "source_url": "https://qwenlm.github.io/blog/qwen2.5/",
+          "supporting_text": "support up to 128K tokens and can generate up to 8K tokens. They also maintain multilingual support for over 29 languages, including Chinese, English, French, Spanish, Portuguese, German, Italian, Russian, Japanese, Korean, Vietnamese, Thai",
+          "quote_start": 2383,
+          "quote_end": 2623,
+          "relation": "outdated"
+        }
+      ],
+      "expected_status": "outdated",
+      "allowed_source_ids": [
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_019",
+      "category": "unanswerable",
+      "query": "官方技术文档快照中，EvidencePilot 私有客户 Acme 的生产数据库密码是什么？没有直接证据必须弃答。",
+      "required_claims": [
+        {
+          "claim": "公开快照能否给出该私有密码？",
+          "expected_status": "INSUFFICIENT",
+          "answer_patterns": [],
+          "reference_evidence": [],
+          "required_source_groups": [],
+          "id": "C1",
+          "reference_statement": "没有 Acme 私有数据库密码证据"
+        }
+      ],
+      "reference_evidence": [],
+      "expected_status": "unanswerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    },
+    {
+      "task_id": "research_020",
+      "category": "unanswerable",
+      "query": "仅凭这些公开技术文档，给出 EvidencePilot 未发布的内部生产压测 QPS 精确值；无直接证据必须弃答。",
+      "required_claims": [
+        {
+          "claim": "公开文档能否确定未发布的生产 QPS？",
+          "expected_status": "INSUFFICIENT",
+          "answer_patterns": [],
+          "reference_evidence": [],
+          "required_source_groups": [],
+          "id": "C1",
+          "reference_statement": "没有未公开生产 QPS 数值证据"
+        }
+      ],
+      "reference_evidence": [],
+      "expected_status": "unanswerable",
+      "allowed_source_ids": [
+        "bge",
+        "reranker",
+        "pgvector",
+        "fastapi",
+        "langgraph",
+        "pydantic",
+        "qwen7",
+        "qwen1",
+        "pgasync",
+        "pgwal",
+        "oldvector",
+        "oldqwen"
+      ],
+      "evaluation_rubric": {
+        "requires_official_source": true,
+        "must_cite_each_claim": true,
+        "judge": "deterministic_status_patterns_and_exact_quote_qrels_v1",
+        "human_reviewed": false
+      }
+    }
+  ]
+}

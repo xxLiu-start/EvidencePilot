@@ -1,0 +1,77 @@
+{
+  "checked_at": "2026-11-20T12:50:18.232969+08:00",
+  "status": "partial",
+  "checks": [
+    {
+      "name": "complex_question_to_claims",
+      "passed": true,
+      "details": {
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "What are the official enterprise private deployment options and requirements for Qwen and DeepSeek?",
+            "priority": "high",
+            "required_source": "official"
+          },
+          {
+            "id": "C2",
+            "claim": "How do the official Function Calling capabilities and supported parameters differ between Qwen and DeepSeek?",
+            "priority": "high",
+            "required_source": "official"
+          }
+        ],
+        "planner_repaired": false
+      }
+    },
+    {
+      "name": "web_search_tool",
+      "passed": true,
+      "details": {
+        "search_count": 3
+      }
+    },
+    {
+      "name": "rag_retrieve_tool",
+      "passed": true,
+      "details": {
+        "retrieval_count": 1
+      }
+    },
+    {
+      "name": "tool_arguments_validated",
+      "passed": true,
+      "details": {
+        "tools": [
+          "open_source_tool",
+          "rag_retrieve_tool",
+          "web_search_tool"
+        ],
+        "mode": "structured_action"
+      }
+    },
+    {
+      "name": "all_tool_calls_in_agent_steps",
+      "passed": true,
+      "details": {
+        "rows": 8,
+        "remaining_budget": 0
+      }
+    },
+    {
+      "name": "langgraph_multiple_action_observation_rounds",
+      "passed": true,
+      "details": {
+        "rounds": 8,
+        "state_bytes": 7411,
+        "restart_persistence": true,
+        "repeat_run_is_idempotent": true
+      }
+    }
+  ],
+  "tool_call_mode": "structured_action",
+  "remote_tool_validation": {
+    "live_status": "pending_remote_configuration",
+    "reason": "Remote HTTPS URL, model ID and its own credential are not configured."
+  },
+  "acceptance_status": "passed"
+}

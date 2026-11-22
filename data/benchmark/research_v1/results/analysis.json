@@ -1,0 +1,141 @@
+{
+  "annotation_status": "agent_reviewed_pending_human",
+  "human_reviewed": false,
+  "analysis_script_sha256": "d85fad715221ad628a20693c5370c429ce911cd3a96cb06f5b76da30ddfecb51",
+  "bootstrap_seed": 0,
+  "bootstrap_draws": 10000,
+  "comparisons": [
+    {
+      "comparison": "EvidencePilot minus Naive RAG",
+      "accuracy_difference": 0.1,
+      "paired_bootstrap_95_interval": [
+        -0.1,
+        0.3
+      ],
+      "task_wins": 3,
+      "task_losses": 1,
+      "task_ties": 16,
+      "retrieval_call_difference": 1.0499999999999998,
+      "latency_seconds_difference": 51.46245990865864
+    },
+    {
+      "comparison": "EvidencePilot minus Fixed Search + RAG",
+      "accuracy_difference": 0.05,
+      "paired_bootstrap_95_interval": [
+        -0.1,
+        0.2
+      ],
+      "task_wins": 2,
+      "task_losses": 1,
+      "task_ties": 17,
+      "retrieval_call_difference": 0.04999999999999982,
+      "latency_seconds_difference": 47.43805136042647
+    },
+    {
+      "comparison": "EvidencePilot minus ReAct",
+      "accuracy_difference": 0.0,
+      "paired_bootstrap_95_interval": [
+        -0.2,
+        0.2
+      ],
+      "task_wins": 2,
+      "task_losses": 2,
+      "task_ties": 16,
+      "retrieval_call_difference": 0.9999999999999998,
+      "latency_seconds_difference": 45.35511058010161
+    },
+    {
+      "comparison": "EvidencePilot minus w/o Evidence State",
+      "accuracy_difference": 0.2,
+      "paired_bootstrap_95_interval": [
+        0.05,
+        0.4
+      ],
+      "task_wins": 4,
+      "task_losses": 0,
+      "task_ties": 16,
+      "retrieval_call_difference": 1.2499999999999998,
+      "latency_seconds_difference": 48.12457321612165
+    },
+    {
+      "comparison": "EvidencePilot minus w/o Claim Verification",
+      "accuracy_difference": 0.05,
+      "paired_bootstrap_95_interval": [
+        0.0,
+        0.15
+      ],
+      "task_wins": 1,
+      "task_losses": 0,
+      "task_ties": 19,
+      "retrieval_call_difference": 0.3999999999999999,
+      "latency_seconds_difference": 30.699895879672837
+    },
+    {
+      "comparison": "EvidencePilot minus w/o Stopping Policy",
+      "accuracy_difference": 0.0,
+      "paired_bootstrap_95_interval": [
+        0.0,
+        0.0
+      ],
+      "task_wins": 0,
+      "task_losses": 0,
+      "task_ties": 20,
+      "retrieval_call_difference": -0.9500000000000002,
+      "latency_seconds_difference": 2.602262544678524
+    }
+  ],
+  "failed_records": 85,
+  "conclusion_scope": "Provisional fixed-suite rule scores. Intervals describe these 20 tasks only; human label review and a broader task set are needed for a superiority claim.",
+  "source_selection_scope": "Each task uses the same preselected allowed_source_ids for every method. This evaluates reasoning on a controlled corpus, not discovery of sources on the open web.",
+  "conflict_suite_scope": "Primarily false-positive conflicts caused by model/index/version differences; does not establish recall on independent same-scope irreconcilable official-source conflicts.",
+  "execution_outcomes": {
+    "Naive RAG": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 0,
+      "unknown_token_usage_tasks": 0
+    },
+    "Fixed Search + RAG": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 0,
+      "unknown_token_usage_tasks": 0
+    },
+    "ReAct": {
+      "task_count": 20,
+      "generation_errors": 1,
+      "tool_timeouts": 0,
+      "unknown_token_usage_tasks": 0
+    },
+    "EvidencePilot": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 1,
+      "unknown_token_usage_tasks": 1
+    },
+    "w/o Evidence State": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 0,
+      "unknown_token_usage_tasks": 0
+    },
+    "w/o Claim Verification": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 0,
+      "unknown_token_usage_tasks": 0
+    },
+    "w/o Stopping Policy": {
+      "task_count": 20,
+      "generation_errors": 0,
+      "tool_timeouts": 1,
+      "unknown_token_usage_tasks": 1
+    }
+  },
+  "coverage_denominator": {
+    "required_claims": 31,
+    "reference_supported_claims": 26,
+    "reference_maximum_coverage": 0.8387096774193549,
+    "note": "Outdated/unanswerable claims remain in the denominator and cannot count as supported coverage, even when correctly abstained."
+  }
+}

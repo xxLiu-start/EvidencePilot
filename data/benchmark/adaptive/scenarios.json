@@ -1,0 +1,1209 @@
+{
+  "execution": "controlled_edge_cases_on_real_langgraph_and_postgresql",
+  "scenarios": [
+    {
+      "name": "missing_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "ffa11944-6fb7-4f73-ac86-9e5d9fa0ace6",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": true,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "719da896-bfbc-4418-95d9-8e19883c7c45"
+        ],
+        "source_ids": [],
+        "selected_action": "STOP",
+        "current_claim_id": "C1",
+        "action_args": {
+          "claim_id": "C1"
+        },
+        "pending_observation": null,
+        "search_count": 2,
+        "retrieval_count": 0,
+        "remaining_budget": 9,
+        "round_count": 3,
+        "claim_statuses": {
+          "C1": {
+            "status": "SUPPORTED",
+            "enough": true,
+            "verified": true,
+            "fresh": true,
+            "has_conflict": false,
+            "evidence_ids": [
+              "719da896-bfbc-4418-95d9-8e19883c7c45"
+            ],
+            "fresh_evidence_ids": [
+              "719da896-bfbc-4418-95d9-8e19883c7c45"
+            ],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 1,
+            "rag_evidence_count": 0,
+            "verification_attempted": true,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "8bff73cd5a722c4c9b0e916415f726b30be7cf90f5e8047d791321fa0fd6f262",
+            "source_requirements_met": true,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": false,
+            "qualified_evidence_ids": [
+              "719da896-bfbc-4418-95d9-8e19883c7c45"
+            ],
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result."
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "web_search_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "The fixture service supports private deployment."
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "web_search_tool",
+            "ok": true,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment evidence angle 4"
+          },
+          {
+            "round": 3,
+            "claim_id": "C1",
+            "tool": "verify_claim_tool",
+            "ok": true,
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.",
+            "error_category": null,
+            "source_ids": [],
+            "query": ""
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：completed；工具调用：3；剩余预算：9。\n终止动作：STOP；加权 Coverage：100.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [SUPPORTED]：The fixture service supports private deployment.\nSUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.\n- Evidence 719da896-bfbc-4418-95d9-8e19883c7c45；关系：context；来源：https://qwen.readthedocs.io/en/latest/fixture/ffa11944-6fb7-4f73-ac86-9e5d9fa0ace6\n> The fixture service supports private deployment.",
+        "status": "completed",
+        "stop_reason": "critical_claims_supported",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 1.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "RETRIEVED"
+            }
+          },
+          {
+            "round": 3,
+            "coverage": 1.0,
+            "statuses": {
+              "C1": "SUPPORTED"
+            }
+          }
+        ],
+        "policy_step_count": 3,
+        "retrieval_action_count": 2,
+        "claim_retrieval_counts": {
+          "C1": 2
+        },
+        "query_rewrite_count": 1,
+        "query_history": {
+          "C1": [
+            {
+              "action": "SEARCH_WEB",
+              "query": "The fixture service supports private deployment.",
+              "normalized": "the fixture service supports private deployment"
+            },
+            {
+              "action": "SEARCH_WEB",
+              "query": "fixture deployment evidence angle 4",
+              "normalized": "fixture deployment evidence angle 4"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "STOP",
+        "policy_reason": "critical_claims_supported",
+        "termination_action": "STOP"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router",
+        "agent_router",
+        "query_rewrite",
+        "agent_router",
+        "evidence_verification"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "web_search_tool",
+          "status": "empty"
+        },
+        {
+          "index": 2,
+          "tool": "web_search_tool",
+          "status": "success"
+        },
+        {
+          "index": 3,
+          "tool": "verify_claim_tool",
+          "status": "success"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "STOP",
+          "selected": "SEARCH_WEB",
+          "reason": "missing_external_evidence"
+        },
+        {
+          "index": 2,
+          "proposed": "STOP",
+          "selected": "SEARCH_WEB",
+          "reason": "missing_external_evidence"
+        },
+        {
+          "index": 3,
+          "proposed": "STOP",
+          "selected": "VERIFY",
+          "reason": "verify_before_more_acquisition"
+        }
+      ]
+    },
+    {
+      "name": "sufficient_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "1c5541f3-2a75-4b70-a7b3-fbcfb1d1c8b5",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "a93deec4-a33e-455a-bebc-c0aec92c3389"
+        ],
+        "source_ids": [],
+        "selected_action": "STOP",
+        "current_claim_id": "C1",
+        "action_args": {
+          "claim_id": "C1"
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 1,
+        "remaining_budget": 10,
+        "round_count": 2,
+        "claim_statuses": {
+          "C1": {
+            "status": "SUPPORTED",
+            "enough": true,
+            "verified": true,
+            "fresh": true,
+            "has_conflict": false,
+            "evidence_ids": [
+              "a93deec4-a33e-455a-bebc-c0aec92c3389"
+            ],
+            "fresh_evidence_ids": [
+              "a93deec4-a33e-455a-bebc-c0aec92c3389"
+            ],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 1,
+            "verification_attempted": true,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "68ee029331314f3ad0be9650293269bf0e4534e23f79faeaac4f270f9e222381",
+            "source_requirements_met": true,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": false,
+            "qualified_evidence_ids": [
+              "a93deec4-a33e-455a-bebc-c0aec92c3389"
+            ],
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result."
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": true,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment capability"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "verify_claim_tool",
+            "ok": true,
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.",
+            "error_category": null,
+            "source_ids": [],
+            "query": ""
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：completed；工具调用：2；剩余预算：10。\n终止动作：STOP；加权 Coverage：100.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [SUPPORTED]：The fixture service supports private deployment.\nSUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.\n- Evidence a93deec4-a33e-455a-bebc-c0aec92c3389；关系：context；来源：document:734256b6-ff98-4a3f-af5d-d0459d96cf55#chunk=29974e25-d3a9-4f53-b114-5e3f77330727\n> The fixture service supports private deployment.",
+        "status": "completed",
+        "stop_reason": "critical_claims_supported",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 1.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "RETRIEVED"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 1.0,
+            "statuses": {
+              "C1": "SUPPORTED"
+            }
+          }
+        ],
+        "policy_step_count": 2,
+        "retrieval_action_count": 1,
+        "claim_retrieval_counts": {
+          "C1": 1
+        },
+        "query_rewrite_count": 0,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment capability",
+              "normalized": "fixture deployment capability"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "RETRIEVE_RAG",
+        "policy_reason": "critical_claims_supported",
+        "termination_action": "STOP"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router",
+        "agent_router",
+        "evidence_verification"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "rag_retrieve_tool",
+          "status": "success"
+        },
+        {
+          "index": 2,
+          "tool": "verify_claim_tool",
+          "status": "success"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 2,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "VERIFY",
+          "reason": "verify_before_more_acquisition"
+        }
+      ]
+    },
+    {
+      "name": "conflicting_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "9566ff93-f6b4-4c8e-8a03-57cf70721670",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "9a3ed989-1a39-42e1-8559-ed11e53d388f",
+          "89f9de55-8852-44df-9de1-69452fccd0a7"
+        ],
+        "source_ids": [],
+        "selected_action": "ABSTAIN",
+        "current_claim_id": "C1",
+        "action_args": {
+          "query": "fixture deployment evidence angle 8",
+          "top_k": 5
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 3,
+        "remaining_budget": 8,
+        "round_count": 4,
+        "claim_statuses": {
+          "C1": {
+            "status": "CONTRADICTED",
+            "enough": false,
+            "verified": true,
+            "fresh": true,
+            "has_conflict": true,
+            "evidence_ids": [
+              "9a3ed989-1a39-42e1-8559-ed11e53d388f",
+              "89f9de55-8852-44df-9de1-69452fccd0a7"
+            ],
+            "fresh_evidence_ids": [
+              "9a3ed989-1a39-42e1-8559-ed11e53d388f",
+              "89f9de55-8852-44df-9de1-69452fccd0a7"
+            ],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 2,
+            "verification_attempted": true,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "5a10f754dc1afe21809c9acd19deae8ba4b9e6748814e5892e9b73637d8eec07",
+            "source_requirements_met": true,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": false,
+            "qualified_evidence_ids": [
+              "9a3ed989-1a39-42e1-8559-ed11e53d388f",
+              "89f9de55-8852-44df-9de1-69452fccd0a7"
+            ],
+            "summary": "CONTRADICTED: 2 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result."
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": true,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment capability"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "verify_claim_tool",
+            "ok": true,
+            "summary": "CONTRADICTED: 2 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.",
+            "error_category": null,
+            "source_ids": [],
+            "query": ""
+          },
+          {
+            "round": 3,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment evidence angle 6"
+          },
+          {
+            "round": 4,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment evidence angle 8"
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：partial；工具调用：4；剩余预算：8。\n终止动作：ABSTAIN；加权 Coverage：0.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [CONTRADICTED]：The fixture service supports private deployment.\nCONTRADICTED: 2 fresh, exact excerpts; source requirements met; semantic verification performed. Explicit controlled fixture verdict; not a live inference result.\n- Evidence 9a3ed989-1a39-42e1-8559-ed11e53d388f；关系：supports；来源：document:9cd2f482-ffb0-4b04-b172-6a1c5cedb0e5#chunk=85fb2c33-8f2a-4b95-9f31-82b3ba6b40f2\n> The fixture service supports private deployment.\n- Evidence 89f9de55-8852-44df-9de1-69452fccd0a7；关系：refutes；来源：document:99e69e7c-0e98-440c-b424-0b3b611ae477#chunk=bf80bd55-fefa-4cd6-afb6-099ba5a82987\n> The fixture service does not support private deployment.\n待补充：满足 required_source=any 的证据。",
+        "status": "partial",
+        "stop_reason": "unable_to_verify_within_limits",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 0.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "CONTRADICTED"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "CONTRADICTED"
+            }
+          },
+          {
+            "round": 3,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "CONTRADICTED"
+            }
+          },
+          {
+            "round": 4,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "CONTRADICTED"
+            }
+          }
+        ],
+        "policy_step_count": 4,
+        "retrieval_action_count": 3,
+        "claim_retrieval_counts": {
+          "C1": 3
+        },
+        "query_rewrite_count": 2,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment capability",
+              "normalized": "fixture deployment capability"
+            },
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment evidence angle 6",
+              "normalized": "fixture deployment evidence angle 6"
+            },
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment evidence angle 8",
+              "normalized": "fixture deployment evidence angle 8"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "RETRIEVE_RAG",
+        "policy_reason": "unable_to_verify_within_limits",
+        "termination_action": "ABSTAIN"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router",
+        "agent_router",
+        "evidence_verification",
+        "agent_router",
+        "query_rewrite",
+        "agent_router",
+        "query_rewrite"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "rag_retrieve_tool",
+          "status": "success"
+        },
+        {
+          "index": 2,
+          "tool": "verify_claim_tool",
+          "status": "success"
+        },
+        {
+          "index": 3,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        },
+        {
+          "index": 4,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 2,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "VERIFY",
+          "reason": "conflict_requires_verification"
+        },
+        {
+          "index": 3,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 4,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        }
+      ]
+    },
+    {
+      "name": "budget_exhausted",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "a3823e45-37f2-444c-a598-a19dbfb8a1ea",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [],
+        "source_ids": [],
+        "selected_action": "ABSTAIN",
+        "current_claim_id": "C1",
+        "action_args": {
+          "query": "fixture deployment capability",
+          "top_k": 5
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 1,
+        "remaining_budget": 0,
+        "round_count": 1,
+        "claim_statuses": {
+          "C1": {
+            "status": "INSUFFICIENT",
+            "enough": false,
+            "verified": false,
+            "fresh": false,
+            "has_conflict": false,
+            "evidence_ids": [],
+            "fresh_evidence_ids": [],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 0,
+            "verification_attempted": false,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "56bae8942fb8b254d7517c9e2eb4e7e74d26f8a91d92ba35e364ed2be7197f14",
+            "source_requirements_met": false,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": true,
+            "qualified_evidence_ids": [],
+            "summary": "INSUFFICIENT: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. "
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment capability"
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：partial；工具调用：1；剩余预算：0。\n终止动作：ABSTAIN；加权 Coverage：0.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [INSUFFICIENT]：The fixture service supports private deployment.\nINSUFFICIENT: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. \n待补充：满足 required_source=any 的证据。",
+        "status": "partial",
+        "stop_reason": "budget_exhausted",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 0.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          }
+        ],
+        "policy_step_count": 1,
+        "retrieval_action_count": 1,
+        "claim_retrieval_counts": {
+          "C1": 1
+        },
+        "query_rewrite_count": 0,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment capability",
+              "normalized": "fixture deployment capability"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "RETRIEVE_RAG",
+        "policy_reason": "budget_exhausted",
+        "termination_action": "ABSTAIN"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        }
+      ]
+    },
+    {
+      "name": "unverifiable_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "03870e35-38f0-4a2a-a852-f68798f7e343",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "a6459aef-127f-4613-81a5-aafbfd2db783"
+        ],
+        "source_ids": [],
+        "selected_action": "ABSTAIN",
+        "current_claim_id": "C1",
+        "action_args": {
+          "claim_id": "C1"
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 1,
+        "remaining_budget": 10,
+        "round_count": 2,
+        "claim_statuses": {
+          "C1": {
+            "status": "INSUFFICIENT",
+            "enough": false,
+            "verified": false,
+            "fresh": true,
+            "has_conflict": false,
+            "evidence_ids": [
+              "a6459aef-127f-4613-81a5-aafbfd2db783"
+            ],
+            "fresh_evidence_ids": [
+              "a6459aef-127f-4613-81a5-aafbfd2db783"
+            ],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 1,
+            "verification_attempted": true,
+            "can_verify": false,
+            "verification_error": "unverifiable_verdict",
+            "fingerprint": "8930c8eb97f0d44f825828eb503436092dbd3749c2858da79948537adebe6771",
+            "source_requirements_met": true,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": false,
+            "qualified_evidence_ids": [
+              "a6459aef-127f-4613-81a5-aafbfd2db783"
+            ],
+            "summary": "INSUFFICIENT: 1 fresh, exact excerpts; source requirements met; semantic verification not passed. Verification failed without a usable validated verdict."
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": true,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment capability"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "verify_claim_tool",
+            "ok": false,
+            "summary": "INSUFFICIENT: 1 fresh, exact excerpts; source requirements met; semantic verification not passed. Verification failed without a usable validated verdict.",
+            "error_category": "unverifiable_verdict",
+            "source_ids": [],
+            "query": ""
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：partial；工具调用：2；剩余预算：10。\n终止动作：ABSTAIN；加权 Coverage：0.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [INSUFFICIENT]：The fixture service supports private deployment.\nINSUFFICIENT: 1 fresh, exact excerpts; source requirements met; semantic verification not passed. Verification failed without a usable validated verdict.\n- Evidence a6459aef-127f-4613-81a5-aafbfd2db783；关系：context；来源：document:76ad93a4-1c0b-4050-9470-e4772dd5cbc3#chunk=4d3faf2c-5693-4878-adb1-d06ace3d95c0\n> The fixture service supports private deployment.\n待补充：满足 required_source=any 的证据。\n最后一次错误类别：unverifiable_verdict。",
+        "status": "partial",
+        "stop_reason": "verification_unavailable",
+        "last_error": "unverifiable_verdict",
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 0.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "RETRIEVED"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          }
+        ],
+        "policy_step_count": 2,
+        "retrieval_action_count": 1,
+        "claim_retrieval_counts": {
+          "C1": 1
+        },
+        "query_rewrite_count": 0,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment capability",
+              "normalized": "fixture deployment capability"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "RETRIEVE_RAG",
+        "policy_reason": "verification_unavailable",
+        "termination_action": "ABSTAIN"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router",
+        "agent_router",
+        "evidence_verification"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "rag_retrieve_tool",
+          "status": "success"
+        },
+        {
+          "index": 2,
+          "tool": "verify_claim_tool",
+          "status": "empty"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 2,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "VERIFY",
+          "reason": "verify_before_more_acquisition"
+        }
+      ]
+    },
+    {
+      "name": "bounded_loop",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "state": {
+        "task_id": "a694be5b-5c49-419a-a5da-dc6843eb8d90",
+        "user_query": "Check fixture private deployment support",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "The fixture service supports private deployment.",
+            "priority": "high",
+            "required_source": "any",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [],
+        "source_ids": [],
+        "selected_action": "ABSTAIN",
+        "current_claim_id": "C1",
+        "action_args": {
+          "query": "fixture deployment evidence angle 6",
+          "top_k": 5
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 3,
+        "remaining_budget": 9,
+        "round_count": 3,
+        "claim_statuses": {
+          "C1": {
+            "status": "INSUFFICIENT",
+            "enough": false,
+            "verified": false,
+            "fresh": false,
+            "has_conflict": false,
+            "evidence_ids": [],
+            "fresh_evidence_ids": [],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 0,
+            "verification_attempted": false,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "56bae8942fb8b254d7517c9e2eb4e7e74d26f8a91d92ba35e364ed2be7197f14",
+            "source_requirements_met": false,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": true,
+            "qualified_evidence_ids": [],
+            "summary": "INSUFFICIENT: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. "
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment capability"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment evidence angle 4"
+          },
+          {
+            "round": 3,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": false,
+            "summary": "Controlled acquisition fixture",
+            "error_category": null,
+            "source_ids": [],
+            "query": "fixture deployment evidence angle 6"
+          }
+        ],
+        "final_report": "研究问题：Check fixture private deployment support\n状态：partial；工具调用：3；剩余预算：9。\n终止动作：ABSTAIN；加权 Coverage：0.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [INSUFFICIENT]：The fixture service supports private deployment.\nINSUFFICIENT: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. \n待补充：满足 required_source=any 的证据。",
+        "status": "partial",
+        "stop_reason": "unable_to_verify_within_limits",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "fixture",
+          "requested_model": "fixture",
+          "actual_model": "fixture",
+          "elapsed_ms": 1,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 0.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          },
+          {
+            "round": 3,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          }
+        ],
+        "policy_step_count": 3,
+        "retrieval_action_count": 3,
+        "claim_retrieval_counts": {
+          "C1": 3
+        },
+        "query_rewrite_count": 2,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment capability",
+              "normalized": "fixture deployment capability"
+            },
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment evidence angle 4",
+              "normalized": "fixture deployment evidence angle 4"
+            },
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "fixture deployment evidence angle 6",
+              "normalized": "fixture deployment evidence angle 6"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "RETRIEVE_RAG",
+        "policy_reason": "unable_to_verify_within_limits",
+        "termination_action": "ABSTAIN"
+      },
+      "operations": [
+        "claim_decomposition",
+        "agent_router",
+        "agent_router",
+        "query_rewrite",
+        "agent_router",
+        "query_rewrite"
+      ],
+      "steps": [
+        {
+          "index": 1,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        },
+        {
+          "index": 2,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        },
+        {
+          "index": 3,
+          "tool": "rag_retrieve_tool",
+          "status": "empty"
+        }
+      ],
+      "decisions": [
+        {
+          "index": 1,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 2,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        },
+        {
+          "index": 3,
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "proposal_accepted"
+        }
+      ]
+    }
+  ]
+}

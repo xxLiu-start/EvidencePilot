@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-11-20T05:59:05.669583+00:00",
+  "status": "passed",
+  "passed": 142,
+  "failed": 0,
+  "skipped": 0,
+  "includes_real_postgresql_pgvector": true,
+  "command": "EVIDENCEPILOT_TEST_POSTGRES_URL=<isolated-test-db> HF_HUB_OFFLINE=1 python -m pytest -q"
+}

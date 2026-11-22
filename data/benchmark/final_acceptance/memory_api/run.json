@@ -1,0 +1,522 @@
+{
+  "initial_state": {
+    "task_id": "6c4368e6-0724-4730-abc0-d7a6d73d49ba",
+    "user_query": "根据内部文档，仅核对一个 Claim：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？",
+    "claims": [
+      {
+        "id": "C1",
+        "claim": "EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？",
+        "priority": "high",
+        "required_source": "internal",
+        "needs_internal": false,
+        "needs_external": false,
+        "scope": null,
+        "weight": 3.0
+      }
+    ],
+    "evidence_ids": [
+      "198fe638-a858-5836-b1bd-8934356d350a"
+    ],
+    "source_ids": [],
+    "selected_action": "STOP",
+    "current_claim_id": "C1",
+    "action_args": {
+      "claim_id": "C1"
+    },
+    "pending_observation": null,
+    "search_count": 0,
+    "retrieval_count": 1,
+    "remaining_budget": 2,
+    "round_count": 2,
+    "claim_statuses": {
+      "C1": {
+        "status": "SUPPORTED",
+        "enough": true,
+        "verified": true,
+        "fresh": true,
+        "has_conflict": false,
+        "evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "potential_conflict": false,
+        "conflict_candidates": [],
+        "fresh_evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "outdated_evidence_count": 0,
+        "web_evidence_count": 0,
+        "rag_evidence_count": 1,
+        "verification_attempted": true,
+        "can_verify": false,
+        "verification_error": null,
+        "fingerprint": "70d8cb333bd1bac9c97eb4b723734816400e8a2637fa9b0bfc0ccc0796a414b4",
+        "verification_status": "SUPPORTED",
+        "source_requirements_met": true,
+        "missing_internal": false,
+        "missing_external": false,
+        "missing_required_source": false,
+        "qualified_evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly answers the question with specific values for both Chunk Size and Overlap."
+      }
+    },
+    "step_summaries": [
+      {
+        "round": 1,
+        "claim_id": "C1",
+        "tool": "rag_retrieve_tool",
+        "ok": true,
+        "summary": "Retrieved 1 exact document excerpts.",
+        "error_category": null,
+        "source_ids": [],
+        "query": "EvidencePilot 默认 Chunk Size Overlap 配置"
+      },
+      {
+        "round": 2,
+        "claim_id": "C1",
+        "tool": "verify_claim_tool",
+        "ok": true,
+        "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly answers the question with specific values for both Chunk Size and Overlap.",
+        "error_category": null,
+        "source_ids": [],
+        "query": ""
+      }
+    ],
+    "final_report": "研究问题：根据内部文档，仅核对一个 Claim：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？\n状态：completed；工具调用：2；剩余预算：2。\n终止动作：STOP；加权 Coverage：100.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [SUPPORTED]：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？\nSUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly answers the question with specific values for both Chunk Size and Overlap.\n- Evidence 198fe638-a858-5836-b1bd-8934356d350a；关系：context；来源：document:79a0c4aa-8482-4974-aac6-444f0637d674#chunk=cc8927df-c8ba-410e-963f-efd528be83a6\n> # EvidencePilot defaults\n> \n> EvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+    "status": "completed",
+    "stop_reason": "critical_claims_supported",
+    "last_error": null,
+    "planner_repaired": false,
+    "router_trace": {
+      "operation": "agent_router",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 1291.1299942061305,
+      "attempts": 1,
+      "error_category": null,
+      "prompt_tokens": 876,
+      "completion_tokens": 44,
+      "total_tokens": 920,
+      "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+    },
+    "algorithm_version": "adaptive-v1",
+    "coverage": 1.0,
+    "coverage_history": [
+      {
+        "round": 0,
+        "coverage": 0.0,
+        "statuses": {
+          "C1": "NOT_RETRIEVED"
+        }
+      },
+      {
+        "round": 1,
+        "coverage": 0.0,
+        "statuses": {
+          "C1": "RETRIEVED"
+        }
+      },
+      {
+        "round": 2,
+        "coverage": 1.0,
+        "statuses": {
+          "C1": "SUPPORTED"
+        }
+      }
+    ],
+    "policy_step_count": 2,
+    "retrieval_action_count": 1,
+    "claim_retrieval_counts": {
+      "C1": 1
+    },
+    "query_rewrite_count": 0,
+    "query_history": {
+      "C1": [
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+          "normalized": "evidencepilot 默认 chunk size overlap 配置"
+        }
+      ]
+    },
+    "opened_source_ids": {},
+    "limits": {
+      "max_retrieval_actions": 6,
+      "max_claim_retrievals": 3,
+      "max_query_rewrites": 2,
+      "max_steps": 12
+    },
+    "selected_tool": null,
+    "proposed_action": "VERIFY",
+    "policy_reason": "critical_claims_supported",
+    "termination_action": "STOP",
+    "reflections": [],
+    "applied_step_indices": [
+      1,
+      2
+    ],
+    "recovery_count": 0,
+    "recovery_node": null
+  },
+  "verifications": [
+    {
+      "claim_id": "C1",
+      "fingerprint": "70d8cb333bd1bac9c97eb4b723734816400e8a2637fa9b0bfc0ccc0796a414b4",
+      "result": {
+        "verdict": "SUPPORTED",
+        "supporting_evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "refuting_evidence_ids": [],
+        "evidence_relations": [
+          {
+            "evidence_id": "198fe638-a858-5836-b1bd-8934356d350a",
+            "supporting_text": "# EvidencePilot defaults\n\nEvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+            "relation": "supports",
+            "reason": "The quote explicitly states the default Chunk Size is 500 tokens and Overlap is 80 tokens for EvidencePilot.",
+            "scope": {}
+          }
+        ],
+        "reason": "The provided internal document explicitly answers the question with specific values for both Chunk Size and Overlap.",
+        "claim_id": "C1",
+        "status": "SUPPORTED",
+        "contradicting_evidence_ids": [],
+        "scope_comparison": {
+          "has_conflict": false,
+          "requires_verification": false,
+          "pairs": [],
+          "reason": "Only explicit semantic verification can confirm a same-scope contradiction."
+        },
+        "verified": true,
+        "error_category": null
+      },
+      "trace": {
+        "operation": "evidence_verification",
+        "mode": "local",
+        "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "elapsed_ms": 5484.176618047059,
+        "attempts": 1,
+        "error_category": null,
+        "prompt_tokens": 464,
+        "completion_tokens": 231,
+        "total_tokens": 695,
+        "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+      },
+      "created_at": "2026-11-21T04:49:46.400204+00:00"
+    }
+  ],
+  "recovered_state": {
+    "task_id": "0c96a443-fa6b-475e-90fc-1203448b19c9",
+    "user_query": "根据内部文档，仅核对一个 Claim：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？",
+    "claims": [
+      {
+        "id": "C1",
+        "claim": "EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？",
+        "priority": "high",
+        "required_source": "internal",
+        "needs_internal": false,
+        "needs_external": false,
+        "scope": null,
+        "weight": 3.0
+      }
+    ],
+    "evidence_ids": [
+      "198fe638-a858-5836-b1bd-8934356d350a"
+    ],
+    "source_ids": [],
+    "selected_action": "STOP",
+    "current_claim_id": "C1",
+    "action_args": {
+      "claim_id": "C1"
+    },
+    "pending_observation": null,
+    "search_count": 0,
+    "retrieval_count": 1,
+    "remaining_budget": 2,
+    "round_count": 2,
+    "claim_statuses": {
+      "C1": {
+        "status": "SUPPORTED",
+        "enough": true,
+        "verified": true,
+        "fresh": true,
+        "has_conflict": false,
+        "evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "potential_conflict": false,
+        "conflict_candidates": [],
+        "fresh_evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "outdated_evidence_count": 0,
+        "web_evidence_count": 0,
+        "rag_evidence_count": 1,
+        "verification_attempted": true,
+        "can_verify": false,
+        "verification_error": null,
+        "fingerprint": "70d8cb333bd1bac9c97eb4b723734816400e8a2637fa9b0bfc0ccc0796a414b4",
+        "verification_status": "SUPPORTED",
+        "source_requirements_met": true,
+        "missing_internal": false,
+        "missing_external": false,
+        "missing_required_source": false,
+        "qualified_evidence_ids": [
+          "198fe638-a858-5836-b1bd-8934356d350a"
+        ],
+        "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly confirms the default Chunk Size (500 tokens) and Overlap (80 tokens) for EvidencePilot."
+      }
+    },
+    "step_summaries": [
+      {
+        "round": 1,
+        "claim_id": "C1",
+        "tool": "rag_retrieve_tool",
+        "ok": true,
+        "summary": "Retrieved 1 exact document excerpts.",
+        "error_category": null,
+        "source_ids": [],
+        "query": "EvidencePilot 默认 Chunk Size Overlap 配置"
+      },
+      {
+        "round": 2,
+        "claim_id": "C1",
+        "tool": "verify_claim_tool",
+        "ok": true,
+        "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly confirms the default Chunk Size (500 tokens) and Overlap (80 tokens) for EvidencePilot.",
+        "error_category": null,
+        "source_ids": [],
+        "query": ""
+      }
+    ],
+    "final_report": "研究问题：根据内部文档，仅核对一个 Claim：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？\n状态：completed；工具调用：2；剩余预算：2。\n终止动作：STOP；加权 Coverage：100.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [SUPPORTED]：EvidencePilot 默认 Chunk Size 和 Overlap 各是多少？\nSUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly confirms the default Chunk Size (500 tokens) and Overlap (80 tokens) for EvidencePilot.\n- Evidence 198fe638-a858-5836-b1bd-8934356d350a；关系：context；来源：document:79a0c4aa-8482-4974-aac6-444f0637d674#chunk=cc8927df-c8ba-410e-963f-efd528be83a6\n> # EvidencePilot defaults\n> \n> EvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+    "status": "completed",
+    "stop_reason": "critical_claims_supported",
+    "last_error": null,
+    "planner_repaired": false,
+    "router_trace": {
+      "operation": "agent_router",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 26161.577558144927,
+      "attempts": 1,
+      "error_category": null,
+      "prompt_tokens": 876,
+      "completion_tokens": 44,
+      "total_tokens": 920,
+      "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+    },
+    "algorithm_version": "adaptive-v1",
+    "coverage": 1.0,
+    "coverage_history": [
+      {
+        "round": 0,
+        "coverage": 0.0,
+        "statuses": {
+          "C1": "NOT_RETRIEVED"
+        }
+      },
+      {
+        "round": 1,
+        "coverage": 0.0,
+        "statuses": {
+          "C1": "RETRIEVED"
+        }
+      },
+      {
+        "round": 2,
+        "coverage": 1.0,
+        "statuses": {
+          "C1": "SUPPORTED"
+        }
+      }
+    ],
+    "policy_step_count": 2,
+    "retrieval_action_count": 1,
+    "claim_retrieval_counts": {
+      "C1": 1
+    },
+    "query_rewrite_count": 0,
+    "query_history": {
+      "C1": [
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+          "normalized": "evidencepilot 默认 chunk size overlap 配置"
+        }
+      ]
+    },
+    "opened_source_ids": {},
+    "limits": {
+      "max_retrieval_actions": 6,
+      "max_claim_retrievals": 3,
+      "max_query_rewrites": 2,
+      "max_steps": 12
+    },
+    "selected_tool": null,
+    "proposed_action": "VERIFY",
+    "policy_reason": "critical_claims_supported",
+    "termination_action": "STOP",
+    "reflections": [],
+    "applied_step_indices": [
+      1,
+      2
+    ],
+    "recovery_count": 1,
+    "recovery_node": null
+  },
+  "recovered_trace": {
+    "task_id": "0c96a443-fa6b-475e-90fc-1203448b19c9",
+    "status": "completed",
+    "steps": [
+      {
+        "id": "8fda0e48-34e3-4de1-add6-e75941694abe",
+        "step_index": 1,
+        "claim_id": "C1",
+        "tool_name": "rag_retrieve_tool",
+        "arguments": {
+          "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+          "top_k": 5
+        },
+        "observation": {
+          "ok": true,
+          "summary": "Retrieved 1 exact document excerpts.",
+          "evidence_ids": [
+            "198fe638-a858-5836-b1bd-8934356d350a"
+          ],
+          "source_ids": [],
+          "chunk_ids": [
+            "cc8927df-c8ba-410e-963f-efd528be83a6"
+          ],
+          "error_category": null
+        },
+        "status": "success",
+        "elapsed_ms": 1144.3636137992144,
+        "error_category": null,
+        "trace": {
+          "fixture": "simulated_crash_after_real_tool_commit"
+        }
+      },
+      {
+        "id": "1caa9ac5-29a1-47df-8e6a-e59ed6871b4e",
+        "step_index": 2,
+        "claim_id": "C1",
+        "tool_name": "verify_claim_tool",
+        "arguments": {
+          "claim_id": "C1"
+        },
+        "observation": {
+          "ok": true,
+          "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. The provided internal document explicitly confirms the default Chunk Size (500 tokens) and Overlap (80 tokens) for EvidencePilot.",
+          "evidence_ids": [],
+          "source_ids": [],
+          "chunk_ids": [],
+          "error_category": null
+        },
+        "status": "success",
+        "elapsed_ms": 4382.972878403962,
+        "error_category": null,
+        "trace": {
+          "inference": {
+            "operation": "agent_router",
+            "mode": "local",
+            "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "elapsed_ms": 26161.577558144927,
+            "attempts": 1,
+            "error_category": null,
+            "prompt_tokens": 876,
+            "completion_tokens": 44,
+            "total_tokens": 920,
+            "system_fingerprint": "vllm-0.23.0-tp4-ad065b3e"
+          },
+          "mode": "local",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "policy": {
+            "proposed_action": "VERIFY",
+            "selected_action": "VERIFY",
+            "reason": "verify_before_more_acquisition"
+          }
+        }
+      }
+    ],
+    "policy_decisions": [
+      {
+        "decision_index": 2,
+        "proposed_action": "VERIFY",
+        "selected_action": "VERIFY",
+        "target_claim_id": "C1",
+        "reason": "verify_before_more_acquisition",
+        "snapshot": {
+          "remaining_budget": 3,
+          "coverage": 0.0,
+          "retrieval_action_count": 1,
+          "claim_retrieval_counts": {
+            "C1": 1
+          },
+          "query_rewrite_count": 0,
+          "statuses": {
+            "C1": "RETRIEVED"
+          }
+        }
+      }
+    ],
+    "reflections": [],
+    "checkpoints": [
+      {
+        "sequence": 1,
+        "next_node": "recover_tool",
+        "created_at": "2026-11-21T04:49:47.189502+00:00"
+      },
+      {
+        "sequence": 2,
+        "next_node": "state_updater",
+        "created_at": "2026-11-21T04:49:50.470186+00:00"
+      },
+      {
+        "sequence": 3,
+        "next_node": "verifier",
+        "created_at": "2026-11-21T04:49:50.501823+00:00"
+      },
+      {
+        "sequence": 4,
+        "next_node": "router",
+        "created_at": "2026-11-21T04:49:50.521471+00:00"
+      },
+      {
+        "sequence": 5,
+        "next_node": "tool_executor",
+        "created_at": "2026-11-21T04:50:16.705826+00:00"
+      },
+      {
+        "sequence": 6,
+        "next_node": "recover_tool",
+        "created_at": "2026-11-21T04:50:16.726098+00:00"
+      },
+      {
+        "sequence": 7,
+        "next_node": "state_updater",
+        "created_at": "2026-11-21T04:50:21.120537+00:00"
+      },
+      {
+        "sequence": 8,
+        "next_node": "verifier",
+        "created_at": "2026-11-21T04:50:21.135386+00:00"
+      },
+      {
+        "sequence": 9,
+        "next_node": "reporter",
+        "created_at": "2026-11-21T04:50:21.160408+00:00"
+      },
+      {
+        "sequence": 10,
+        "next_node": "END",
+        "created_at": "2026-11-21T04:50:21.173395+00:00"
+      }
+    ]
+  }
+}

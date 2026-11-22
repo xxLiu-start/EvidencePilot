@@ -1,0 +1,111 @@
+{
+  "dataset": "evidencepilot-day3-seed-v1",
+  "annotation_status": "agent_reviewed_pending_human",
+  "human_reviewed": false,
+  "query_count": 20,
+  "chunk_count": 80,
+  "chunk_size": 500,
+  "chunk_overlap": 80,
+  "tokenizer": "cl100k_base",
+  "sources": [
+    {
+      "source": "claude/08_claude_models_overview.md",
+      "sha256": "44d8c656855f06fb4946092ead5a22cf54385901d85623e406e6b3a989634fc9"
+    },
+    {
+      "source": "claude/09_claude_pricing.md",
+      "sha256": "2a1ad7a2890b211ca8096b0c75f6585ae6a5481a0fd922f45ffe89480cce6b82"
+    },
+    {
+      "source": "claude/10_claude_api_data_retention.md",
+      "sha256": "4ac96fc4d05923d86f58f408077d987f63b2d4b529afe2dd8dbafbaabe1c8cc4"
+    },
+    {
+      "source": "deepseek/05_deepseek_models_pricing.md",
+      "sha256": "2b78cf1a094e095cee2603144597447ad9a7e4120f60a3d5abd333662fdf1d2a"
+    },
+    {
+      "source": "deepseek/06_deepseek_thinking_mode.md",
+      "sha256": "e09a908175a55cb6d1c5c8e37534af1a9cd9655a9f386f12c28178db6fc1d31b"
+    },
+    {
+      "source": "deepseek/07_deepseek_tool_calls.md",
+      "sha256": "de5b79b3a7516ca8d05b419b8f2d52c7f3a4a2f868b85af2daad0abfe7e2f398"
+    },
+    {
+      "source": "enterprise_requirements/18_nist_ai_rmf_genai_profile.md",
+      "sha256": "4b4571a2b1f4bbaf6ab880e81023a07b30fa89b59e780a73d890275c5a76e10b"
+    },
+    {
+      "source": "enterprise_requirements/19_iso_iec_42001.md",
+      "sha256": "06e3032dc04e573d9ad04c8f3e1d1f97caa3ea28c9605bb7067ec504fb6ca464"
+    },
+    {
+      "source": "enterprise_requirements/20_owasp_top10_llm_apps.md",
+      "sha256": "316bd0cad20bd54f4fea6e8fe587b29e0a8c455cd5af732549fa790949316d18"
+    },
+    {
+      "source": "enterprise_requirements/enterprise_model_selection_checklist.md",
+      "sha256": "3057858bc1016d68dbb206d9dc126c19018a5ab2c33a53d4f1e7eb35f79ddace"
+    },
+    {
+      "source": "enterprise_requirements/enterprise_requirements.md",
+      "sha256": "1a29b3a364be331f281d5147570bfb708c9175eb2e39123e1e270fcbc89474e5"
+    },
+    {
+      "source": "huggingface/15_hf_create_endpoint.md",
+      "sha256": "db4065a7645db364f4b232edc082413b181e17bd6f1b1eaf1016fd4bd539289d"
+    },
+    {
+      "source": "huggingface/16_hf_endpoint_configuration.md",
+      "sha256": "80aa4089deddfa43864564a8d7c96402dace78b6c7771b5fc11b53bf91cfeb70"
+    },
+    {
+      "source": "huggingface/17_hf_security_enterprise.md",
+      "sha256": "5fbb054520a91c1fb314234091a84361be54871adf0b6394900f89910a0c2a55"
+    },
+    {
+      "source": "qwen/01_qwen35_model_card.md",
+      "sha256": "7f1def1bc8d8978923ae6e994e6763058ee5bc46b06001e8807782b507d8a987"
+    },
+    {
+      "source": "qwen/02_model_studio_model_catalog.md",
+      "sha256": "5655d8c105dafc25edf961944ae5547a2ff95b6cfd8c1ab6865eb052c75fcb6b"
+    },
+    {
+      "source": "qwen/03_qwen_openai_compatible_chat_api.md",
+      "sha256": "cfe0d388c489e325907024522aa86374b654c3970233e976ee603075ff877488"
+    },
+    {
+      "source": "qwen/04_model_studio_dedicated_deployment.md",
+      "sha256": "c0b01842dd9f1cc0739a9cbb106123f8ac6e93f56aaa8f686b3cb5e560158df2"
+    },
+    {
+      "source": "vllm/11_vllm_openai_compatible_server.md",
+      "sha256": "f6c3f94bd75364e8f2f9ccbdf7d3836b7b8b384a4067115130f4923407bf4b0c"
+    },
+    {
+      "source": "vllm/12_vllm_quantization.md",
+      "sha256": "2e8db557c56f0741fae8679175946cd70af059ead0e80ddca6cd20289c77f547"
+    },
+    {
+      "source": "vllm/13_vllm_parallelism_scaling.md",
+      "sha256": "41dac089ddebd58fd88a5808a6ab2da9e24dc95e38b5cea07ffe96c9b2e27a01"
+    },
+    {
+      "source": "vllm/14_vllm_production_metrics.md",
+      "sha256": "531627d4622b9f88932ed1f6b6b21163746bb750a4791cd2a0ae6653cbf9f8bf"
+    }
+  ],
+  "limitations": [
+    "Small local reading-note corpus, not full official documentation.",
+    "Seed judgments are agent-reviewed; human review is pending.",
+    "Cross-source relevance judgments may be incomplete; metrics are a smoke benchmark, not proof of general superiority."
+  ],
+  "files": {
+    "chunks.jsonl": "be65f184d3f8cf1a3827814fc45bfd3ab6a50428c3f149b44b28a31fda5f6d75",
+    "queries.jsonl": "0818d96fe5a4bae230e6b07e3f231f48b83c932a5bfef1a209ed2d24e67f36e4",
+    "qrels.json": "8950481c1f8be0be49880a47b1ad149ca9cc61f139cc58057e1154a0ff58c061",
+    "annotations.jsonl": "1d968c634acc93f6532c6a927db35938d80ea35074f4e8a1f6f119da2719cf6d"
+  }
+}

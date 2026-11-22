@@ -1,0 +1,14 @@
+EvidencePilot｜可追溯证据研究 Agent
+
+技术栈：Python、FastAPI、Streamlit、LangGraph、PostgreSQL/pgvector、BGE-M3、BM25/RRF、Qwen。
+
+• 实现 PDF/DOCX/Markdown 文档解析、约 500/80 token 分块、1024 维 BGE-M3 向量持久化，以及 Dense/BM25/Hybrid/Reranker 检索。
+• 构建 Claim 驱动的研究循环，以证据来源、覆盖率、时效、冲突和预算校验约束动作；逐字引用可追溯到网页缓存或文档 Chunk，证据不足时保留缺口并弃答。
+• 实现步骤事务、快照、工具回执和手动任务恢复，并通过 FastAPI 提供历史任务、Trace、证据、报告及评测接口；Streamlit 六页面只通过 API 交互，通过 183 项回归和真实浏览器端到端验收。
+• 建立 20 个固定任务、3 种 Baseline、3 组消融的 140 次真实推理实验，冻结资料、模型与 Prompt，支持离线评分回放；构建并验证 PostgreSQL/FastAPI/Streamlit 三服务 Compose，同时提供 Conda 混合部署。
+
+可用于面试说明的实测事实：
+初始规则评分下，EvidencePilot 准确率 45%，与 ReAct 持平；证据覆盖率 38.7% 对比 32.3%，平均耗时 63.3 秒对比 17.9 秒。
+这些结果基于待人工复核的初始标注，不能声称已证明普遍优势；未执行 SFT，未完成真实远程 API 验收。
+
+演示与证据：README.md、docs/demo/evidencepilot-demo.webm、data/benchmark/research_v1/results/。

@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-evidencepilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_password}
+      POSTGRES_DB: ${POSTGRES_DB:-evidencepilot}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - type: bind
+        source: ./scripts/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: [apps]
+    build:
+      context: .
+      target: api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${API_PORT:-8001}:8000"
+    environment:
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
+      LLM_MODE: ${LLM_MODE:-local}
+      LLM_LOCAL_BASE_URL: ${LLM_CONTAINER_LOCAL_BASE_URL:-http://host.docker.internal:8010/v1}
+      LLM_LOCAL_MODEL: ${LLM_LOCAL_MODEL:-}
+      LLM_REMOTE_BASE_URL: ${LLM_REMOTE_BASE_URL:-}
+      LLM_REMOTE_MODEL: ${LLM_REMOTE_MODEL:-}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-90}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-2}
+      LLM_DISABLE_THINKING: ${LLM_DISABLE_THINKING:-true}
+      EMBEDDING_DEVICE: cpu
+      EMBEDDING_USE_FP16: "false"
+      EMBEDDING_LOCAL_FILES_ONLY: ${EMBEDDING_LOCAL_FILES_ONLY:-false}
+      RERANKER_DEVICE: cpu
+      RERANKER_USE_FP16: "false"
+      RERANKER_LOCAL_FILES_ONLY: ${RERANKER_LOCAL_FILES_ONLY:-false}
+      AGENT_RAG_METHOD: ${AGENT_RAG_METHOD:-hybrid}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /run/secrets/evidencepilot.env
+        read_only: true
+        bind:
+          create_host_path: false
+      - ./data/cache/models:/workspace/data/cache/models
+      - ./data/cache/web:/workspace/data/cache/web
+      - ./data/benchmark:/workspace/data/benchmark:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
+
+  streamlit:
+    profiles: [apps]
+    build:
+      context: .
+      target: frontend
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: http://api:8000
+    ports:
+      - "127.0.0.1:${STREAMLIT_PORT:-8501}:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

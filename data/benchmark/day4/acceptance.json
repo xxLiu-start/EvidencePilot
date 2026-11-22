@@ -1,0 +1,96 @@
+{
+  "checked_at": "2026-11-20T12:18:12.399355+08:00",
+  "status": "partial",
+  "checks": [
+    {
+      "name": "multi_query_generation",
+      "passed": true,
+      "details": {
+        "queries": [
+          {
+            "claim_id": "D4-C1",
+            "query": "Qwen official self-hosted deployment documentation"
+          },
+          {
+            "claim_id": "D4-C1",
+            "query": "Qwen function calling examples official documentation"
+          }
+        ],
+        "trace": {
+          "operation": "query_generation",
+          "mode": "local",
+          "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "elapsed_ms": 732.3644459247589,
+          "attempts": 1,
+          "error_category": null
+        }
+      }
+    },
+    {
+      "name": "search_results_parsed",
+      "passed": true,
+      "details": {
+        "pages": 3,
+        "errors": []
+      }
+    },
+    {
+      "name": "evidence_pydantic_schema",
+      "passed": true,
+      "details": {
+        "evidences": 4
+      }
+    },
+    {
+      "name": "claim_association",
+      "passed": true,
+      "details": {
+        "claim_id": "D4-C1",
+        "stored_evidences": 4
+      }
+    },
+    {
+      "name": "every_web_evidence_has_source_url",
+      "passed": true,
+      "details": {
+        "urls": [
+          "https://blog.barrack.ai/self-host-qwen-3-32b",
+          "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py"
+        ],
+        "quotes_exact": true
+      }
+    },
+    {
+      "name": "url_dedup_and_fixed_cache",
+      "passed": true,
+      "details": {
+        "run_id": "7ee0fab0-5ef4-42c7-9604-716a27552371",
+        "offline": {
+          "status": "passed",
+          "queries": 2,
+          "pages": 3,
+          "evidences": 4,
+          "network_requests": 0,
+          "llm_requests": 0
+        },
+        "restart_persistence": true
+      }
+    },
+    {
+      "name": "local_and_remote_inference",
+      "passed": false,
+      "status": "pending_remote_configuration",
+      "local": {
+        "operation": "query_generation",
+        "mode": "local",
+        "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "elapsed_ms": 732.3644459247589,
+        "attempts": 1,
+        "error_category": null
+      },
+      "reason": "Remote HTTPS URL, model ID and its own .env credential are required; no remote fallback was attempted."
+    }
+  ]
+}

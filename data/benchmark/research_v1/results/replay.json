@@ -1,0 +1,164 @@
+{
+  "status": "passed",
+  "record_count": 140,
+  "network_requests": 0,
+  "llm_requests": 0,
+  "identical_grades": true,
+  "summary": [
+    {
+      "method": "Naive RAG",
+      "answer_accuracy": 0.35,
+      "claim_accuracy": 0.3548387096774194,
+      "evidence_coverage": 0.1935483870967742,
+      "citation_precision": 0.24324324324324326,
+      "unsupported_claim_rate": 0.6666666666666666,
+      "avg_retrieval_calls": 1.0,
+      "avg_latency": 11.829622161574662,
+      "avg_token_cost": 3567.55,
+      "token_usage_available_tasks": 20,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 11,
+        "required_claims": 31,
+        "covered_claims": 6,
+        "valid_citations": 9,
+        "citations": 37,
+        "unsupported_claims": 12,
+        "asserted_claims": 18
+      }
+    },
+    {
+      "method": "Fixed Search + RAG",
+      "answer_accuracy": 0.4,
+      "claim_accuracy": 0.45161290322580644,
+      "evidence_coverage": 0.3225806451612903,
+      "citation_precision": 0.2978723404255319,
+      "unsupported_claim_rate": 0.6538461538461539,
+      "avg_retrieval_calls": 2.0,
+      "avg_latency": 15.85403070980683,
+      "avg_token_cost": 5183.35,
+      "token_usage_available_tasks": 20,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 14,
+        "required_claims": 31,
+        "covered_claims": 10,
+        "valid_citations": 14,
+        "citations": 47,
+        "unsupported_claims": 17,
+        "asserted_claims": 26
+      }
+    },
+    {
+      "method": "ReAct",
+      "answer_accuracy": 0.45,
+      "claim_accuracy": 0.41935483870967744,
+      "evidence_coverage": 0.3225806451612903,
+      "citation_precision": 0.34146341463414637,
+      "unsupported_claim_rate": 0.64,
+      "avg_retrieval_calls": 1.05,
+      "avg_latency": 17.93697149013169,
+      "avg_token_cost": 7300.8,
+      "token_usage_available_tasks": 20,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 13,
+        "required_claims": 31,
+        "covered_claims": 10,
+        "valid_citations": 14,
+        "citations": 41,
+        "unsupported_claims": 16,
+        "asserted_claims": 25
+      }
+    },
+    {
+      "method": "EvidencePilot",
+      "answer_accuracy": 0.45,
+      "claim_accuracy": 0.45161290322580644,
+      "evidence_coverage": 0.3870967741935484,
+      "citation_precision": 0.45454545454545453,
+      "unsupported_claim_rate": 0.5263157894736842,
+      "avg_retrieval_calls": 2.05,
+      "avg_latency": 63.2920820702333,
+      "avg_token_cost": null,
+      "token_usage_available_tasks": 19,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 14,
+        "required_claims": 31,
+        "covered_claims": 12,
+        "valid_citations": 15,
+        "citations": 33,
+        "unsupported_claims": 10,
+        "asserted_claims": 19
+      }
+    },
+    {
+      "method": "w/o Evidence State",
+      "answer_accuracy": 0.25,
+      "claim_accuracy": 0.16129032258064516,
+      "evidence_coverage": 0.12903225806451613,
+      "citation_precision": 0.5384615384615384,
+      "unsupported_claim_rate": null,
+      "avg_retrieval_calls": 0.8,
+      "avg_latency": 15.167508854111656,
+      "avg_token_cost": 4606.6,
+      "token_usage_available_tasks": 20,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 5,
+        "required_claims": 31,
+        "covered_claims": 4,
+        "valid_citations": 7,
+        "citations": 13,
+        "unsupported_claims": 0,
+        "asserted_claims": 0
+      }
+    },
+    {
+      "method": "w/o Claim Verification",
+      "answer_accuracy": 0.4,
+      "claim_accuracy": 0.3870967741935484,
+      "evidence_coverage": 0.3548387096774194,
+      "citation_precision": 0.4444444444444444,
+      "unsupported_claim_rate": 0.6111111111111112,
+      "avg_retrieval_calls": 1.65,
+      "avg_latency": 32.59218619056046,
+      "avg_token_cost": 14694.3,
+      "token_usage_available_tasks": 20,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 12,
+        "required_claims": 31,
+        "covered_claims": 11,
+        "valid_citations": 16,
+        "citations": 36,
+        "unsupported_claims": 11,
+        "asserted_claims": 18
+      }
+    },
+    {
+      "method": "w/o Stopping Policy",
+      "answer_accuracy": 0.45,
+      "claim_accuracy": 0.41935483870967744,
+      "evidence_coverage": 0.3548387096774194,
+      "citation_precision": 0.41025641025641024,
+      "unsupported_claim_rate": 0.6190476190476191,
+      "avg_retrieval_calls": 3.0,
+      "avg_latency": 60.689819525554775,
+      "avg_token_cost": null,
+      "token_usage_available_tasks": 19,
+      "task_count": 20,
+      "counts": {
+        "correct_claims": 13,
+        "required_claims": 31,
+        "covered_claims": 11,
+        "valid_citations": 16,
+        "citations": 39,
+        "unsupported_claims": 13,
+        "asserted_claims": 21
+      }
+    }
+  ],
+  "note": "Deterministic scoring replay; live generation can vary even with identical temperature/settings."
+}

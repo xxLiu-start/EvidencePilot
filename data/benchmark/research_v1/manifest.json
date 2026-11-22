@@ -1,0 +1,28 @@
+{
+  "dataset_version": "research-v1",
+  "task_count": 20,
+  "categories": {
+    "single_source": 4,
+    "multi_source": 4,
+    "multi_hop": 4,
+    "source_conflict": 3,
+    "outdated": 3,
+    "unanswerable": 2
+  },
+  "annotation_status": "agent_reviewed_pending_human",
+  "human_reviewed": false,
+  "annotation_author": "independent source/rule review, not the evaluated model",
+  "created_at": "2026-11-20T07:54:22.725761+00:00",
+  "evaluation_as_of": "2026-11-20T08:00:00+00:00",
+  "files": {
+    "sources.json": "8facac91b9073de142b729b9b8e2ffd5404f61c9aa7ca18776f015c0c278d222",
+    "tasks.json": "ea43be4bf4407115cf37325697944517ca28deeddd92b88b7a074b7fac00a534",
+    "chunks.json": "882a567266e8d248bc57b0cc603a78f4276adbc8ef87d6b0d7b15f5370c60e81"
+  },
+  "limitations": [
+    "Initial labels require human confirmation before a formal superiority claim.",
+    "Small engineering-document task suite; no external validity claim.",
+    "Frozen-corpus web search measures cached-document research, not live search-engine quality.",
+    "Rule-based accuracy checks may miss semantic errors; human review remains necessary."
+  ]
+}

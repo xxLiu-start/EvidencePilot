@@ -1,0 +1,59 @@
+{
+  "task_id": "e1046a2a-66cb-45d6-99f4-c97e389592c2",
+  "items": [
+    {
+      "claim_id": "C1",
+      "fingerprint": "502ebbbf4da6143279b27d5b336184f18afd01ecea7b2027ccf1c5ce143d3ed7",
+      "result": {
+        "verdict": "SUPPORTED",
+        "supporting_evidence_ids": [
+          "9cd3f71f-edaa-5399-928c-919bae7908c5",
+          "df3c6323-b54b-59c2-8817-0b4980cb276d"
+        ],
+        "refuting_evidence_ids": [],
+        "evidence_relations": [
+          {
+            "evidence_id": "9cd3f71f-edaa-5399-928c-919bae7908c5",
+            "supporting_text": "# EvidencePilot 默认参数\n\nEvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。\n\n这份演示资料用于核对内部配置，不涉及敏感信息。",
+            "relation": "supports",
+            "reason": "Explicitly states the default Chunk Size is 500 tokens and Overlap is 80 tokens for EvidencePilot.",
+            "scope": {}
+          },
+          {
+            "evidence_id": "df3c6323-b54b-59c2-8817-0b4980cb276d",
+            "supporting_text": "# EvidencePilot 默认参数\n\nEvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。\n\n这份演示资料用于核对内部配置，不涉及敏感信息。",
+            "relation": "supports",
+            "reason": "Explicitly states the default Chunk Size is 500 tokens and Overlap is 80 tokens for EvidencePilot.",
+            "scope": {}
+          }
+        ],
+        "reason": "Both internal sources explicitly confirm the default Chunk Size is 500 tokens and Overlap is 80 tokens.",
+        "claim_id": "C1",
+        "status": "SUPPORTED",
+        "contradicting_evidence_ids": [],
+        "scope_comparison": {
+          "has_conflict": false,
+          "requires_verification": false,
+          "pairs": [],
+          "reason": "Only explicit semantic verification can confirm a same-scope contradiction."
+        },
+        "verified": true,
+        "error_category": null
+      },
+      "trace": {
+        "operation": "evidence_verification",
+        "mode": "local",
+        "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+        "elapsed_ms": 6741.165400482714,
+        "attempts": 1,
+        "error_category": null,
+        "prompt_tokens": 608,
+        "completion_tokens": 390,
+        "total_tokens": 998,
+        "system_fingerprint": "vllm-0.23.0-tp4-341d85b9"
+      },
+      "created_at": "2026-11-21T04:58:27.612560+00:00"
+    }
+  ]
+}

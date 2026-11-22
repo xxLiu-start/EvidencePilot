@@ -1,0 +1,16 @@
+{
+  "status": "partial",
+  "engineering_status": "passed",
+  "ground_truth_status": "pending_human_review",
+  "formal_superiority_claim_allowed": false,
+  "checks": {
+    "fixed_tasks_20": true,
+    "three_baselines": true,
+    "automatic_metrics": true,
+    "three_ablations": true,
+    "five_observed_bad_cases": true,
+    "frozen_snapshots_and_replay": true,
+    "same_mode_and_actual_model": true
+  },
+  "record_count": 140
+}

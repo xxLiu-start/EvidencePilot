@@ -1,0 +1,124 @@
+{
+  "status": "partial",
+  "engineering_status": "passed",
+  "checked_at": "2026-11-21T05:07:47.282551+00:00",
+  "checks": [
+    {
+      "name": "fastapi_running",
+      "passed": true,
+      "evidence": "compose"
+    },
+    {
+      "name": "postgresql_persistent_after_restart",
+      "passed": true,
+      "evidence": "deployment-compose/acceptance.json"
+    },
+    {
+      "name": "streamlit_http_api_six_pages",
+      "passed": true,
+      "evidence": "video/acceptance.json"
+    },
+    {
+      "name": "local_end_to_end_research",
+      "passed": true,
+      "evidence": "video/acceptance.json"
+    },
+    {
+      "name": "evidence_original_source_traceable",
+      "passed": true,
+      "evidence": "video/acceptance.json"
+    },
+    {
+      "name": "historical_tasks_trace_reports_after_restart",
+      "passed": true,
+      "evidence": "deployment-compose/acceptance.json"
+    },
+    {
+      "name": "manual_snapshot_recovery",
+      "passed": true,
+      "evidence": "memory_api/acceptance.json"
+    },
+    {
+      "name": "three_service_compose_started_and_healthy",
+      "passed": true,
+      "evidence": "compose/environment.json"
+    },
+    {
+      "name": "bounded_faults_and_no_cross_mode_fallback_controlled_tests",
+      "passed": true,
+      "evidence": "regression.xml"
+    },
+    {
+      "name": "readme_architecture_experiment_tables_and_resume",
+      "passed": true,
+      "evidence": "README.md"
+    },
+    {
+      "name": "demo_video_3_to_5_minutes",
+      "passed": true,
+      "evidence": "video/media.json"
+    },
+    {
+      "name": "credentials_and_logs_sanitized",
+      "passed": true,
+      "evidence": "privacy_check.json"
+    }
+  ],
+  "real_local_mode": {
+    "status": "passed",
+    "mode": "local",
+    "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+    "task_id": "e1046a2a-66cb-45d6-99f4-c97e389592c2",
+    "deployment": "three_service_compose"
+  },
+  "real_remote_mode": {
+    "status": "pending_user_configuration",
+    "user_decision": "暂不配置，远程实测保留待验收",
+    "reason": "No real remote HTTPS endpoint/model/key configured; protocol tests do not replace live acceptance."
+  },
+  "regression": {
+    "checked_at": "2026-11-21T04:58:50.684645+00:00",
+    "status": "passed",
+    "passed": 183,
+    "failed": 0,
+    "skipped": 0,
+    "includes_real_postgresql_pgvector": true
+  },
+  "video": {
+    "status": "passed",
+    "path": "docs/demo/evidencepilot-demo.webm",
+    "duration_seconds": 220.04,
+    "bytes": 23285032,
+    "format": "webm",
+    "audio": "silent_screen_recording",
+    "recording": "real_chromium_streamlit_fastapi_postgresql_qwen_bge"
+  },
+  "services": {
+    "api": {
+      "status": "running",
+      "health": "healthy",
+      "image_id": "sha256:65fcd6e8ca5a1be3a424032bf541b533182599350058b45efb235dfa60b14f4c"
+    },
+    "streamlit": {
+      "status": "running",
+      "health": "healthy",
+      "image_id": "sha256:579b17e1b08b478019eee666314e39f09381a008dbb159f9579be5f796111a99"
+    },
+    "postgres": {
+      "status": "running",
+      "health": "healthy",
+      "image_id": "sha256:484e838076e04939d27d3e176e91c86eea96236126023be8d3059761122e579f"
+    }
+  },
+  "urls": {
+    "streamlit": "http://127.0.0.1:18502",
+    "api_docs": "http://127.0.0.1:18002/docs"
+  },
+  "known_limitations": {
+    "sft_experiment": "not_executed; documented honestly in README",
+    "benchmark_ground_truth": "initial_labels_pending_human_review",
+    "manual_recovery_fixture": "controlled_crash_window_using_real_committed_tool_receipt",
+    "prior_failed_attempts": "data/cache/diagnostics/final_acceptance_attempts",
+    "model_service_epoch_changed_during_setup": true
+  }
+}

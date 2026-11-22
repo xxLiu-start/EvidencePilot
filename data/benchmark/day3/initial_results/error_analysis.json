@@ -1,0 +1,503 @@
+{
+  "status": "seed_judgments_pending_human",
+  "regressions": [
+    {
+      "query_id": "q02",
+      "query": "如何在阿里云 Model Studio 目录按模态、区域和能力筛选模型？",
+      "dense": {
+        "recall_at_5": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_10": 0.5296052411645183
+      },
+      "hybrid": {
+        "recall_at_5": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.5360595666833466
+      },
+      "reranker": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.7967075809905066
+      },
+      "positive_chunk_ids": {
+        "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01": 1,
+        "f984d755-fb1a-50b7-a882-a00255d7e3e2": 2
+      },
+      "dense_top5": [
+        "f9465f94-b264-51c3-aadd-c27f81f18f2f",
+        "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+        "d346eb37-eae6-5dd3-aa18-52df9140bc24",
+        "f984d755-fb1a-50b7-a882-a00255d7e3e2",
+        "684dfa9c-fe93-533d-8a95-6987b105b799"
+      ],
+      "hybrid_top5": [
+        "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+        "d346eb37-eae6-5dd3-aa18-52df9140bc24",
+        "6e7df458-1026-59aa-b535-8a38da43821c",
+        "f9465f94-b264-51c3-aadd-c27f81f18f2f"
+      ],
+      "reranker_top5": [
+        "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+        "f984d755-fb1a-50b7-a882-a00255d7e3e2",
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+        "8452a4a2-5ba6-5f60-a957-f28ae3e1b5cd",
+        "d346eb37-eae6-5dd3-aa18-52df9140bc24"
+      ]
+    },
+    {
+      "query_id": "q04",
+      "query": "Model Studio 的按 token 计费与专属算力部署如何比较？",
+      "dense": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.7967075809905066
+      },
+      "hybrid": {
+        "recall_at_5": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.5697222754831122
+      },
+      "reranker": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "positive_chunk_ids": {
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1": 1,
+        "cb09f477-328d-5f7f-b976-400943797e5e": 2
+      },
+      "dense_top5": [
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+        "cb09f477-328d-5f7f-b976-400943797e5e",
+        "6e7df458-1026-59aa-b535-8a38da43821c",
+        "720a4122-1e79-54c5-90f3-f3f624b235d1",
+        "81f1096e-90f2-5828-aa39-6ae9828fecc6"
+      ],
+      "hybrid_top5": [
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+        "81f1096e-90f2-5828-aa39-6ae9828fecc6",
+        "6e7df458-1026-59aa-b535-8a38da43821c",
+        "6c8fb7c9-8372-528e-82a3-d039a2051b39",
+        "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01"
+      ],
+      "reranker_top5": [
+        "cb09f477-328d-5f7f-b976-400943797e5e",
+        "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+        "00244706-ecf9-534e-bcda-da02be65717b",
+        "fe24f6d3-a8dd-5c95-80be-2c14c1741de3",
+        "720a4122-1e79-54c5-90f3-f3f624b235d1"
+      ]
+    },
+    {
+      "query_id": "q05",
+      "query": "How should DeepSeek API costs account for input, output and cache-hit token pricing?",
+      "dense": {
+        "recall_at_5": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.5508231047523733
+      },
+      "hybrid": {
+        "recall_at_5": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.5697222754831122
+      },
+      "reranker": {
+        "recall_at_5": 1.0,
+        "mrr": 0.3333333333333333,
+        "ndcg_at_10": 0.5196610607458307
+      },
+      "positive_chunk_ids": {
+        "249fc3f1-f1d2-50b6-b61a-8fb03f6f7e7f": 1,
+        "6c8fb7c9-8372-528e-82a3-d039a2051b39": 2
+      },
+      "dense_top5": [
+        "249fc3f1-f1d2-50b6-b61a-8fb03f6f7e7f",
+        "720a4122-1e79-54c5-90f3-f3f624b235d1",
+        "35c47888-f0ba-5731-ae84-07afcbf856cb",
+        "00244706-ecf9-534e-bcda-da02be65717b",
+        "b86ee402-2fec-5625-a724-087815273976"
+      ],
+      "hybrid_top5": [
+        "249fc3f1-f1d2-50b6-b61a-8fb03f6f7e7f",
+        "b86ee402-2fec-5625-a724-087815273976",
+        "00244706-ecf9-534e-bcda-da02be65717b",
+        "e4ba22ff-22ec-5d57-a711-4b7ae798a62d",
+        "720a4122-1e79-54c5-90f3-f3f624b235d1"
+      ],
+      "reranker_top5": [
+        "720a4122-1e79-54c5-90f3-f3f624b235d1",
+        "00244706-ecf9-534e-bcda-da02be65717b",
+        "6c8fb7c9-8372-528e-82a3-d039a2051b39",
+        "e4ba22ff-22ec-5d57-a711-4b7ae798a62d",
+        "249fc3f1-f1d2-50b6-b61a-8fb03f6f7e7f"
+      ]
+    },
+    {
+      "query_id": "q11",
+      "query": "vLLM OpenAI-compatible server 的 API key 是否保护所有端点，还需要什么网络加固？",
+      "dense": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.9639404333166532
+      },
+      "hybrid": {
+        "recall_at_5": 0.5,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.5697222754831122
+      },
+      "reranker": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.9639404333166532
+      },
+      "positive_chunk_ids": {
+        "81bc8663-f2b2-5110-b4cd-6f4637c50928": 2,
+        "86c979b2-45d3-5b3f-9dad-00effad8c2c6": 1
+      },
+      "dense_top5": [
+        "81bc8663-f2b2-5110-b4cd-6f4637c50928",
+        "9e939843-44f4-5edd-b362-b935b23c63e2",
+        "86c979b2-45d3-5b3f-9dad-00effad8c2c6",
+        "6034770d-d789-5d6d-aec7-6659db546b5d",
+        "0ae821b0-96af-578a-bf7a-383c1ab5f93c"
+      ],
+      "hybrid_top5": [
+        "86c979b2-45d3-5b3f-9dad-00effad8c2c6",
+        "c2009998-c67f-5e2d-a76f-ab22d57a3806",
+        "0ae821b0-96af-578a-bf7a-383c1ab5f93c",
+        "ab4b0de5-3444-50cd-9024-cadce6003434",
+        "6034770d-d789-5d6d-aec7-6659db546b5d"
+      ],
+      "reranker_top5": [
+        "81bc8663-f2b2-5110-b4cd-6f4637c50928",
+        "9e939843-44f4-5edd-b362-b935b23c63e2",
+        "86c979b2-45d3-5b3f-9dad-00effad8c2c6",
+        "316f4367-ed2a-5af8-8fe9-3cfbc81e6d88",
+        "6034770d-d789-5d6d-aec7-6659db546b5d"
+      ]
+    },
+    {
+      "query_id": "q14",
+      "query": "Which vLLM Prometheus metrics support monitoring TTFT, TPOT, queue depth and KV cache?",
+      "dense": {
+        "recall_at_5": 1.0,
+        "mrr": 1.0,
+        "ndcg_at_10": 0.944847956559586
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_10": 0.6590018048024133
+      },
+      "reranker": {
+        "recall_at_5": 1.0,
+        "mrr": 0.5,
+        "ndcg_at_10": 0.6590018048024133
+      },
+      "positive_chunk_ids": {
+        "45515285-778c-55ab-aede-061bca3b9298": 1,
+        "90a3c97f-ba20-535a-90c0-471487639b83": 2
+      },
+      "dense_top5": [
+        "90a3c97f-ba20-535a-90c0-471487639b83",
+        "c313027e-d4ef-5abb-ac94-a1a3b70a1f13",
+        "0ae821b0-96af-578a-bf7a-383c1ab5f93c",
+        "45515285-778c-55ab-aede-061bca3b9298",
+        "e9c72cbb-6920-538a-9762-ec391c7e3fad"
+      ],
+      "hybrid_top5": [
+        "c313027e-d4ef-5abb-ac94-a1a3b70a1f13",
+        "90a3c97f-ba20-535a-90c0-471487639b83",
+        "45515285-778c-55ab-aede-061bca3b9298",
+        "6034770d-d789-5d6d-aec7-6659db546b5d",
+        "0ae821b0-96af-578a-bf7a-383c1ab5f93c"
+      ],
+      "reranker_top5": [
+        "c313027e-d4ef-5abb-ac94-a1a3b70a1f13",
+        "90a3c97f-ba20-535a-90c0-471487639b83",
+        "45515285-778c-55ab-aede-061bca3b9298",
+        "6034770d-d789-5d6d-aec7-6659db546b5d",
+        "f703f8e5-6889-507a-b2f2-01da488934c4"
+      ]
+    }
+  ],
+  "review_examples": [
+    {
+      "query_id": "q02",
+      "method": "BM25",
+      "top_results": [
+        {
+          "id": "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+          "source": "qwen/04_model_studio_dedicated_deployment.md",
+          "section": "Model Studio dedicated deployment overview",
+          "grade": 0,
+          "text": "# Model Studio dedicated deployment overview\n\n- **Resource ID:** 04\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/model-deployment-introduction\n- **Purpose:** Compare token-based billing with dedicated compute deployment."
+        },
+        {
+          "id": "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+          "source": "qwen/02_model_studio_model_catalog.md",
+          "section": "Alibaba Model Studio model catalog",
+          "grade": 1,
+          "text": "# Alibaba Model Studio model catalog\n\n- **Resource ID:** 02\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/list-models\n- **Purpose:** Discover available models, capabilities, context lengths, prices, providers and deployment modes."
+        },
+        {
+          "id": "8452a4a2-5ba6-5f60-a957-f28ae3e1b5cd",
+          "source": "qwen/03_qwen_openai_compatible_chat_api.md",
+          "section": "Qwen OpenAI-compatible Chat API",
+          "grade": 0,
+          "text": "# Qwen OpenAI-compatible Chat API\n\n- **Resource ID:** 03\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions\n- **Purpose:** Assess API integration, protocol compatibility and multimodal inputs."
+        }
+      ]
+    },
+    {
+      "query_id": "q02",
+      "method": "Hybrid + Reranker",
+      "top_results": [
+        {
+          "id": "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+          "source": "qwen/02_model_studio_model_catalog.md",
+          "section": "Alibaba Model Studio model catalog",
+          "grade": 1,
+          "text": "# Alibaba Model Studio model catalog\n\n- **Resource ID:** 02\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/list-models\n- **Purpose:** Discover available models, capabilities, context lengths, prices, providers and deployment modes."
+        },
+        {
+          "id": "f984d755-fb1a-50b7-a882-a00255d7e3e2",
+          "source": "qwen/02_model_studio_model_catalog.md",
+          "section": "Alibaba Model Studio model catalog > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nThe catalog API supports filtering by provider, modality, capability, feature, context length, region and deployment mode. It returns model IDs, descriptions, capabilities and pricing fields. Treat the catalog and prices as dynamic; re-check before procurement."
+        },
+        {
+          "id": "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+          "source": "qwen/04_model_studio_dedicated_deployment.md",
+          "section": "Model Studio dedicated deployment overview",
+          "grade": 0,
+          "text": "# Model Studio dedicated deployment overview\n\n- **Resource ID:** 04\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/model-deployment-introduction\n- **Purpose:** Compare token-based billing with dedicated compute deployment."
+        }
+      ]
+    },
+    {
+      "query_id": "q04",
+      "method": "BM25",
+      "top_results": [
+        {
+          "id": "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+          "source": "qwen/04_model_studio_dedicated_deployment.md",
+          "section": "Model Studio dedicated deployment overview",
+          "grade": 1,
+          "text": "# Model Studio dedicated deployment overview\n\n- **Resource ID:** 04\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/model-deployment-introduction\n- **Purpose:** Compare token-based billing with dedicated compute deployment."
+        },
+        {
+          "id": "7b7d3b5e-a5cc-53a5-91b1-211ded6f7f01",
+          "source": "qwen/02_model_studio_model_catalog.md",
+          "section": "Alibaba Model Studio model catalog",
+          "grade": 0,
+          "text": "# Alibaba Model Studio model catalog\n\n- **Resource ID:** 02\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/list-models\n- **Purpose:** Discover available models, capabilities, context lengths, prices, providers and deployment modes."
+        },
+        {
+          "id": "8452a4a2-5ba6-5f60-a957-f28ae3e1b5cd",
+          "source": "qwen/03_qwen_openai_compatible_chat_api.md",
+          "section": "Qwen OpenAI-compatible Chat API",
+          "grade": 0,
+          "text": "# Qwen OpenAI-compatible Chat API\n\n- **Resource ID:** 03\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions\n- **Purpose:** Assess API integration, protocol compatibility and multimodal inputs."
+        }
+      ]
+    },
+    {
+      "query_id": "q04",
+      "method": "Hybrid + Reranker",
+      "top_results": [
+        {
+          "id": "cb09f477-328d-5f7f-b976-400943797e5e",
+          "source": "qwen/04_model_studio_dedicated_deployment.md",
+          "section": "Model Studio dedicated deployment overview > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nThe guide distinguishes token-usage billing from dedicated model-unit/compute deployment and describes deployment and billing choices. Dedicated capacity may suit stable high-concurrency or low-latency workloads. Confirm current pricing and supported models in the console."
+        },
+        {
+          "id": "4e53e1f4-94e4-5007-90a3-3b532cba69e1",
+          "source": "qwen/04_model_studio_dedicated_deployment.md",
+          "section": "Model Studio dedicated deployment overview",
+          "grade": 1,
+          "text": "# Model Studio dedicated deployment overview\n\n- **Resource ID:** 04\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/model-deployment-introduction\n- **Purpose:** Compare token-based billing with dedicated compute deployment."
+        },
+        {
+          "id": "00244706-ecf9-534e-bcda-da02be65717b",
+          "source": "enterprise_requirements/enterprise_model_selection_checklist.md",
+          "section": "Enterprise LLM Selection Checklist > D. Total cost of ownership",
+          "grade": 0,
+          "text": "## D. Total cost of ownership\n\n- [ ] Input/output tokens and cache-hit assumptions.\n- [ ] Peak/off-peak prices, rate limits and minimum spend.\n- [ ] GPU, storage, network and operations costs.\n- [ ] Cost per successful task, not just price per million tokens.\n- [ ] Retries, agent turns and tool costs.\n- [ ] Budget limits and abnormal-usage alerts."
+        }
+      ]
+    },
+    {
+      "query_id": "q05",
+      "method": "BM25",
+      "top_results": [
+        {
+          "id": "249fc3f1-f1d2-50b6-b61a-8fb03f6f7e7f",
+          "source": "deepseek/05_deepseek_models_pricing.md",
+          "section": "DeepSeek API models and pricing",
+          "grade": 1,
+          "text": "# DeepSeek API models and pricing\n\n- **Resource ID:** 05\n- **Publisher:** DeepSeek API Docs\n- **Official source:** https://api-docs.deepseek.com/quick_start/pricing/\n- **Purpose:** Compare API models, context, output limits, cache-hit pricing and output pricing."
+        },
+        {
+          "id": "e4ba22ff-22ec-5d57-a711-4b7ae798a62d",
+          "source": "claude/09_claude_pricing.md",
+          "section": "Claude API pricing and prompt caching",
+          "grade": 0,
+          "text": "# Claude API pricing and prompt caching\n\n- **Resource ID:** 09\n- **Publisher:** Anthropic Claude Platform\n- **Official source:** https://platform.claude.com/docs/en/about-claude/pricing\n- **Purpose:** Estimate input/output, cache-write and cache-hit costs."
+        },
+        {
+          "id": "b86ee402-2fec-5625-a724-087815273976",
+          "source": "claude/09_claude_pricing.md",
+          "section": "Claude API pricing and prompt caching > Enterprise selection questions",
+          "grade": 0,
+          "text": "## Enterprise selection questions\n\n- How much input is repeated\n- Can cache hits offset cache-write costs\n- What invalidates cache breakpoints\n- Does the estimate include input, output, cache and tool costs?"
+        }
+      ]
+    },
+    {
+      "query_id": "q05",
+      "method": "Hybrid + Reranker",
+      "top_results": [
+        {
+          "id": "720a4122-1e79-54c5-90f3-f3f624b235d1",
+          "source": "enterprise_requirements/enterprise_requirements.md",
+          "section": "Enterprise Requirements (Synthetic Internal) > 4. Cost requirements",
+          "grade": 0,
+          "text": "## 4. Cost requirements\n\n- Estimate input, output, and cached-token usage from representative traffic.\n- Include API charges, dedicated capacity, GPU rental or depreciation, storage, networking, and operations.\n- Calculate cost per successful task, not only price per million tokens.\n- Include retries, multi-step agent calls, and tool execution overhead.\n- Define budget limits, quotas, and abnormal-usage alerts."
+        },
+        {
+          "id": "00244706-ecf9-534e-bcda-da02be65717b",
+          "source": "enterprise_requirements/enterprise_model_selection_checklist.md",
+          "section": "Enterprise LLM Selection Checklist > D. Total cost of ownership",
+          "grade": 0,
+          "text": "## D. Total cost of ownership\n\n- [ ] Input/output tokens and cache-hit assumptions.\n- [ ] Peak/off-peak prices, rate limits and minimum spend.\n- [ ] GPU, storage, network and operations costs.\n- [ ] Cost per successful task, not just price per million tokens.\n- [ ] Retries, agent turns and tool costs.\n- [ ] Budget limits and abnormal-usage alerts."
+        },
+        {
+          "id": "6c8fb7c9-8372-528e-82a3-d039a2051b39",
+          "source": "deepseek/05_deepseek_models_pricing.md",
+          "section": "DeepSeek API models and pricing > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nThe official page lists model IDs, context and output limits, tool/API capabilities, input and output prices, and cache-hit prices. Prices and aliases can change. Record the retrieval date and model version in any cost model."
+        }
+      ]
+    },
+    {
+      "query_id": "q11",
+      "method": "BM25",
+      "top_results": [
+        {
+          "id": "86c979b2-45d3-5b3f-9dad-00effad8c2c6",
+          "source": "vllm/11_vllm_openai_compatible_server.md",
+          "section": "vLLM OpenAI-compatible server",
+          "grade": 1,
+          "text": "# vLLM OpenAI-compatible server\n\n- **Resource ID:** 11\n- **Publisher:** vLLM Documentation\n- **Official source:** https://docs.vllm.ai/en/stable/serving/online_serving/openai_compatible_server/\n- **Purpose:** Assess self-hosted serving interfaces and API compatibility."
+        },
+        {
+          "id": "8452a4a2-5ba6-5f60-a957-f28ae3e1b5cd",
+          "source": "qwen/03_qwen_openai_compatible_chat_api.md",
+          "section": "Qwen OpenAI-compatible Chat API",
+          "grade": 0,
+          "text": "# Qwen OpenAI-compatible Chat API\n\n- **Resource ID:** 03\n- **Publisher:** Alibaba Cloud Model Studio\n- **Official source:** https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions\n- **Purpose:** Assess API integration, protocol compatibility and multimodal inputs."
+        },
+        {
+          "id": "c2009998-c67f-5e2d-a76f-ab22d57a3806",
+          "source": "enterprise_requirements/enterprise_model_selection_checklist.md",
+          "section": "Enterprise LLM Selection Checklist > C. Deployment and infrastructure",
+          "grade": 0,
+          "text": "## C. Deployment and infrastructure\n\n- [ ] API hosting, dedicated deployment or fully private hosting.\n- [ ] Region, data residency and network access.\n- [ ] GPU type, VRAM, interconnect and compute budget.\n- [ ] vLLM/SGLang/Transformers compatibility.\n- [ ] Quantization quality regression.\n- [ ] Parallelism, scaling, rollout and rollback."
+        }
+      ]
+    },
+    {
+      "query_id": "q11",
+      "method": "Hybrid + Reranker",
+      "top_results": [
+        {
+          "id": "81bc8663-f2b2-5110-b4cd-6f4637c50928",
+          "source": "vllm/11_vllm_openai_compatible_server.md",
+          "section": "vLLM OpenAI-compatible server > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nvLLM exposes HTTP endpoints compatible with several APIs, including OpenAI-style endpoints and Anthropic Messages. The documentation warns that API-key authentication does not protect every endpoint; production deployments need network controls and hardening."
+        },
+        {
+          "id": "9e939843-44f4-5edd-b362-b935b23c63e2",
+          "source": "vllm/11_vllm_openai_compatible_server.md",
+          "section": "vLLM OpenAI-compatible server > Enterprise selection questions",
+          "grade": 0,
+          "text": "## Enterprise selection questions\n\n- Which APIs are required\n- Are chat templates and tool-call formats compatible\n- Are all exposed endpoints protected\n- Are TLS, reverse proxy, rate limits and network isolation configured?"
+        },
+        {
+          "id": "86c979b2-45d3-5b3f-9dad-00effad8c2c6",
+          "source": "vllm/11_vllm_openai_compatible_server.md",
+          "section": "vLLM OpenAI-compatible server",
+          "grade": 1,
+          "text": "# vLLM OpenAI-compatible server\n\n- **Resource ID:** 11\n- **Publisher:** vLLM Documentation\n- **Official source:** https://docs.vllm.ai/en/stable/serving/online_serving/openai_compatible_server/\n- **Purpose:** Assess self-hosted serving interfaces and API compatibility."
+        }
+      ]
+    },
+    {
+      "query_id": "q14",
+      "method": "BM25",
+      "top_results": [
+        {
+          "id": "c313027e-d4ef-5abb-ac94-a1a3b70a1f13",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics > Enterprise selection questions",
+          "grade": 0,
+          "text": "## Enterprise selection questions\n\n- Are TTFT, TPOT, throughput, queue depth and KV-cache utilization monitored\n- Can metrics be segmented by model and tenant\n- Do alerts map to the SLA\n- Is load testing documented?"
+        },
+        {
+          "id": "45515285-778c-55ab-aede-061bca3b9298",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics",
+          "grade": 1,
+          "text": "# vLLM production metrics\n\n- **Resource ID:** 14\n- **Publisher:** vLLM Documentation\n- **Official source:** https://docs.vllm.ai/en/stable/usage/metrics/\n- **Purpose:** Design production monitoring, capacity planning and incident diagnosis."
+        },
+        {
+          "id": "90a3c97f-ba20-535a-90c0-471487639b83",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nvLLM exposes Prometheus-style metrics through /metrics. Combine engine metrics with application success, timeout, cost, model version and user-feedback metrics for end-to-end observability."
+        }
+      ]
+    },
+    {
+      "query_id": "q14",
+      "method": "Hybrid + Reranker",
+      "top_results": [
+        {
+          "id": "c313027e-d4ef-5abb-ac94-a1a3b70a1f13",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics > Enterprise selection questions",
+          "grade": 0,
+          "text": "## Enterprise selection questions\n\n- Are TTFT, TPOT, throughput, queue depth and KV-cache utilization monitored\n- Can metrics be segmented by model and tenant\n- Do alerts map to the SLA\n- Is load testing documented?"
+        },
+        {
+          "id": "90a3c97f-ba20-535a-90c0-471487639b83",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics > Reading notes",
+          "grade": 2,
+          "text": "## Reading notes\n\nvLLM exposes Prometheus-style metrics through /metrics. Combine engine metrics with application success, timeout, cost, model version and user-feedback metrics for end-to-end observability."
+        },
+        {
+          "id": "45515285-778c-55ab-aede-061bca3b9298",
+          "source": "vllm/14_vllm_production_metrics.md",
+          "section": "vLLM production metrics",
+          "grade": 1,
+          "text": "# vLLM production metrics\n\n- **Resource ID:** 14\n- **Publisher:** vLLM Documentation\n- **Official source:** https://docs.vllm.ai/en/stable/usage/metrics/\n- **Purpose:** Design production monitoring, capacity planning and incident diagnosis."
+        }
+      ]
+    }
+  ],
+  "observations": [
+    "RRF moves labeled positives below rank 5 for q02, q04 and q11; lexical metadata matches compete with direct reading-note answers.",
+    "For q05, reranker puts general enterprise cost passages above the DeepSeek-specific labeled chunks.",
+    "For q14, the top reranked Enterprise selection questions chunk explicitly names TTFT/TPOT/queue depth/KV-cache but is unjudged in the seed labels; this is a likely label gap requiring human review.",
+    "Seed labels remain frozen for comparison. Do not change judgments to favor a retrieval method or infer general superiority from this small set."
+  ]
+}

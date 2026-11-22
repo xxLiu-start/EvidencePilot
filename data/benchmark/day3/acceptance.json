@@ -1,0 +1,87 @@
+{
+  "checked_at": "2026-11-20T11:53:23.253160+08:00",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "bm25",
+      "passed": true,
+      "details": {
+        "results": 10,
+        "automatic_update": true,
+        "manual_rebuild": 19
+      }
+    },
+    {
+      "name": "dense_plus_bm25",
+      "passed": true,
+      "details": {
+        "dense_candidates": 10,
+        "bm25_candidates": 10,
+        "results": 5
+      }
+    },
+    {
+      "name": "rrf",
+      "passed": true,
+      "details": {
+        "k": 60,
+        "deduplicated_results": 5
+      }
+    },
+    {
+      "name": "cross_encoder_reranker",
+      "passed": true,
+      "details": {
+        "model": "BAAI/bge-reranker-v2-m3",
+        "results": 5,
+        "score_normalization": "sigmoid",
+        "restart_verified": true
+      }
+    },
+    {
+      "name": "four_method_evaluation",
+      "passed": true,
+      "details": [
+        {
+          "method": "Dense",
+          "recall_at_5": 0.95,
+          "mrr": 0.975,
+          "ndcg_at_10": 0.7859087655579027,
+          "mean_latency_ms": 301.27798025496304
+        },
+        {
+          "method": "BM25",
+          "recall_at_5": 0.775,
+          "mrr": 0.9,
+          "ndcg_at_10": 0.6194771412446267,
+          "mean_latency_ms": 32.02211670577526
+        },
+        {
+          "method": "Hybrid",
+          "recall_at_5": 0.875,
+          "mrr": 0.975,
+          "ndcg_at_10": 0.727385219435629,
+          "mean_latency_ms": 333.4178290795535
+        },
+        {
+          "method": "Hybrid + Reranker",
+          "recall_at_5": 1.0,
+          "mrr": 0.9416666666666667,
+          "ndcg_at_10": 0.8327873222490976,
+          "mean_latency_ms": 4881.35919328779
+        }
+      ]
+    },
+    {
+      "name": "queries_and_judgments_saved",
+      "passed": true,
+      "details": {
+        "queries": 20,
+        "chunks": 80,
+        "annotation_status": "agent_reviewed_pending_human",
+        "human_reviewed": false
+      }
+    }
+  ],
+  "annotation_status": "agent_reviewed_pending_human"
+}

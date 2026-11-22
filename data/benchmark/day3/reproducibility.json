@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "query_method_pairs": 80,
+  "identical_rankings": 80,
+  "max_metric_difference": 0.0,
+  "max_score_difference": 0.0,
+  "configuration_mismatches": [],
+  "both_runs_have_code_hashes": false,
+  "code_hashes_available_in_rerun": true,
+  "latency_compared": false,
+  "first_run": "data/benchmark/day3/initial_results",
+  "second_run": "data/benchmark/day3/repeat_results",
+  "primary_report": "data/benchmark/day3/results/results.json",
+  "note": "The first run predates source-hash instrumentation; full source hashes are recorded in the rerun and primary report."
+}

@@ -1,0 +1,153 @@
+{
+  "run_id": "7ee0fab0-5ef4-42c7-9604-716a27552371",
+  "claims": [
+    {
+      "claim_id": "D4-C1",
+      "claim_text": "Qwen provides official self-hosted deployment documentation and function calling examples."
+    }
+  ],
+  "status": "complete",
+  "queries": [
+    {
+      "claim_id": "D4-C1",
+      "query": "Qwen official self-hosted deployment documentation"
+    },
+    {
+      "claim_id": "D4-C1",
+      "query": "Qwen function calling examples official documentation"
+    }
+  ],
+  "pages": [
+    {
+      "source_url": "https://blog.barrack.ai/self-host-qwen-3-32b",
+      "fetched_url": "https://blog.barrack.ai/self-host-qwen-3-32b/",
+      "title": "Self-Host Qwen 3-32B in Minutes — Zero Configuration Required | Barrack AI",
+      "published_at": "2026-02-23T00:00:00+00:00",
+      "retrieved_at": "2026-11-20T04:18:22.132148+00:00",
+      "content_hash": "217f36735999f083195089b43d0af237bbc7b630bf19d692d98720401e773257",
+      "source_type": "web",
+      "cache_hit": false
+    },
+    {
+      "source_url": "https://www.promptquorum.com/power-local-llm/qwen-local-deployment-complete-guide-2026",
+      "fetched_url": "https://www.promptquorum.com/power-local-llm/qwen-local-deployment-complete-guide-2026",
+      "title": "Self-Host Qwen3 2026: 8B, 14B, 32B + Docker API",
+      "published_at": "2026-05-26T00:00:00+00:00",
+      "retrieved_at": "2026-11-20T04:18:24.963351+00:00",
+      "content_hash": "1da05ec37cab405a569cdd82d25659d5e8f5ab20e02fc15fed12ea3866113d39",
+      "source_type": "web",
+      "cache_hit": false
+    },
+    {
+      "source_url": "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py",
+      "fetched_url": "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py",
+      "title": "Qwen-Agent/examples/function_calling.py at main · QwenLM/Qwen-Agent",
+      "published_at": "2023-09-22T00:00:00+00:00",
+      "retrieved_at": "2026-11-20T04:18:28.593168+00:00",
+      "content_hash": "f6310b92bde4e0624a6689e8e9f1094843ce2763afe064995a6de31108b914fd",
+      "source_type": "web",
+      "cache_hit": false
+    }
+  ],
+  "evidences": [
+    {
+      "evidence_id": "99a447df-7384-5119-ae60-d607553375de",
+      "claim_id": "D4-C1",
+      "claim_text": "Qwen provides official self-hosted deployment documentation and function calling examples.",
+      "source_type": "web",
+      "source_url": "https://blog.barrack.ai/self-host-qwen-3-32b",
+      "document_id": null,
+      "published_at": "2026-02-23T00:00:00Z",
+      "retrieved_at": "2026-11-20T04:18:22.132148Z",
+      "supporting_text": "Prefer API deployment? You can also deploy programmatically using our API. See the deployment documentation.",
+      "relation": "context",
+      "content_hash": "217f36735999f083195089b43d0af237bbc7b630bf19d692d98720401e773257",
+      "quote_start": 2393,
+      "quote_end": 2501
+    },
+    {
+      "evidence_id": "02d3ded5-43fb-5cf3-8df1-799fd3c87585",
+      "claim_id": "D4-C1",
+      "claim_text": "Qwen provides official self-hosted deployment documentation and function calling examples.",
+      "source_type": "web",
+      "source_url": "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py",
+      "document_id": null,
+      "published_at": "2023-09-22T00:00:00Z",
+      "retrieved_at": "2026-11-20T04:18:28.593168Z",
+      "supporting_text": "Copyright 2023 The Qwen team, Alibaba Group. All rights reserved.",
+      "relation": "supports",
+      "content_hash": "f6310b92bde4e0624a6689e8e9f1094843ce2763afe064995a6de31108b914fd",
+      "quote_start": 575,
+      "quote_end": 640
+    },
+    {
+      "evidence_id": "317091a8-6074-5baa-860e-9c9bb60b8a8f",
+      "claim_id": "D4-C1",
+      "claim_text": "Qwen provides official self-hosted deployment documentation and function calling examples.",
+      "source_type": "web",
+      "source_url": "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py",
+      "document_id": null,
+      "published_at": "2023-09-22T00:00:00Z",
+      "retrieved_at": "2026-11-20T04:18:28.593168Z",
+      "supporting_text": "Use your own model service compatible with OpenAI API:\n        # 'model': 'Qwen/qwen2.5-7b-instruct',\n        # 'model_server': 'http://localhost:8000/v1',  # api_base",
+      "relation": "supports",
+      "content_hash": "f6310b92bde4e0624a6689e8e9f1094843ce2763afe064995a6de31108b914fd",
+      "quote_start": 2866,
+      "quote_end": 3033
+    },
+    {
+      "evidence_id": "be59ba07-a8bc-5f02-8802-9e45b2ff1da8",
+      "claim_id": "D4-C1",
+      "claim_text": "Qwen provides official self-hosted deployment documentation and function calling examples.",
+      "source_type": "web",
+      "source_url": "https://github.com/QwenLM/Qwen-Agent/blob/main/examples/function_calling.py",
+      "document_id": null,
+      "published_at": "2023-09-22T00:00:00Z",
+      "retrieved_at": "2026-11-20T04:18:28.593168Z",
+      "supporting_text": "Run example of function calling with QwenFnCallPrompt",
+      "relation": "supports",
+      "content_hash": "f6310b92bde4e0624a6689e8e9f1094843ce2763afe064995a6de31108b914fd",
+      "quote_start": 6323,
+      "quote_end": 6376
+    }
+  ],
+  "errors": [],
+  "traces": [
+    {
+      "operation": "query_generation",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 775.1311473548412,
+      "attempts": 1,
+      "error_category": null
+    },
+    {
+      "operation": "evidence_extraction",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 948.9298425614834,
+      "attempts": 1,
+      "error_category": null
+    },
+    {
+      "operation": "evidence_extraction",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 1086.6435850039124,
+      "attempts": 1,
+      "error_category": null
+    },
+    {
+      "operation": "evidence_extraction",
+      "mode": "local",
+      "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+      "elapsed_ms": 3277.435440570116,
+      "attempts": 1,
+      "error_category": null
+    }
+  ]
+}

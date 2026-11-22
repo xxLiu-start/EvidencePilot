@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "configured_secret_matches": 0,
+  "text_files_checked": 85,
+  "application_logs_checked": true,
+  "streamlit_has_no_model_or_database_credentials": true,
+  "private_env_mounted_only_to_api_read_only": true
+}

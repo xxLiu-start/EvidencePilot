@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "records": 140,
+  "dataset_identity_matches": true,
+  "code_snapshot_and_current_implementation_match": true,
+  "all_hard_budgets_respected": true,
+  "same_mode_and_model": true,
+  "token_accounting_matches_api_traces": true,
+  "offline_replay_and_summary_identical": true,
+  "observed_bad_cases": 5,
+  "human_reviewed": false,
+  "formal_comparison_provisional": true,
+  "generation_errors_included_in_scores": 1,
+  "non_transport_outcomes_preserved_exactly": null,
+  "audit_script_sha256": "843347d16c316e4707f10809d192bec75b70432dfcf8ede27f44ccc6dd0bfd5d"
+}

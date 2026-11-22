@@ -1,0 +1,7 @@
+{
+  "claim_id": "C1",
+  "failure_category": "no_parseable_sources",
+  "analysis": "Previous action: web_search_tool; evidence status: INSUFFICIENT; missing_internal=False; missing_external=True. Keep the claim entities, target the missing source or fact, and change the search angle.",
+  "rewrite_index": 1,
+  "rewritten_query": "Qwen self-hosted deployment documentation"
+}

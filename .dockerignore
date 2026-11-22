@@ -1,0 +1,12 @@
+.env
+data/
+tests/
+training/
+prompts/
+**/__pycache__/
+**/*.pyc
+.tools/
+.pytest_cache/
+docs/
+start.md
+README.md

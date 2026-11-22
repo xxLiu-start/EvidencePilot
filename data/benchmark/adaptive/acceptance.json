@@ -1,0 +1,98 @@
+{
+  "checked_at": "2026-11-20T05:56:43.123780+00:00",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "missing_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 3,
+      "coverage": 1.0,
+      "termination_action": "STOP"
+    },
+    {
+      "name": "sufficient_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 2,
+      "coverage": 1.0,
+      "termination_action": "STOP"
+    },
+    {
+      "name": "conflicting_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 4,
+      "coverage": 0.0,
+      "termination_action": "ABSTAIN"
+    },
+    {
+      "name": "budget_exhausted",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 1,
+      "coverage": 0.0,
+      "termination_action": "ABSTAIN"
+    },
+    {
+      "name": "unverifiable_evidence",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 2,
+      "coverage": 0.0,
+      "termination_action": "ABSTAIN"
+    },
+    {
+      "name": "bounded_loop",
+      "passed": true,
+      "execution": "real_langgraph_and_database_with_controlled_model_and_acquisition",
+      "rounds": 3,
+      "coverage": 0.0,
+      "termination_action": "ABSTAIN"
+    }
+  ],
+  "algorithm_version": "adaptive-v1",
+  "live_runs": [
+    {
+      "name": "local_rag",
+      "execution": "real_qwen_and_tools",
+      "status": "completed",
+      "termination_action": "STOP",
+      "coverage": 1.0,
+      "rounds": 2,
+      "stop_reason": "critical_claims_supported",
+      "tools": [
+        "rag_retrieve_tool",
+        "verify_claim_tool"
+      ],
+      "claim_statuses": {
+        "C1": "SUPPORTED"
+      },
+      "outdated_evidence_count": 0
+    },
+    {
+      "name": "web_research",
+      "execution": "real_qwen_and_tools",
+      "status": "partial",
+      "termination_action": "ABSTAIN",
+      "coverage": 0.0,
+      "rounds": 6,
+      "stop_reason": "budget_exhausted",
+      "tools": [
+        "web_search_tool",
+        "open_source_tool",
+        "web_search_tool",
+        "open_source_tool",
+        "open_source_tool",
+        "web_search_tool"
+      ],
+      "claim_statuses": {
+        "C1": "OUTDATED"
+      },
+      "outdated_evidence_count": 6
+    }
+  ],
+  "restart_persistence": true,
+  "repeat_run_is_idempotent": true,
+  "finished_at": "2026-11-20T05:59:05.669286+00:00"
+}

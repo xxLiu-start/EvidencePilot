@@ -1,0 +1,930 @@
+{
+  "execution": "real_qwen_bge_m3_tavily_postgresql",
+  "runs": [
+    {
+      "name": "local_rag",
+      "state": {
+        "task_id": "06d02f91-990f-4fb2-9625-a597edb831f5",
+        "user_query": "根据内部知识库核对：EvidencePilot 的默认 Chunk Size 和 Overlap 分别是多少？只生成一个 Claim，要求内部文档来源。",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "EvidencePilot 的默认 Chunk Size 和 Overlap 分别是多少？",
+            "priority": "high",
+            "required_source": "internal",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+        ],
+        "source_ids": [],
+        "selected_action": "STOP",
+        "current_claim_id": "C1",
+        "action_args": {
+          "claim_id": "C1"
+        },
+        "pending_observation": null,
+        "search_count": 0,
+        "retrieval_count": 1,
+        "remaining_budget": 4,
+        "round_count": 2,
+        "claim_statuses": {
+          "C1": {
+            "status": "SUPPORTED",
+            "enough": true,
+            "verified": true,
+            "fresh": true,
+            "has_conflict": false,
+            "evidence_ids": [
+              "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+            ],
+            "fresh_evidence_ids": [
+              "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+            ],
+            "outdated_evidence_count": 0,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 1,
+            "verification_attempted": true,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "e7c9515055c28ecde97ff699130dba5595c7cd53d36f282d43e53dc8859d9044",
+            "source_requirements_met": true,
+            "missing_internal": false,
+            "missing_external": false,
+            "missing_required_source": false,
+            "qualified_evidence_ids": [
+              "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+            ],
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. 内部文档明确说明默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。"
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "rag_retrieve_tool",
+            "ok": true,
+            "summary": "Retrieved 1 exact document excerpts.",
+            "error_category": null,
+            "source_ids": [],
+            "query": "EvidencePilot 默认 Chunk Size Overlap 配置"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "verify_claim_tool",
+            "ok": true,
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. 内部文档明确说明默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+            "error_category": null,
+            "source_ids": [],
+            "query": ""
+          }
+        ],
+        "final_report": "研究问题：根据内部知识库核对：EvidencePilot 的默认 Chunk Size 和 Overlap 分别是多少？只生成一个 Claim，要求内部文档来源。\n状态：completed；工具调用：2；剩余预算：4。\n终止动作：STOP；加权 Coverage：100.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [SUPPORTED]：EvidencePilot 的默认 Chunk Size 和 Overlap 分别是多少？\nSUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. 内部文档明确说明默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。\n- Evidence fa1924d9-1ec9-5784-a774-ac6a279e2fe8；关系：context；来源：document:981dbcf4-2b07-4be6-87c8-f9ef07f5a66d#chunk=c2dbf74f-afe1-426c-89ff-4c2769f1eb53\n> # EvidencePilot chunk configuration\n> \n> EvidencePilot 的默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。切分优先遵循标题和段落。",
+        "status": "completed",
+        "stop_reason": "critical_claims_supported",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "local",
+          "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "elapsed_ms": 761.5991393104196,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 1.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "RETRIEVED"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 1.0,
+            "statuses": {
+              "C1": "SUPPORTED"
+            }
+          }
+        ],
+        "policy_step_count": 2,
+        "retrieval_action_count": 1,
+        "claim_retrieval_counts": {
+          "C1": 1
+        },
+        "query_rewrite_count": 0,
+        "query_history": {
+          "C1": [
+            {
+              "action": "RETRIEVE_RAG",
+              "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+              "normalized": "evidencepilot 默认 chunk size overlap 配置"
+            }
+          ]
+        },
+        "opened_source_ids": {},
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "VERIFY",
+        "policy_reason": "critical_claims_supported",
+        "termination_action": "STOP"
+      },
+      "steps": [
+        {
+          "id": "43795291-453a-484f-8ae5-aa59684173db",
+          "task_id": "06d02f91-990f-4fb2-9625-a597edb831f5",
+          "step_index": 1,
+          "claim_id": "C1",
+          "tool_name": "rag_retrieve_tool",
+          "arguments": {
+            "query": "EvidencePilot 默认 Chunk Size Overlap 配置",
+            "top_k": 5
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Retrieved 1 exact document excerpts.",
+            "evidence_ids": [
+              "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+            ],
+            "source_ids": [],
+            "chunk_ids": [
+              "c2dbf74f-afe1-426c-89ff-4c2769f1eb53"
+            ],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 1090.2571193873882,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1248.6245045438409,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "RETRIEVE_RAG",
+              "selected_action": "RETRIEVE_RAG",
+              "reason": "missing_internal_evidence"
+            }
+          },
+          "created_at": "2026-11-20T05:56:56.578085+00:00"
+        },
+        {
+          "id": "36686a0b-51e6-4705-8a2d-96260f339168",
+          "task_id": "06d02f91-990f-4fb2-9625-a597edb831f5",
+          "step_index": 2,
+          "claim_id": "C1",
+          "tool_name": "verify_claim_tool",
+          "arguments": {
+            "claim_id": "C1"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "SUPPORTED: 1 fresh, exact excerpts; source requirements met; semantic verification performed. 内部文档明确说明默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+            "evidence_ids": [],
+            "source_ids": [],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 1427.637992426753,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 761.5991393104196,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "VERIFY",
+              "selected_action": "VERIFY",
+              "reason": "verify_before_more_acquisition"
+            }
+          },
+          "created_at": "2026-11-20T05:56:58.540215+00:00"
+        }
+      ],
+      "policy_decisions": [
+        {
+          "proposed": "RETRIEVE_RAG",
+          "selected": "RETRIEVE_RAG",
+          "reason": "missing_internal_evidence",
+          "snapshot": {
+            "remaining_budget": 6,
+            "coverage": 0.0,
+            "retrieval_action_count": 0,
+            "claim_retrieval_counts": {},
+            "query_rewrite_count": 0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          }
+        },
+        {
+          "proposed": "VERIFY",
+          "selected": "VERIFY",
+          "reason": "verify_before_more_acquisition",
+          "snapshot": {
+            "remaining_budget": 5,
+            "coverage": 0.0,
+            "retrieval_action_count": 1,
+            "claim_retrieval_counts": {
+              "C1": 1
+            },
+            "query_rewrite_count": 0,
+            "statuses": {
+              "C1": "RETRIEVED"
+            }
+          }
+        }
+      ],
+      "verifications": [
+        {
+          "claim_id": "C1",
+          "fingerprint": "e7c9515055c28ecde97ff699130dba5595c7cd53d36f282d43e53dc8859d9044",
+          "result": {
+            "verdict": "SUPPORTED",
+            "supporting_evidence_ids": [
+              "fa1924d9-1ec9-5784-a774-ac6a279e2fe8"
+            ],
+            "refuting_evidence_ids": [],
+            "reason": "内部文档明确说明默认 Chunk Size 为 500 tokens，Overlap 为 80 tokens。",
+            "verified": true,
+            "error_category": null
+          },
+          "trace": {
+            "operation": "evidence_verification",
+            "mode": "local",
+            "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "elapsed_ms": 1395.921640098095,
+            "attempts": 1,
+            "error_category": null
+          }
+        }
+      ]
+    },
+    {
+      "name": "web_research",
+      "state": {
+        "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+        "user_query": "核对 Qwen 是否提供使用 vLLM 自托管部署的官方文档。请搜索官方资料，只生成一个 Claim。",
+        "claims": [
+          {
+            "id": "C1",
+            "claim": "Qwen 是否提供使用 vLLM 自托管部署的官方文档？",
+            "priority": "high",
+            "required_source": "official",
+            "needs_internal": false,
+            "needs_external": false,
+            "weight": 3.0
+          }
+        ],
+        "evidence_ids": [
+          "72fd34ac-cf3c-536b-8dac-ba0f152674c8",
+          "d3b16e3a-3626-5081-a63e-2e790e551b19",
+          "65d42b30-c50f-5e99-8b27-e739e7140494",
+          "f6a7eaaf-e4dd-5f3f-b04a-50f45886b0dc",
+          "8c870f9c-7941-5540-b972-95f037635b7d",
+          "2f474922-0bc2-5062-bb4f-246d891abfb9"
+        ],
+        "source_ids": [
+          "461b6d48-2ddc-42d0-9cca-1dca4c921395",
+          "e9447b07-708f-4b6d-8158-7c743b02a2f5",
+          "4476e684-fb64-4f5d-947a-5fbf8fff6bc5",
+          "1a144372-b984-44b1-b654-f16f776fec4c",
+          "3ce5f75c-152c-44da-92e5-54486825da31",
+          "117f0b17-1780-461c-bb1d-d6a6b3901496"
+        ],
+        "selected_action": "ABSTAIN",
+        "current_claim_id": "C1",
+        "action_args": {
+          "query": "Qwen vLLM deployment guide site:github.com/QwenLM OR site:qwenlm.github.io"
+        },
+        "pending_observation": null,
+        "search_count": 3,
+        "retrieval_count": 0,
+        "remaining_budget": 0,
+        "round_count": 6,
+        "claim_statuses": {
+          "C1": {
+            "status": "OUTDATED",
+            "enough": false,
+            "verified": false,
+            "fresh": false,
+            "has_conflict": false,
+            "evidence_ids": [
+              "72fd34ac-cf3c-536b-8dac-ba0f152674c8",
+              "d3b16e3a-3626-5081-a63e-2e790e551b19",
+              "65d42b30-c50f-5e99-8b27-e739e7140494",
+              "f6a7eaaf-e4dd-5f3f-b04a-50f45886b0dc",
+              "8c870f9c-7941-5540-b972-95f037635b7d",
+              "2f474922-0bc2-5062-bb4f-246d891abfb9"
+            ],
+            "fresh_evidence_ids": [],
+            "outdated_evidence_count": 6,
+            "web_evidence_count": 0,
+            "rag_evidence_count": 0,
+            "verification_attempted": false,
+            "can_verify": false,
+            "verification_error": null,
+            "fingerprint": "d377ed3ab570ae265e65de42d736d482c50e7aff92044ae9fb62ba71e441529d",
+            "source_requirements_met": false,
+            "missing_internal": false,
+            "missing_external": true,
+            "missing_required_source": true,
+            "qualified_evidence_ids": [],
+            "summary": "OUTDATED: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. "
+          }
+        },
+        "step_summaries": [
+          {
+            "round": 1,
+            "claim_id": "C1",
+            "tool": "web_search_tool",
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "error_category": null,
+            "source_ids": [
+              "461b6d48-2ddc-42d0-9cca-1dca4c921395",
+              "e9447b07-708f-4b6d-8158-7c743b02a2f5"
+            ],
+            "query": "Qwen official documentation vLLM self-hosted deployment site:qwenlm.github.io OR site:github.com/QwenLM"
+          },
+          {
+            "round": 2,
+            "claim_id": "C1",
+            "tool": "open_source_tool",
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "error_category": null,
+            "source_ids": [
+              "e9447b07-708f-4b6d-8158-7c743b02a2f5"
+            ],
+            "query": ""
+          },
+          {
+            "round": 3,
+            "claim_id": "C1",
+            "tool": "web_search_tool",
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "error_category": null,
+            "source_ids": [
+              "4476e684-fb64-4f5d-947a-5fbf8fff6bc5",
+              "1a144372-b984-44b1-b654-f16f776fec4c"
+            ],
+            "query": "official documentation Qwen 是否提供使用 vLLM 自托管部署的官方文档？"
+          },
+          {
+            "round": 4,
+            "claim_id": "C1",
+            "tool": "open_source_tool",
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "error_category": null,
+            "source_ids": [
+              "1a144372-b984-44b1-b654-f16f776fec4c"
+            ],
+            "query": ""
+          },
+          {
+            "round": 5,
+            "claim_id": "C1",
+            "tool": "open_source_tool",
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "error_category": null,
+            "source_ids": [
+              "4476e684-fb64-4f5d-947a-5fbf8fff6bc5"
+            ],
+            "query": ""
+          },
+          {
+            "round": 6,
+            "claim_id": "C1",
+            "tool": "web_search_tool",
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "error_category": null,
+            "source_ids": [
+              "3ce5f75c-152c-44da-92e5-54486825da31",
+              "117f0b17-1780-461c-bb1d-d6a6b3901496"
+            ],
+            "query": "Qwen vLLM deployment guide site:github.com/QwenLM OR site:qwenlm.github.io"
+          }
+        ],
+        "final_report": "研究问题：核对 Qwen 是否提供使用 vLLM 自托管部署的官方文档。请搜索官方资料，只生成一个 Claim。\n状态：partial；工具调用：6；剩余预算：0。\n终止动作：ABSTAIN；加权 Coverage：0.0%。\n只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。\n\nC1 [OUTDATED]：Qwen 是否提供使用 vLLM 自托管部署的官方文档？\nOUTDATED: 0 fresh, exact excerpts; source requirements not met; semantic verification not passed. \n- Evidence 72fd34ac-cf3c-536b-8dac-ba0f152674c8；关系：supports；来源：https://qwen.readthedocs.io/en/latest/deployment/vllm.html\n> We recommend you trying vLLM for your deployment of Qwen. It is simple to use, and it is fast with state-of-the-art serving throughput, efficient management of attention key value memory with PagedAttention, continuous batching of input requests, optimized CUDA kernels, etc. To learn more about vLLM, please refer to the paper and documentation.\n- Evidence d3b16e3a-3626-5081-a63e-2e790e551b19；关系：supports；来源：https://qwen.readthedocs.io/en/latest/deployment/vllm.html\n> For more usage guide with vLLM, please see vLLM’s Qwen3 Usage Guide.\n- Evidence 65d42b30-c50f-5e99-8b27-e739e7140494；关系：supports；来源：https://help.aliyun.com/zh/ack/cloud-native-ai-suite/use-cases/deploy-qwen-model-inference-service-by-using-vllm-based-on-ack\n> 本文以\n> 背景信息\n> Qwen1.5-4B-Chat\n> vLLM\n待补充：满足 required_source=official 的证据。",
+        "status": "partial",
+        "stop_reason": "budget_exhausted",
+        "last_error": null,
+        "planner_repaired": false,
+        "router_trace": {
+          "operation": "agent_router",
+          "mode": "local",
+          "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+          "elapsed_ms": 1094.0412413328886,
+          "attempts": 1,
+          "error_category": null
+        },
+        "algorithm_version": "adaptive-v1",
+        "coverage": 0.0,
+        "coverage_history": [
+          {
+            "round": 0,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          },
+          {
+            "round": 1,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          },
+          {
+            "round": 2,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          },
+          {
+            "round": 3,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          },
+          {
+            "round": 4,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          },
+          {
+            "round": 5,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          },
+          {
+            "round": 6,
+            "coverage": 0.0,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          }
+        ],
+        "policy_step_count": 6,
+        "retrieval_action_count": 3,
+        "claim_retrieval_counts": {
+          "C1": 3
+        },
+        "query_rewrite_count": 2,
+        "query_history": {
+          "C1": [
+            {
+              "action": "SEARCH_WEB",
+              "query": "Qwen official documentation vLLM self-hosted deployment site:qwenlm.github.io OR site:github.com/QwenLM",
+              "normalized": "qwen official documentation vllm self hosted deployment site qwenlm github io or site github com qwenlm"
+            },
+            {
+              "action": "SEARCH_WEB",
+              "query": "official documentation Qwen 是否提供使用 vLLM 自托管部署的官方文档？",
+              "normalized": "official documentation qwen 是否提供使用 vllm 自托管部署的官方文档"
+            },
+            {
+              "action": "SEARCH_WEB",
+              "query": "Qwen vLLM deployment guide site:github.com/QwenLM OR site:qwenlm.github.io",
+              "normalized": "qwen vllm deployment guide site github com qwenlm or site qwenlm github io"
+            }
+          ]
+        },
+        "opened_source_ids": {
+          "C1": [
+            "e9447b07-708f-4b6d-8158-7c743b02a2f5",
+            "1a144372-b984-44b1-b654-f16f776fec4c",
+            "4476e684-fb64-4f5d-947a-5fbf8fff6bc5"
+          ]
+        },
+        "limits": {
+          "max_retrieval_actions": 6,
+          "max_claim_retrievals": 3,
+          "max_query_rewrites": 2,
+          "max_steps": 12
+        },
+        "selected_tool": null,
+        "proposed_action": "VERIFY",
+        "policy_reason": "budget_exhausted",
+        "termination_action": "ABSTAIN"
+      },
+      "steps": [
+        {
+          "id": "01057f2a-de25-485d-a204-18e48ecef250",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 1,
+          "claim_id": "C1",
+          "tool_name": "web_search_tool",
+          "arguments": {
+            "query": "Qwen official documentation vLLM self-hosted deployment site:qwenlm.github.io OR site:github.com/QwenLM"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "evidence_ids": [],
+            "source_ids": [
+              "461b6d48-2ddc-42d0-9cca-1dca4c921395",
+              "e9447b07-708f-4b6d-8158-7c743b02a2f5"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 6809.415387921035,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1346.1161870509386,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "SEARCH_WEB",
+              "selected_action": "SEARCH_WEB",
+              "reason": "missing_external_evidence"
+            }
+          },
+          "created_at": "2026-11-20T05:57:02.224586+00:00"
+        },
+        {
+          "id": "34d1c90b-eaab-42b5-a909-062d5da39d08",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 2,
+          "claim_id": "C1",
+          "tool_name": "open_source_tool",
+          "arguments": {
+            "url": "https://qwen.readthedocs.io/en/latest/deployment/vllm.html"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "evidence_ids": [
+              "72fd34ac-cf3c-536b-8dac-ba0f152674c8",
+              "d3b16e3a-3626-5081-a63e-2e790e551b19"
+            ],
+            "source_ids": [
+              "e9447b07-708f-4b6d-8158-7c743b02a2f5"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 3247.9715310037136,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1205.2419073879719,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "OPEN_SOURCE",
+              "selected_action": "OPEN_SOURCE",
+              "reason": "open_cached_external_source"
+            }
+          },
+          "created_at": "2026-11-20T05:57:10.318155+00:00"
+        },
+        {
+          "id": "1a6cb0e0-ab3b-4aa4-9e95-40226b74da2f",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 3,
+          "claim_id": "C1",
+          "tool_name": "web_search_tool",
+          "arguments": {
+            "query": "official documentation Qwen 是否提供使用 vLLM 自托管部署的官方文档？"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "evidence_ids": [],
+            "source_ids": [
+              "4476e684-fb64-4f5d-947a-5fbf8fff6bc5",
+              "1a144372-b984-44b1-b654-f16f776fec4c"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 6644.16285045445,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 995.3505750745535,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "VERIFY",
+              "selected_action": "SEARCH_WEB",
+              "reason": "missing_external_evidence"
+            }
+          },
+          "created_at": "2026-11-20T05:57:14.680503+00:00"
+        },
+        {
+          "id": "7cc1f30b-65bb-4dd3-9d55-64fa960aeed0",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 4,
+          "claim_id": "C1",
+          "tool_name": "open_source_tool",
+          "arguments": {
+            "url": "https://help.aliyun.com/zh/ack/cloud-native-ai-suite/use-cases/deploy-qwen-model-inference-service-by-using-vllm-based-on-ack"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "evidence_ids": [
+              "65d42b30-c50f-5e99-8b27-e739e7140494",
+              "f6a7eaaf-e4dd-5f3f-b04a-50f45886b0dc"
+            ],
+            "source_ids": [
+              "1a144372-b984-44b1-b654-f16f776fec4c"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 2262.446353211999,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1306.8975415080786,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "OPEN_SOURCE",
+              "selected_action": "OPEN_SOURCE",
+              "reason": "open_cached_external_source"
+            }
+          },
+          "created_at": "2026-11-20T05:57:22.741340+00:00"
+        },
+        {
+          "id": "34c4b29d-7bb2-4559-a421-ca9ee9253ec8",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 5,
+          "claim_id": "C1",
+          "tool_name": "open_source_tool",
+          "arguments": {
+            "url": "https://qwen.readthedocs.io/zh-cn/latest/deployment/vllm.html"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Validated 2 verbatim excerpts from one task-authorized cached source.",
+            "evidence_ids": [
+              "8c870f9c-7941-5540-b972-95f037635b7d",
+              "2f474922-0bc2-5062-bb4f-246d891abfb9"
+            ],
+            "source_ids": [
+              "4476e684-fb64-4f5d-947a-5fbf8fff6bc5"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 3160.603611730039,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1062.6647751778364,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "VERIFY",
+              "selected_action": "OPEN_SOURCE",
+              "reason": "open_cached_external_source"
+            }
+          },
+          "created_at": "2026-11-20T05:57:26.205792+00:00"
+        },
+        {
+          "id": "842ebf42-a1dd-4c3b-9a20-e6f8ef5a221d",
+          "task_id": "7be5aab0-909b-4519-aa40-9b9433ab219b",
+          "step_index": 6,
+          "claim_id": "C1",
+          "tool_name": "web_search_tool",
+          "arguments": {
+            "query": "Qwen vLLM deployment guide site:github.com/QwenLM OR site:qwenlm.github.io"
+          },
+          "observation": {
+            "ok": true,
+            "summary": "Cached 2 public search sources; 0 pages unavailable.",
+            "evidence_ids": [],
+            "source_ids": [
+              "3ce5f75c-152c-44da-92e5-54486825da31",
+              "117f0b17-1780-461c-bb1d-d6a6b3901496"
+            ],
+            "chunk_ids": [],
+            "error_category": null
+          },
+          "status": "success",
+          "elapsed_ms": 5658.872288651764,
+          "error_category": null,
+          "trace": {
+            "inference": {
+              "operation": "agent_router",
+              "mode": "local",
+              "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+              "elapsed_ms": 1094.0412413328886,
+              "attempts": 1,
+              "error_category": null
+            },
+            "mode": "local",
+            "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+            "policy": {
+              "proposed_action": "VERIFY",
+              "selected_action": "SEARCH_WEB",
+              "reason": "missing_external_evidence"
+            }
+          },
+          "created_at": "2026-11-20T05:57:31.154929+00:00"
+        }
+      ],
+      "policy_decisions": [
+        {
+          "proposed": "SEARCH_WEB",
+          "selected": "SEARCH_WEB",
+          "reason": "missing_external_evidence",
+          "snapshot": {
+            "remaining_budget": 6,
+            "coverage": 0.0,
+            "retrieval_action_count": 0,
+            "claim_retrieval_counts": {},
+            "query_rewrite_count": 0,
+            "statuses": {
+              "C1": "NOT_RETRIEVED"
+            }
+          }
+        },
+        {
+          "proposed": "OPEN_SOURCE",
+          "selected": "OPEN_SOURCE",
+          "reason": "open_cached_external_source",
+          "snapshot": {
+            "remaining_budget": 5,
+            "coverage": 0.0,
+            "retrieval_action_count": 1,
+            "claim_retrieval_counts": {
+              "C1": 1
+            },
+            "query_rewrite_count": 0,
+            "statuses": {
+              "C1": "INSUFFICIENT"
+            }
+          }
+        },
+        {
+          "proposed": "VERIFY",
+          "selected": "SEARCH_WEB",
+          "reason": "missing_external_evidence",
+          "snapshot": {
+            "remaining_budget": 4,
+            "coverage": 0.0,
+            "retrieval_action_count": 1,
+            "claim_retrieval_counts": {
+              "C1": 1
+            },
+            "query_rewrite_count": 1,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          }
+        },
+        {
+          "proposed": "OPEN_SOURCE",
+          "selected": "OPEN_SOURCE",
+          "reason": "open_cached_external_source",
+          "snapshot": {
+            "remaining_budget": 3,
+            "coverage": 0.0,
+            "retrieval_action_count": 2,
+            "claim_retrieval_counts": {
+              "C1": 2
+            },
+            "query_rewrite_count": 1,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          }
+        },
+        {
+          "proposed": "VERIFY",
+          "selected": "OPEN_SOURCE",
+          "reason": "open_cached_external_source",
+          "snapshot": {
+            "remaining_budget": 2,
+            "coverage": 0.0,
+            "retrieval_action_count": 2,
+            "claim_retrieval_counts": {
+              "C1": 2
+            },
+            "query_rewrite_count": 1,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          }
+        },
+        {
+          "proposed": "VERIFY",
+          "selected": "SEARCH_WEB",
+          "reason": "missing_external_evidence",
+          "snapshot": {
+            "remaining_budget": 1,
+            "coverage": 0.0,
+            "retrieval_action_count": 2,
+            "claim_retrieval_counts": {
+              "C1": 2
+            },
+            "query_rewrite_count": 2,
+            "statuses": {
+              "C1": "OUTDATED"
+            }
+          }
+        }
+      ],
+      "verifications": []
+    }
+  ]
+}

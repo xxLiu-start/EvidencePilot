@@ -1,0 +1,20 @@
+{"id": "q01", "query": "Qwen3.5-35B-A3B 的多模态能力、激活参数和长上下文架构是什么？"}
+{"id": "q02", "query": "如何在阿里云 Model Studio 目录按模态、区域和能力筛选模型？"}
+{"id": "q03", "query": "How can a Qwen application reuse OpenAI Chat Completions and handle multimodal inputs?"}
+{"id": "q04", "query": "Model Studio 的按 token 计费与专属算力部署如何比较？"}
+{"id": "q05", "query": "How should DeepSeek API costs account for input, output and cache-hit token pricing?"}
+{"id": "q06", "query": "DeepSeek thinking mode 的推理强度和多轮工具调用上下文需要注意什么？"}
+{"id": "q07", "query": "How should DeepSeek tool calls handle strict JSON Schema, retries and authorization?"}
+{"id": "q08", "query": "Which Claude overview helps compare context windows, output limits and speed?"}
+{"id": "q09", "query": "Claude prompt caching 的缓存写入、缓存命中和稳定前缀如何影响费用？"}
+{"id": "q10", "query": "What are the eligibility boundaries and feature exceptions of Claude API Zero Data Retention?"}
+{"id": "q11", "query": "vLLM OpenAI-compatible server 的 API key 是否保护所有端点，还需要什么网络加固？"}
+{"id": "q12", "query": "How do vLLM FP8, INT4, AWQ and GPTQ choices depend on GPU compatibility and quality?"}
+{"id": "q13", "query": "vLLM 的 tensor parallelism 和 pipeline parallelism 如何结合 KV cache 与 GPU 互联规划？"}
+{"id": "q14", "query": "Which vLLM Prometheus metrics support monitoring TTFT, TPOT, queue depth and KV cache?"}
+{"id": "q15", "query": "创建 Hugging Face Inference Endpoint 时如何选择模型、云区域、实例和安全等级？"}
+{"id": "q16", "query": "How do Hugging Face endpoint replicas, scale-to-zero and PrivateLink affect deployment?"}
+{"id": "q17", "query": "Hugging Face Hub 的访问令牌、MFA、提交签名与模型文件扫描如何控制供应链风险？"}
+{"id": "q18", "query": "What is the role of NIST AI 600-1 in generative AI risk management and lifecycle evaluation?"}
+{"id": "q19", "query": "ISO/IEC 42001 对 AI 管理体系、责任角色、供应商和生命周期控制提出什么要求？"}
+{"id": "q20", "query": "Which OWASP LLM application risks involve prompt injection, output validation and excessive agency?"}

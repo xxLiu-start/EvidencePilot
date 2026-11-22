@@ -1,0 +1,517 @@
+{
+  "kind": "observed_failures_with_annotation_uncertainty_explicit",
+  "count": 5,
+  "cases": [
+    {
+      "task_id": "research_014",
+      "method": "EvidencePilot",
+      "category": "source_conflict",
+      "query": "同一份 pgvector 文档同时说不需训练和要训练，这矛盾吗？区分 HNSW 与 IVFFlat。",
+      "diagnoses": [
+        "Check model/index/version qualifiers and whether citations cover both sides; differing scopes do not by themselves prove contradiction.",
+        "Critical-only stopping left planned noncritical claims uncovered; inspect priorities against the benchmark's required claims.",
+        "A real quote comes from an approved source but outside initial qrels. This may be an annotation gap; do not call it a factual model error without human review.",
+        "An answer-pattern check failed despite a matching status. Review possible paraphrase/notation gaps in the initial rubric before treating it as a semantic error."
+      ],
+      "citation_failures": [
+        {
+          "claim_id": "C2",
+          "kind": "outside_annotated_passages_review_qrels",
+          "source_id": "pgvector",
+          "quote": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat.",
+          "exact_in_retrieved_chunk": true
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "claim_id": "C1",
+            "status": "SUPPORTED",
+            "answer": "HNSW 没有训练步骤，可以在表中没有数据时创建索引。",
+            "citations": [
+              {
+                "evidence_id": "fc16fddf-5f12-5d65-94fe-0329b17aeabd",
+                "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat."
+              }
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "status": "SUPPORTED",
+            "answer": "不矛盾。文档明确指出 IVFFlat 有训练步骤，而 HNSW 没有，两者要求不同。",
+            "citations": [
+              {
+                "evidence_id": "fc16fddf-5f12-5d65-94fe-0329b17aeabd",
+                "supporting_text": "Also, an index can be created without any data in the table since there isn’t a training step like IVFFlat."
+              }
+            ]
+          }
+        ]
+      },
+      "grading": {
+        "counts": {
+          "correct_claims": 0,
+          "required_claims": 2,
+          "covered_claims": 1,
+          "valid_citations": 1,
+          "citations": 2,
+          "unsupported_claims": 2,
+          "asserted_claims": 2
+        },
+        "details": [
+          {
+            "claim_id": "C1",
+            "correct": false,
+            "covered": true,
+            "unsupported": true,
+            "answer_patterns_passed": false,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [
+              "pgvector"
+            ],
+            "invalid_citation_ids": []
+          },
+          {
+            "claim_id": "C2",
+            "correct": false,
+            "covered": false,
+            "unsupported": true,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [],
+            "invalid_citation_ids": [
+              "fc16fddf-5f12-5d65-94fe-0329b17aeabd"
+            ]
+          }
+        ],
+        "task_correct": false,
+        "claim_accuracy": 0.0
+      },
+      "retrieval_trace": [
+        {
+          "action": "SEARCH_WEB",
+          "query": "pgvector HNSW index training required official documentation"
+        }
+      ],
+      "termination_action": "STOP",
+      "stop_reason": "critical_claims_supported",
+      "agent_coverage": 0.75,
+      "repeated_retrieval_pairs": 0,
+      "review_status": "pending_human_review"
+    },
+    {
+      "task_id": "research_013",
+      "method": "ReAct",
+      "category": "source_conflict",
+      "query": "两条官方资料分别写 131072 和 32768：核对 Qwen2.5-7B-Instruct 与 Qwen2.5-1.5B-Instruct 的完整上下文长度，解释是否同型号冲突。",
+      "diagnoses": [
+        "Check model/index/version qualifiers and whether citations cover both sides; differing scopes do not by themselves prove contradiction.",
+        "Repeated normalized retrieval action/query pairs: 1; these consume retrieval budget."
+      ],
+      "citation_failures": [
+        {
+          "claim_id": "C1",
+          "kind": "source_not_qualified_for_this_claim",
+          "source_id": "oldqwen",
+          "quote": "Like Qwen2, the Qwen2.5 language models support up to 128K tokens and can generate up to 8K tokens.",
+          "exact_in_retrieved_chunk": true
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "claim_id": "C1",
+            "status": "INSUFFICIENT",
+            "answer": "提供的证据中未包含 Qwen2.5-7B-Instruct 的具体上下文长度数值，仅提及 Qwen2.5 系列模型支持 128K tokens，但无法确认 7B 版本的具体完整上下文是否为 131072。",
+            "citations": [
+              {
+                "evidence_id": "eaf9574d-0acf-50d8-b235-9df964d8c4f9",
+                "supporting_text": "Like Qwen2, the Qwen2.5 language models support up to 128K tokens and can generate up to 8K tokens."
+              }
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "status": "SUPPORTED",
+            "answer": "Qwen2.5-1.5B-Instruct 的完整上下文长度为 32,768 tokens。这与 7B 版本（若为 131072）不构成同型号冲突，因为它们是不同参数规模（1.5B vs 7B）的独立模型，且官方资料明确区分了不同模型的规格。",
+            "citations": [
+              {
+                "evidence_id": "a378276b-b804-5a6d-bdb1-241ee7d9ef1c",
+                "supporting_text": "Context Length: Full 32,768 tokens and generation 8192 tokens"
+              },
+              {
+                "evidence_id": "a378276b-b804-5a6d-bdb1-241ee7d9ef1c",
+                "supporting_text": "This repo contains the instruction-tuned 1.5B Qwen2.5 model"
+              }
+            ]
+          }
+        ]
+      },
+      "grading": {
+        "counts": {
+          "correct_claims": 0,
+          "required_claims": 2,
+          "covered_claims": 0,
+          "valid_citations": 2,
+          "citations": 3,
+          "unsupported_claims": 1,
+          "asserted_claims": 1
+        },
+        "details": [
+          {
+            "claim_id": "C1",
+            "correct": false,
+            "covered": false,
+            "unsupported": false,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "INSUFFICIENT",
+            "valid_source_ids": [],
+            "invalid_citation_ids": [
+              "eaf9574d-0acf-50d8-b235-9df964d8c4f9"
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "correct": false,
+            "covered": false,
+            "unsupported": true,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [
+              "qwen1"
+            ],
+            "invalid_citation_ids": []
+          }
+        ],
+        "task_correct": false,
+        "claim_accuracy": 0.0
+      },
+      "retrieval_trace": [
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "Qwen2.5-7B-Instruct context length 131072"
+        },
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "Qwen2.5-7B-Instruct context length 131072 tokens"
+        },
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "Qwen2.5-7B-Instruct context length 131072 tokens model card"
+        },
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "Qwen2.5-7B-Instruct model card context length 131072 tokens"
+        },
+        {
+          "action": "RETRIEVE_RAG",
+          "query": "Qwen2.5-7B-Instruct context length 131072 tokens model card"
+        }
+      ],
+      "termination_action": null,
+      "stop_reason": null,
+      "agent_coverage": null,
+      "repeated_retrieval_pairs": 1,
+      "review_status": "pending_human_review"
+    },
+    {
+      "task_id": "research_015",
+      "method": "EvidencePilot",
+      "category": "source_conflict",
+      "query": "有人说 Optional[str] 可省略，也有人说必须提供。依据 Pydantic v2 迁移文档解释版本变化及添加 = None 后的行为。",
+      "diagnoses": [
+        "Check model/index/version qualifiers and whether citations cover both sides; differing scopes do not by themselves prove contradiction.",
+        "A real quote comes from an approved source but outside initial qrels. This may be an annotation gap; do not call it a factual model error without human review.",
+        "At least one quote is not a contiguous substring of its claimed retrieved chunk; punctuation/Markdown edits also violate exact citation provenance."
+      ],
+      "citation_failures": [
+        {
+          "claim_id": "C1",
+          "kind": "fabricated_or_altered_quote",
+          "source_id": "pydantic",
+          "quote": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`. It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_",
+          "exact_in_retrieved_chunk": false
+        },
+        {
+          "claim_id": "C2",
+          "kind": "outside_annotated_passages_review_qrels",
+          "source_id": "pydantic",
+          "quote": "Not required, can be `None`, is `None` by default     | `f4: Optional[str] = None`",
+          "exact_in_retrieved_chunk": true
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "claim_id": "C1",
+            "status": "SUPPORTED",
+            "answer": "In Pydantic V2, a field annotated as `Optional[str]` is required and allows `None`, but does not have a default value of `None`. This is a breaking change from V1, where `Optional` implied a default of `None`.",
+            "citations": [
+              {
+                "evidence_id": "14284200-3008-5ebe-9f56-b46c2b99a9c6",
+                "supporting_text": "A field annotated as `typing.Optional[T]` will be required, and will allow for a value of `None`. It does not mean that the field has a default value of `None`. _(This is a breaking change from V1.)_"
+              }
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "status": "SUPPORTED",
+            "answer": "Yes, adding an explicit default of `None` (e.g., `Optional[str] = None`) makes the field not required, allowing it to be omitted from the input.",
+            "citations": [
+              {
+                "evidence_id": "14284200-3008-5ebe-9f56-b46c2b99a9c6",
+                "supporting_text": "Not required, can be `None`, is `None` by default     | `f4: Optional[str] = None`"
+              },
+              {
+                "evidence_id": "87f1d74c-320a-5521-9786-b3665488a50f",
+                "supporting_text": "Any default value if provided makes a field not required."
+              }
+            ]
+          }
+        ]
+      },
+      "grading": {
+        "counts": {
+          "correct_claims": 1,
+          "required_claims": 2,
+          "covered_claims": 1,
+          "valid_citations": 1,
+          "citations": 3,
+          "unsupported_claims": 1,
+          "asserted_claims": 2
+        },
+        "details": [
+          {
+            "claim_id": "C1",
+            "correct": false,
+            "covered": false,
+            "unsupported": true,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [],
+            "invalid_citation_ids": [
+              "14284200-3008-5ebe-9f56-b46c2b99a9c6"
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "correct": true,
+            "covered": true,
+            "unsupported": false,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [
+              "pydantic"
+            ],
+            "invalid_citation_ids": [
+              "14284200-3008-5ebe-9f56-b46c2b99a9c6"
+            ]
+          }
+        ],
+        "task_correct": false,
+        "claim_accuracy": 0.5
+      },
+      "retrieval_trace": [
+        {
+          "action": "SEARCH_WEB",
+          "query": "Pydantic v2 migration guide Optional[str] default value None required change"
+        }
+      ],
+      "termination_action": "STOP",
+      "stop_reason": "critical_claims_supported",
+      "agent_coverage": 1.0,
+      "repeated_retrieval_pairs": 0,
+      "review_status": "pending_human_review"
+    },
+    {
+      "task_id": "research_002",
+      "method": "w/o Stopping Policy",
+      "category": "single_source",
+      "query": "BAAI/bge-m3 模型卡给出的最大输入长度是多少 tokens？",
+      "diagnoses": [
+        "A real quote comes from an approved source but outside initial qrels. This may be an annotation gap; do not call it a factual model error without human review."
+      ],
+      "citation_failures": [
+        {
+          "claim_id": "C1",
+          "kind": "outside_annotated_passages_review_qrels",
+          "source_id": "bge",
+          "quote": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|",
+          "exact_in_retrieved_chunk": true
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "claim_id": "C1",
+            "status": "SUPPORTED",
+            "answer": "8192 tokens",
+            "citations": [
+              {
+                "evidence_id": "637a37ff-80db-54f0-99d4-4f4aedf200d8",
+                "supporting_text": "| [BAAI/bge-m3](https://huggingface.co/BAAI/bge-m3) | 1024 | 8192 | multilingual; unified fine-tuning (dense, sparse, and colbert) from bge-m3-unsupervised|"
+              }
+            ]
+          }
+        ]
+      },
+      "grading": {
+        "counts": {
+          "correct_claims": 0,
+          "required_claims": 1,
+          "covered_claims": 0,
+          "valid_citations": 0,
+          "citations": 1,
+          "unsupported_claims": 1,
+          "asserted_claims": 1
+        },
+        "details": [
+          {
+            "claim_id": "C1",
+            "correct": false,
+            "covered": false,
+            "unsupported": true,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [],
+            "invalid_citation_ids": [
+              "637a37ff-80db-54f0-99d4-4f4aedf200d8"
+            ]
+          }
+        ],
+        "task_correct": false,
+        "claim_accuracy": 0.0
+      },
+      "retrieval_trace": [
+        {
+          "action": "SEARCH_WEB",
+          "query": "BAAI/bge-m3 model card maximum input length tokens"
+        },
+        {
+          "action": "SEARCH_WEB",
+          "query": "official documentation BAAI/bge-m3 模型卡给出的最大输入长度是多少 tokens？"
+        },
+        {
+          "action": "SEARCH_WEB",
+          "query": "BAAI/bge-m3 Hugging Face model card max_length 8192"
+        }
+      ],
+      "termination_action": "ABSTAIN",
+      "stop_reason": "hard_retrieval_limit",
+      "agent_coverage": 1.0,
+      "repeated_retrieval_pairs": 0,
+      "review_status": "pending_human_review"
+    },
+    {
+      "task_id": "research_012",
+      "method": "w/o Claim Verification",
+      "category": "multi_hop",
+      "query": "已提交任务状态需要崩溃安全：PostgreSQL 异步提交与 fsync=off 的风险相同吗，fsync 开启如何保护落盘？",
+      "diagnoses": [
+        "A real quote comes from an approved source but outside initial qrels. This may be an annotation gap; do not call it a factual model error without human review.",
+        "At least one quote is not a contiguous substring of its claimed retrieved chunk; punctuation/Markdown edits also violate exact citation provenance."
+      ],
+      "citation_failures": [
+        {
+          "claim_id": "C1",
+          "kind": "outside_annotated_passages_review_qrels",
+          "source_id": "pgasync",
+          "quote": "If the database crashes during the risk window between an asynchronous commit and the writing of the transaction's WAL records, then changes made during that transaction will be lost.",
+          "exact_in_retrieved_chunk": true
+        },
+        {
+          "claim_id": "C1",
+          "kind": "fabricated_or_altered_quote",
+          "source_id": "pgasync",
+          "quote": "Asynchronous commit provides behavior different from setting fsync = off. ... a system crash ... could result in arbitrarily bad corruption of the database state. In many scenarios, asynchronous commit provides most of the performance improvement that could be obtained by turning off fsync, but without the risk of data corruption.",
+          "exact_in_retrieved_chunk": false
+        }
+      ],
+      "answer": {
+        "claims": [
+          {
+            "claim_id": "C1",
+            "status": "SUPPORTED",
+            "answer": "异步提交在崩溃后可能导致已提交事务丢失，但数据库状态保持一致，不会导致数据损坏。",
+            "citations": [
+              {
+                "evidence_id": "29b4201b-75a3-5554-b0a3-1f90b93b68cd",
+                "supporting_text": "If the database crashes during the risk window between an asynchronous commit and the writing of the transaction's WAL records, then changes made during that transaction will be lost."
+              },
+              {
+                "evidence_id": "29b4201b-75a3-5554-b0a3-1f90b93b68cd",
+                "supporting_text": "Asynchronous commit provides behavior different from setting fsync = off. ... a system crash ... could result in arbitrarily bad corruption of the database state. In many scenarios, asynchronous commit provides most of the performance improvement that could be obtained by turning off fsync, but without the risk of data corruption."
+              }
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "status": "INSUFFICIENT",
+            "answer": "无法从提供的证据中得出完整答案，因为验证约束仅批准了关于异步提交的证据，未批准关于 fsync 具体机制的证据。",
+            "citations": []
+          }
+        ]
+      },
+      "grading": {
+        "counts": {
+          "correct_claims": 0,
+          "required_claims": 2,
+          "covered_claims": 0,
+          "valid_citations": 0,
+          "citations": 2,
+          "unsupported_claims": 1,
+          "asserted_claims": 1
+        },
+        "details": [
+          {
+            "claim_id": "C1",
+            "correct": false,
+            "covered": false,
+            "unsupported": true,
+            "answer_patterns_passed": true,
+            "expected_status": "SUPPORTED",
+            "actual_status": "SUPPORTED",
+            "valid_source_ids": [],
+            "invalid_citation_ids": [
+              "29b4201b-75a3-5554-b0a3-1f90b93b68cd",
+              "29b4201b-75a3-5554-b0a3-1f90b93b68cd"
+            ]
+          },
+          {
+            "claim_id": "C2",
+            "correct": false,
+            "covered": false,
+            "unsupported": false,
+            "answer_patterns_passed": false,
+            "expected_status": "SUPPORTED",
+            "actual_status": "INSUFFICIENT",
+            "valid_source_ids": [],
+            "invalid_citation_ids": []
+          }
+        ],
+        "task_correct": false,
+        "claim_accuracy": 0.0
+      },
+      "retrieval_trace": [
+        {
+          "action": "SEARCH_WEB",
+          "query": "PostgreSQL synchronous_commit=off vs fsync=off crash safety difference WAL durability"
+        }
+      ],
+      "termination_action": "STOP",
+      "stop_reason": "critical_claims_supported",
+      "agent_coverage": 1.0,
+      "repeated_retrieval_pairs": 0,
+      "review_status": "pending_human_review"
+    }
+  ],
+  "total_failed_records": 85,
+  "note": "Scoring failures include provenance errors, incomplete evidence and possible initial-qrel gaps; review before assigning semantic blame."
+}

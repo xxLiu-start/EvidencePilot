@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-11-21T05:03:45.720503+00:00",
+  "kind": "live_owned_service_outage_and_restart",
+  "task_id": "e1046a2a-66cb-45d6-99f4-c97e389592c2",
+  "checks": [
+    {
+      "name": "real_postgresql_disconnect_api_503_and_ui_diagnostic",
+      "passed": true
+    },
+    {
+      "name": "database_container_restart_persists_report_and_evidence",
+      "passed": true
+    },
+    {
+      "name": "application_restart_history_trace_report_and_evidence_unchanged",
+      "passed": true
+    }
+  ],
+  "status": "passed",
+  "finished_at": "2026-11-21T05:04:03.215701+00:00"
+}

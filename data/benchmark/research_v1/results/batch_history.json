@@ -1,0 +1,15 @@
+{
+  "previous_batch": "data/cache/diagnostics/research_interrupted_2f219aa6",
+  "previous_system_fingerprints": [
+    "vllm-0.23.0-tp4-2f219aa6"
+  ],
+  "current_pinned_system_fingerprint": "vllm-0.23.0-tp4-ad065b3e",
+  "reason_for_full_rerun": "Original inference service stopped and restarted with a changed system fingerprint; batches were not merged.",
+  "same_frozen_dataset": true,
+  "same_method_prompts": true,
+  "changed_app_files": [
+    "app/evaluation/research_benchmark.py"
+  ],
+  "change_scope": "Experiment transport/identity guard and same-identity resume only; algorithms and scoring unchanged.",
+  "path_base": "project_root"
+}

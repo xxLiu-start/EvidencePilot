@@ -1,0 +1,18 @@
+{
+  "snapshot": "fixed_snapshot.json",
+  "snapshot_hash": "c78d72678b8a548ffdb4857339873919f69920b5661e3f3336e83739b25f65dd",
+  "content_hashes": [
+    "1da05ec37cab405a569cdd82d25659d5e8f5ab20e02fc15fed12ea3866113d39",
+    "217f36735999f083195089b43d0af237bbc7b630bf19d692d98720401e773257",
+    "f6310b92bde4e0624a6689e8e9f1094843ce2763afe064995a6de31108b914fd"
+  ],
+  "local_trace": {
+    "operation": "query_generation",
+    "mode": "local",
+    "requested_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+    "actual_model": "/data0/liuxule/project/models/Qwen3.8-27B",
+    "elapsed_ms": 732.3644459247589,
+    "attempts": 1,
+    "error_category": null
+  }
+}

@@ -1,0 +1,11 @@
+EvidencePilot 3–5 分钟演示（真实界面录制，无旁白）
+
+0:00–0:33 上传 Markdown，展示来源、版本、500/80 分块参数及入库结果。
+0:33–1:28 创建非敏感研究任务，展示 task_id、自动轮询、覆盖率和执行步骤。
+1:28–2:01 打开 Agent Trace，核对 Action 参数、Observation、模式、实际模型 ID。
+2:01–2:34 打开 Evidence Explorer，点击 Evidence ID，核对原文与来源 Hash。
+2:34–3:07 展示最终研究报告、证据索引和报告下载。
+3:07–3:40 展示冻结 Benchmark、初始标注限制及浏览器刷新后的历史任务。
+
+脚本：scripts/browser_acceptance.py --record --seconds 220。
+以实际保存的验收 JSON 和视频时长为准；章节时间会受真实模型响应耗时影响。

@@ -1,0 +1,8 @@
+{
+  "checked_at": "2026-11-21T04:58:50.684645+00:00",
+  "status": "passed",
+  "passed": 183,
+  "failed": 0,
+  "skipped": 0,
+  "includes_real_postgresql_pgvector": true
+}
