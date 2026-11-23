@@ -116,11 +116,8 @@ def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, con
         content = db.get(WebContent, source.content_hash)
         if content is None or digest(content.body) != source.content_hash:
             raise PageError("Stored webpage hash mismatch")
-        if search_query and search_query not in source.search_queries:
-            source.search_queries = [*source.search_queries, search_query]
-            if before_commit:
-                before_commit()
-            db.commit()
+        # Search queries can contain customer research terms. The public URL/body cache
+        # is shared, but tenant query strings are never persisted on global WebSource rows.
         return ParsedPage(canonical, source.fetched_url, source.title, content.body,
                           source.published_at.isoformat() if source.published_at else None,
                           source.retrieved_at.isoformat(), source.content_hash, cache_hit=True)
@@ -158,8 +155,7 @@ def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, con
         source.fetched_url, source.title, source.content_hash = page.fetched_url, page.title, page.content_hash
         source.published_at = datetime.fromisoformat(page.published_at) if page.published_at else None
         source.retrieved_at = datetime.fromisoformat(page.retrieved_at)
-    if search_query and search_query not in source.search_queries:
-        source.search_queries = [*source.search_queries, search_query]
+    source.search_queries = []
     try:
         if before_commit:
             before_commit()
