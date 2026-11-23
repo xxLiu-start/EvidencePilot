@@ -13,7 +13,9 @@ This document records what is implemented in the current upgrade increment and w
 - Added a generic source-authority registry for government, standards, academic, known official documentation, and unknown web sources. Classification is a hint, not a trust guarantee.
 - Added a connector contract, explicit registry, root-scoped read-only FileConnector, WebSearchConnector adapter, and tenant-filtered read-only PostgreSQLTableConnector with explicit exposed-column allowlists.
 - Routed Agent web discovery through the WebSearchConnector while retaining existing task authorization and commit fencing.
-- Added OIDC JWT verification using JWKS, issuer/audience checks, asymmetric algorithm allowlisting, development-only local identity, and coarse role dependencies on write operations.
+- Added OIDC JWT verification using JWKS, issuer/audience checks, and asymmetric algorithm allowlisting.
+- Added database-backed User/Tenant/TenantMembership/Project/ProjectMembership models, tenant/project scoped ORM query filters, cross-scope write guards, worker scope propagation, and an OIDC user provisioning CLI.
+- Added project discovery/administration APIs, Streamlit project selection and `X-Project-ID` transport, and tenant/project scoped audit event APIs.
 - Added an optional localhost-only Keycloak development realm and Compose identity profile for API integration testing.
 - Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, PostgreSQL tenant filtering/column allowlists, source classification, corroboration policy, OIDC token verification, role checks, task outbox dispatch, and Alembic baseline migration.
 - Added a Redis/Celery task path with transactional outbox, polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Delivery is at-least-once.
@@ -23,10 +25,9 @@ This document records what is implemented in the current upgrade increment and w
 
 ## Not implemented yet
 
-- Database-backed Tenant, User, Membership, Project and ProjectMembership models.
-- Complete tenant/object-level isolation for all task, document, evidence, retrieval, feedback and evaluation APIs.
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
-- Streamlit OIDC sign-in/callback flow to obtain and populate the per-session access token; APIClient bearer forwarding is implemented, but token acquisition is not.
+- Streamlit OIDC sign-in/callback flow to obtain and populate the per-session access token; bearer forwarding and project selection are implemented, but token acquisition is not.
+- PostgreSQL Row-Level Security and cross-tenant penetration tests; current isolation is enforced at the application/ORM layer.
 - S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry distributed tracing, alert rules, log aggregation and queue/worker SLO dashboards; basic Prometheus metrics and Grafana datasource provisioning are implemented.
@@ -36,6 +37,6 @@ This document records what is implemented in the current upgrade increment and w
 
 ## Readiness statement
 
-The current increment is an architectural foundation, not a production-readiness declaration. The migration baseline is intentionally non-destructive and has no destructive downgrade; subsequent schema changes must be delivered as new Alembic revisions. The queue path uses at-least-once delivery with idempotent consumers; it does not claim exactly-once execution. OIDC protects API authentication and selected write-role boundaries, but without tenant/object-level authorization it is not safe for multiple mutually untrusted organizations. Compliance and business profiles require human review but no review workflow is implemented yet; their Claims therefore remain uncounted as supported until a future approval workflow is added.
+The current increment is an architectural foundation, not a production-readiness declaration. The migration baseline is intentionally non-destructive and has no destructive downgrade; subsequent schema changes must be delivered as new Alembic revisions. The queue path uses at-least-once delivery with idempotent consumers; it does not claim exactly-once execution. OIDC identity is resolved to database-backed tenant/project memberships and ORM queries/writes are scoped accordingly. However, PostgreSQL RLS and full cross-tenant penetration tests are still missing, so this is not yet a production security certification for mutually untrusted organizations. Compliance and business profiles require human review but no review workflow is implemented yet; their Claims therefore remain uncounted as supported until a future approval workflow is added.
 
 GitHub Actions is now the verification path because the repository editing connection cannot execute code in the user's checkout. Each commit triggers the workflow; the final head SHA and run conclusion should be checked before treating the latest increment as verified.
