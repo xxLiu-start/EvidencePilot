@@ -8,6 +8,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC, evidencepilot_app, evidencepilot_dis
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO evidencepilot_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO evidencepilot_app;
+REVOKE UPDATE, DELETE ON TABLE public.audit_events FROM evidencepilot_app;
 
 -- The dispatcher is a trusted control-plane process. BYPASSRLS is narrowly
 -- paired with table-level privileges on the outbox only; it cannot read tasks,
