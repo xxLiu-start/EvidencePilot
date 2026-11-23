@@ -11,15 +11,23 @@ from app.db.session import get_db
 from app.llm_client import LLMConfigurationError
 
 
-from app.auth.oidc import require_roles
+from app.auth.oidc import RequestContext, get_request_context, require_roles
+from app.auth.audit import record_audit_event
 
 router = APIRouter()
 
 
 @router.post("/tasks/{task_id}/run", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
-def run_task(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
+def run_task(task_id: UUID, db: Annotated[Session, Depends(get_db)],
+             context: RequestContext = Depends(get_request_context)):
     try:
         state = run_agent_task(db, task_id)
+        task = db.get(ResearchTask, task_id)
+        if task is not None:
+            record_audit_event(db, context, action="research_task.run", resource_type="research_task",
+                               resource_id=task_id, project_id=task.project_id,
+                               metadata={"status": state.get("status")})
+            db.commit()
         return {"task_id": task_id, "status": state["status"], "state": state}
     except LookupError:
         raise HTTPException(status_code=404, detail="Research task not found") from None
