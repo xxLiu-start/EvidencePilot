@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -37,7 +37,8 @@ def dispatch_once(
     with session_factory() as db:
         statement = (
             select(OutboxEvent)
-            .where(OutboxEvent.status == "pending")
+            .where(OutboxEvent.status == "pending",
+                   or_(OutboxEvent.next_attempt_at.is_(None), OutboxEvent.next_attempt_at <= datetime.now(timezone.utc)))
             .order_by(OutboxEvent.created_at, OutboxEvent.id)
             .limit(batch_size)
             .with_for_update(skip_locked=True)
@@ -50,13 +51,18 @@ def dispatch_once(
                 event.status = "published"
                 event.published_at = datetime.now(timezone.utc)
                 event.last_error = None
+                event.next_attempt_at = None
                 published += 1
             except Exception as exc:
                 event.attempts += 1
                 event.last_error = type(exc).__name__
                 if event.attempts >= max_attempts:
                     event.status = "failed"
+                    event.next_attempt_at = None
                     failed += 1
+                else:
+                    delay = min(2 ** event.attempts, 300)
+                    event.next_attempt_at = datetime.now(timezone.utc) + timedelta(seconds=delay)
         db.commit()
     return {"published": published, "dead_lettered": failed}
 
