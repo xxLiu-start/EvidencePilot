@@ -39,8 +39,14 @@ Provision OIDC users with `python -m scripts.provision_user`; see [OIDC Authenti
 
 Local development creates a single development user, tenant, and default project. Unowned legacy/test rows are attached to that local scope only while the development identity is active. Production does not auto-provision users or tenants; apply Alembic migrations and provision users/memberships explicitly.
 
+## PostgreSQL Row-Level Security
+
+Alembic revision `20261123_0004` enables and forces RLS on `research_tasks`, `documents`, `document_chunks`, `evidences`, `task_feedback`, `evaluation_results`, and `audit_events`. Policies compare each row's `tenant_id` with the transaction-local PostgreSQL setting `app.tenant_id`. Missing context fails closed. The SQLAlchemy Session `after_begin` hook binds this setting from `Session.info`; request authentication sets it immediately after membership resolution, and worker messages carry the task's tenant/project/user context before the first protected query.
+
+The application DB role must not be a PostgreSQL superuser and must not have `BYPASSRLS`. `FORCE ROW LEVEL SECURITY` subjects table owners to policies, but superusers and roles with `BYPASSRLS` still bypass them. Use a dedicated least-privilege runtime role; keep migration ownership credentials separate where possible. The migration is additive and its downgrade intentionally retains security policies.
+
 ## Security limitations
 
-This is application-level ORM isolation, not PostgreSQL Row-Level Security. Every new endpoint must use the request-scoped session and must not issue unscoped raw SQL against tenant data. New background workers must set task-derived scope before querying related records. Global immutable web-source caches may be shared, but APIs must only reveal them through tenant-scoped evidence records.
+RLS currently enforces tenant boundaries on the listed tenant-owned tables; project-level authorization remains enforced by the application ORM/session layer. Global identity and membership tables are not tenant-RLS protected. The PostgreSQL integration test creates a non-owner role and verifies raw SQL cannot read another tenant's rows or see rows without a tenant setting. This is not yet a full penetration test or production security certification.
 
-Future connectors must enforce upstream per-user/per-tenant ACLs; passing `access_context` through an interface is not enough. Add PostgreSQL RLS, cross-tenant penetration tests, and end-to-end tests for every endpoint before production deployment to mutually untrusted tenants.
+Future connectors must enforce upstream per-user/per-tenant ACLs; passing `access_context` through an interface is not enough. Add project-level database policies, full raw-SQL/write/worker/concurrency penetration tests, and end-to-end tests for every endpoint before production deployment to mutually untrusted tenants.
