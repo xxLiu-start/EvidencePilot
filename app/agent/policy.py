@@ -109,6 +109,10 @@ def evaluate_action(state, proposal):
     if not remaining:
         return decide(Action.ABSTAIN, reason="no_verifiable_claims", arguments={})
     statuses = state.get("claim_statuses", {})
+    if any(statuses.get(claim["id"], {}).get("human_review_required")
+           and statuses.get(claim["id"], {}).get("verification_attempted")
+           and not statuses.get(claim["id"], {}).get("human_review_approved") for claim in remaining):
+        return decide(Action.ABSTAIN, reason="human_review_required", arguments={})
     if any(statuses.get(claim["id"], {}).get("verification_error") for claim in remaining):
         return decide(Action.ABSTAIN, reason="verification_unavailable", arguments={})
     conflicts = [claim for claim in remaining if statuses.get(claim["id"], {}).get("has_conflict") or statuses.get(claim["id"], {}).get("potential_conflict")
