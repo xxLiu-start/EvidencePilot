@@ -166,7 +166,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         connection.execute(text(
             "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id, created_at) "
             "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research', now()), "
-            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now(), 0)"
+            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now())"
         ), {"ta": task_a_id, "tb": task_b_id, "a": tenant_a_id, "b": tenant_b_id,
             "pa": project_a_id, "pb": project_b_id})
         connection.execute(text(
