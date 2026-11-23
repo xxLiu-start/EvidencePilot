@@ -97,3 +97,17 @@ def test_oidc_rejects_unapproved_signing_algorithm(monkeypatch):
     with pytest.raises(HTTPException) as error:
         oidc.verify_access_token(token)
     assert error.value.status_code == 401
+
+
+
+def test_role_dependency_denies_missing_role():
+    principal = oidc.Principal(subject="user", issuer="issuer", audience=("api",), roles=("VIEWER",))
+    dependency = oidc.require_roles("RESEARCHER")
+    with pytest.raises(HTTPException) as error:
+        dependency(principal)
+    assert error.value.status_code == 403
+
+
+def test_role_dependency_allows_matching_role():
+    principal = oidc.Principal(subject="user", issuer="issuer", audience=("api",), roles=("RESEARCHER",))
+    assert oidc.require_roles("RESEARCHER")(principal) is principal
