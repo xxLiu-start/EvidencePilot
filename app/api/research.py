@@ -12,7 +12,8 @@ from app.config import settings
 from datetime import datetime, timezone
 from fastapi import HTTPException
 
-from app.auth.oidc import require_roles
+from app.auth.oidc import RequestContext, get_request_context, require_roles
+from app.auth.audit import record_audit_event, require_selected_project
 
 router = APIRouter()
 
@@ -24,19 +25,27 @@ router = APIRouter()
     dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))],
 )
 def create_research_task(
-    request: ResearchRequest, background_tasks: BackgroundTasks, db: Annotated[Session, Depends(get_db)]
+    request: ResearchRequest, background_tasks: BackgroundTasks, db: Annotated[Session, Depends(get_db)],
+    context: RequestContext = Depends(get_request_context),
 ) -> dict:
     try:
         get_domain_profile(request.domain_id)
     except ValueError:
         raise HTTPException(status_code=422, detail="Unknown research domain") from None
-    task = ResearchTask(query=request.query, budget=request.budget, domain_id=request.domain_id)
+    project_id = require_selected_project(context)
+    task = ResearchTask(query=request.query, budget=request.budget, domain_id=request.domain_id,
+                        tenant_id=context.tenant_id, project_id=project_id,
+                        created_by_user_id=context.user_id)
     db.add(task)
     db.flush()
     if settings.task_queue_enabled:
         db.add(OutboxEvent(event_type="research_task.created", aggregate_id=task.id,
                            payload={"task_id": str(task.id)}, status="pending",
                            created_at=datetime.now(timezone.utc)))
+    db.flush()
+    record_audit_event(db, context, action="research_task.create", resource_type="research_task",
+                       resource_id=task.id, project_id=project_id,
+                       metadata={"domain_id": request.domain_id, "budget": request.budget})
     db.commit()
     db.refresh(task)
     if not settings.task_queue_enabled:
