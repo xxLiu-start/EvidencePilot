@@ -21,6 +21,15 @@ from app.verification.scope import EvidenceScope, scope_of, scope_attributes_of,
 from app.verification.source_registry import DEFAULT_SOURCE_REGISTRY
 
 
+def _stable_datetime(value):
+    # SQLite drops tzinfo on read; PostgreSQL preserves it. Normalize naive
+    # database UTC timestamps before hashing so persisted assessment fingerprints
+    # do not change after a Session identity-map reload.
+    if isinstance(value, datetime) and value.tzinfo is None:
+        return str(value.replace(tzinfo=timezone.utc))
+    return str(value)
+
+
 def source_class(evidence):
     return DEFAULT_SOURCE_REGISTRY.classify(evidence.source_type, evidence.source_url)
 
@@ -143,7 +152,7 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
     fingerprint = digest(json.dumps({
         "policy": "verification-v3", "claim": claim, "max_age_days": claim.get("max_evidence_age_days", config.agent_evidence_max_age_days),
         "evidence": sorted((str(row.id), row.content_hash, row.relation, source_class(row),
-                            row in fresh, str(row.published_at), str(row.retrieved_at),
+                            row in fresh, _stable_datetime(row.published_at), _stable_datetime(row.retrieved_at),
                             json.dumps(row.scope, sort_keys=True)) for row in valid),
     }, sort_keys=True))
     assessment = db.get(EvidenceAssessment, (UUID(str(task_id)), claim["id"], fingerprint)) if task_id else None
