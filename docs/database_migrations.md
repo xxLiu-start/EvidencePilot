@@ -1,6 +1,10 @@
 # Database Migrations
 
-EvidencePilot now includes an Alembic baseline at `migrations/versions/20261123_0001_baseline.py`.
+EvidencePilot now includes an Alembic baseline and additive revisions:
+
+- `20261123_0001_baseline.py`: initial non-destructive schema baseline.
+- `20261123_0002_outbox_retry_schedule.py`: bounded outbox retry schedule.
+- `20261123_0003_tenant_project_isolation.py`: tenant/project membership tables and ownership backfill for legacy rows.
 
 ## Development
 
@@ -29,4 +33,4 @@ Production API startup rejects `DB_AUTO_MIGRATE=true` and requires an `alembic_v
 
 The initial revision creates missing tables and applies additive compatibility columns for existing installations. It does not drop existing tables or data. Its downgrade is intentionally a no-op because it may be adopted by databases containing user data.
 
-This is the initial baseline, not a mature multi-release migration history. All future schema changes must be added as new Alembic revisions with explicit upgrade logic and data-safe downgrade behavior where possible. Large-table changes should use expand/migrate/contract patterns.
+The baseline is non-destructive, and ownership migration backfills existing resources into a `legacy-default` tenant and `default` project. The migration does not drop existing data. This is still an early migration history; future schema changes must be added as new revisions. All future schema changes must be added as new Alembic revisions with explicit upgrade logic and data-safe downgrade behavior where possible. Large-table changes should use expand/migrate/contract patterns.
