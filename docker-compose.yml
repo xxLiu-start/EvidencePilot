@@ -136,6 +136,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      api:
+        condition: service_healthy
 
   outbox-dispatcher:
     profiles: [apps]
@@ -155,6 +157,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      api:
         condition: service_healthy
 
   streamlit:
