@@ -8,7 +8,7 @@ from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.api import agent, audit, documents, domains, evaluations, evidences, feedback, projects, research, search, tasks, web_research
+from app.api import agent, audit, documents, domains, evaluations, evidences, feedback, human_reviews, projects, research, search, tasks, web_research
 from app.auth.oidc import get_request_context, validate_auth_configuration
 from app.db.schema import initialize_database
 from app.db.session import SessionLocal, engine, get_db, validate_postgres_rls_runtime
@@ -67,6 +67,7 @@ app.include_router(agent.router, prefix="/api/v1", dependencies=[Depends(get_req
 app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(human_reviews.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 
 
 @app.middleware("http")
