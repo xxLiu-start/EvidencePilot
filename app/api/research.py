@@ -4,10 +4,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.orm import Session
 
 from app.api.schemas import ResearchRequest, ResearchTaskResponse
-from app.db.models import ResearchTask
+from app.db.models import OutboxEvent, ResearchTask
 from app.db.session import get_db
 from app.agent.background import execute_background
 from app.domains.profiles import get_domain_profile
+from app.config import settings
+from datetime import datetime, timezone
 from fastapi import HTTPException
 
 from app.auth.oidc import require_roles
@@ -30,8 +32,14 @@ def create_research_task(
         raise HTTPException(status_code=422, detail="Unknown research domain") from None
     task = ResearchTask(query=request.query, budget=request.budget, domain_id=request.domain_id)
     db.add(task)
+    db.flush()
+    if settings.task_queue_enabled:
+        db.add(OutboxEvent(event_type="research_task.created", aggregate_id=task.id,
+                           payload={"task_id": str(task.id)}, status="pending",
+                           created_at=datetime.now(timezone.utc)))
     db.commit()
     db.refresh(task)
-    background_tasks.add_task(execute_background, db.get_bind(), task.id)
+    if not settings.task_queue_enabled:
+        background_tasks.add_task(execute_background, db.get_bind(), task.id)
     return {"id": task.id, "task_id": task.id, "query": task.query, "status": task.status,
             "budget": task.budget, "domain_id": task.domain_id, "created_at": task.created_at}
