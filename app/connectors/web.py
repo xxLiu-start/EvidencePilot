@@ -8,6 +8,7 @@ from app.connectors.base import ConnectorDocument, SourceConnector
 from app.config import Settings, settings
 from app.search.parser import fetch_page, normalize_url
 from app.search.web_search import WebSearchClient
+from app.secrets import read_secret
 
 
 class WebSearchConnector(SourceConnector):
@@ -59,4 +60,4 @@ class WebSearchConnector(SourceConnector):
         )
 
     def health_check(self) -> dict[str, Any]:
-        return {"connector_id": self.connector_id, "status": "configured" if self.config.tavily_api_key else "credential_required"}
+        return {"connector_id": self.connector_id, "status": "configured" if read_secret("TAVILY_API_KEY", self.config.credentials_env_file) else "credential_required"}
