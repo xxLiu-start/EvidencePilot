@@ -81,6 +81,22 @@ class AuditEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 
 
+class HumanReview(Base):
+    __tablename__ = "human_reviews"
+    __table_args__ = (UniqueConstraint("task_id", "claim_id", "fingerprint", "reviewer_user_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False, index=True)
+    task_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("research_tasks.id", ondelete="CASCADE"), nullable=False, index=True)
+    claim_id: Mapped[str] = mapped_column(String(20), nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    reviewer_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    decision: Mapped[str] = mapped_column(String(20), nullable=False)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+
 class ResearchTask(Base):
     __tablename__ = "research_tasks"
 
