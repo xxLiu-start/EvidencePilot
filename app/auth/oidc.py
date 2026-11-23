@@ -258,7 +258,16 @@ def get_request_context(
         if selected_project_id not in project_roles:
             raise HTTPException(status_code=404, detail="Project not found")
 
-    roles = {tenant_role, *project_roles.values()}
+    # Project roles are not additive across a user's projects. A role held in
+    # Project A must never authorize writes in Project B.
+    if selected_project_id is not None:
+        effective_project_roles = {project_roles[selected_project_id]}
+    elif len(project_roles) == 1:
+        effective_project_roles = set(project_roles.values())
+    else:
+        # Multi-project write operations must select a project explicitly.
+        effective_project_roles = set()
+    roles = {tenant_role, *effective_project_roles}
     context = RequestContext(
         principal=principal,
         user_id=user.id,
