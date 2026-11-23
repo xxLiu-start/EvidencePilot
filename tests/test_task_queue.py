@@ -83,3 +83,56 @@ def test_outbox_publish_failures_are_bounded_and_dead_lettered():
         assert event.attempts == 1
         assert event.last_error == "ConnectionError"
     engine.dispose()
+
+
+
+def test_outbox_retries_use_backoff_before_dead_letter():
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        task = ResearchTask(query="Research supplier risk", budget=2)
+        db.add(task)
+        db.flush()
+        event = OutboxEvent(
+            event_type="research_task.created",
+            aggregate_id=task.id,
+            payload={"task_id": str(task.id)},
+            status="pending",
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(event)
+        db.commit()
+        event_id = event.id
+
+    calls = []
+
+    def fail_publish(identifier, celery_id):
+        calls.append((identifier, celery_id))
+        raise ConnectionError("broker unavailable")
+
+    result = dispatch_once(session_factory=_session_factory(engine), publish=fail_publish,
+                           batch_size=10, max_attempts=3)
+    assert result == {"published": 0, "dead_lettered": 0}
+    with Session(engine) as db:
+        event = db.get(OutboxEvent, event_id)
+        assert event.status == "pending"
+        assert event.attempts == 1
+        assert event.next_attempt_at is not None
+
+    # The retry is not eligible until its backoff deadline.
+    assert dispatch_once(session_factory=_session_factory(engine), publish=fail_publish,
+                         batch_size=10, max_attempts=3) == {"published": 0, "dead_lettered": 0}
+    assert len(calls) == 1
+
+    with Session(engine) as db:
+        event = db.get(OutboxEvent, event_id)
+        event.next_attempt_at = datetime(2000, 1, 1, tzinfo=timezone.utc)
+        db.commit()
+
+    published = []
+    result = dispatch_once(session_factory=_session_factory(engine),
+                           publish=lambda identifier, celery_id: published.append(identifier),
+                           batch_size=10, max_attempts=3)
+    assert result == {"published": 1, "dead_lettered": 0}
+    assert len(published) == 1
+    engine.dispose()
