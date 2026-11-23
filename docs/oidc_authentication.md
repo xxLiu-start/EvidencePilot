@@ -55,3 +55,17 @@ OIDC_JWKS_URL=http://127.0.0.1:8080/realms/evidencepilot/protocol/openid-connect
 ```
 
 The imported realm contains a development CLI client with direct-access grants and a placeholder developer account. These settings are for localhost testing only. Change both the Keycloak administrator password and developer password immediately, never expose the Keycloak port publicly, and never reuse this realm configuration in production. The API's Streamlit login/token acquisition flow remains a separate pending integration.
+
+
+For a local API smoke test, the development CLI client can request an access token (do not use this password-grant pattern in production):
+
+```bash
+curl -sS -X POST http://127.0.0.1:8080/realms/evidencepilot/protocol/openid-connect/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=password' \
+  -d 'client_id=evidencepilot-cli' \
+  -d 'username=developer' \
+  -d 'password=change_me_before_use'
+```
+
+Pass the returned `access_token` as `Authorization: Bearer <token>` to the FastAPI endpoints. The placeholder account is a local smoke-test identity only; rotate it before use and never expose the Keycloak development service publicly.
