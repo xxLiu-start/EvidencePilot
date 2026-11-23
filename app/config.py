@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     agent_evidence_max_age_days: int = Field(default=365, ge=1, le=3650)
     agent_lease_seconds: int = Field(default=360, ge=60, le=3600)
     agent_rag_method: Literal["dense", "hybrid", "hybrid_rerank"] = "hybrid"
+    document_max_upload_bytes: int = Field(default=20_000_000, gt=0, le=100_000_000)
+    document_max_chunk_size: int = Field(default=2_000, ge=1, le=10_000)
+    document_max_pages: int = Field(default=1_000, ge=1, le=10_000)
     embedding_model: str = "BAAI/bge-m3"
     embedding_revision: str = "main"
     embedding_device: str = "cpu"
