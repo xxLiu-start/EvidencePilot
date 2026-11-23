@@ -27,7 +27,7 @@ This document records what is implemented in the current upgrade increment and w
 
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
 - Streamlit OIDC sign-in/callback flow to obtain and populate the per-session access token; bearer forwarding and project selection are implemented, but token acquisition is not.
-- PostgreSQL RLS is now enabled and forced for tenant-owned resource tables, with transaction-local tenant context and a non-owner raw-SQL integration test. Full penetration testing, project-level database policies, and production least-privilege role validation remain pending.
+- PostgreSQL RLS is enabled and forced for tenant-owned resource tables, with transaction-local tenant context, worker context propagation, raw-SQL read/write integration tests, and production startup checks rejecting superuser/BYPASSRLS runtime roles. Full penetration testing and project-level database policies remain pending.
 - S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry distributed tracing, alert rules, log aggregation and queue/worker SLO dashboards; basic Prometheus metrics and Grafana datasource provisioning are implemented.
