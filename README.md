@@ -1188,3 +1188,6 @@ The API exports low-cardinality HTTP and LLM metrics at `/metrics`. With the Com
 - Grafana: `http://127.0.0.1:3000`
 
 Change `GRAFANA_ADMIN_PASSWORD` before shared use. Keep `/metrics` restricted to an internal monitoring network. This is a first metrics increment; distributed OpenTelemetry traces, alert rules and log aggregation are still pending. See [Observability](docs/observability.md).
+
+
+For local OIDC integration testing, an optional Keycloak realm can be started with `docker compose --profile identity up -d keycloak`. The realm includes a development CLI client and placeholder user. This is localhost-only test configuration; rotate all placeholder credentials and do not reuse it in production. See [OIDC Authentication](docs/oidc_authentication.md).
