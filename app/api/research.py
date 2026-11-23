@@ -34,4 +34,4 @@ def create_research_task(
     db.refresh(task)
     background_tasks.add_task(execute_background, db.get_bind(), task.id)
     return {"id": task.id, "task_id": task.id, "query": task.query, "status": task.status,
-            "budget": task.budget, "created_at": task.created_at}
+            "budget": task.budget, "domain_id": task.domain_id, "created_at": task.created_at}
