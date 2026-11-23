@@ -35,7 +35,8 @@ def build_bm25_index(chunks: Sequence) -> BM25Okapi | None:
     return BM25Okapi(tokenized) if any(tokenized) else None
 
 
-def bm25_ranked(index, chunks: Sequence, query: str, top_k: int = 10, document_id=None):
+def bm25_ranked(index, chunks: Sequence, query: str, top_k: int = 10, document_id=None,
+                tenant_id=None, project_ids=None):
     if top_k <= 0 or not query.strip():
         raise ValueError("query and top_k must be non-empty/positive")
     if index is None:
@@ -49,7 +50,13 @@ def bm25_ranked(index, chunks: Sequence, query: str, top_k: int = 10, document_i
     matches = []
     for i, (chunk, score) in enumerate(zip(chunks, scores, strict=True)):
         doc_id = chunk.get("document_id") if isinstance(chunk, dict) else chunk.document_id
+        chunk_tenant = chunk.get("tenant_id") if isinstance(chunk, dict) else getattr(chunk, "tenant_id", None)
+        chunk_project = chunk.get("project_id") if isinstance(chunk, dict) else getattr(chunk, "project_id", None)
         if document_id is not None and str(doc_id) != str(document_id):
+            continue
+        if tenant_id is not None and str(chunk_tenant) != str(tenant_id):
+            continue
+        if project_ids is not None and str(chunk_project) not in {str(value) for value in project_ids}:
             continue
         # No lexical match must not return arbitrary zero-score documents.
         if any(token in index.doc_freqs[i] for token in tokens):
@@ -90,7 +97,9 @@ class BM25Store:
     def retrieve(self, db: Session, query: str, *, top_k=10, document_id=None) -> list[SearchHit]:
         index, chunks = self._snapshot(db)
         return [SearchHit(chunk, score, bm25_score=score) for chunk, score in bm25_ranked(
-            index, chunks, query, top_k=top_k, document_id=document_id
+            index, chunks, query, top_k=top_k, document_id=document_id,
+            tenant_id=db.info.get("tenant_id"),
+            project_ids=db.info.get("selected_project_ids") or db.info.get("project_ids"),
         )]
 
 
