@@ -28,6 +28,7 @@ def identifier(value):
 class APIClient:
     base_url: str
     transport: object = None
+    access_token: str | None = None
 
     def __post_init__(self):
         if not safe_http_url(self.base_url) or urlsplit(self.base_url).query or urlsplit(self.base_url).fragment:
@@ -37,6 +38,11 @@ class APIClient:
     def request(self, method, path, **kwargs):
         # A lost POST response is ambiguous: never silently repeat task/upload writes.
         timeout = kwargs.pop("timeout", 10)
+        headers = dict(kwargs.pop("headers", {}) or {})
+        if self.access_token:
+            headers["Authorization"] = f"Bearer {self.access_token}"
+        if headers:
+            kwargs["headers"] = headers
         try:
             with httpx.Client(base_url=self.base_url, timeout=timeout, trust_env=False,
                               follow_redirects=False, transport=self.transport) as client:
