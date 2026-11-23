@@ -40,6 +40,14 @@ class AgentRuntime:
         self.policy, self.reference_time = policy or evaluate_action, reference_time
         bind = db.get_bind()
         self.engine = getattr(bind, "engine", bind)
+        # Tool calls execute in isolated Sessions; copy the authenticated request
+        # scope explicitly or those sessions would query/persist outside the caller's
+        # tenant and project boundary.
+        self.scope_context = {
+            key: db.info[key]
+            for key in ("tenant_id", "user_id", "project_ids", "selected_project_id", "selected_project_ids")
+            if key in db.info
+        }
         self.registry = registry if registry is not None else ToolRegistry()
 
     def save(self, state, next_node=None):
@@ -150,6 +158,7 @@ class AgentRuntime:
     def work(self, name, params, context):
         # No Session is shared with the parent or with another tool thread.
         with Session(self.engine, autoflush=False) as db:
+            db.info.update(self.scope_context)
             try:
                 result = self.registry.call(name, params, db, context)
                 # Generic tools may commit intermediate effects; missing receipts are
