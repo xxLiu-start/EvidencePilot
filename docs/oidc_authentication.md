@@ -25,3 +25,8 @@ Write operations have role dependencies for the RESEARCHER, REVIEWER, PROJECT_MA
 This change implements authentication and coarse role gates only. It does **not** yet implement database-backed Tenant/Project membership, row-level security, or object-level ownership checks for every task, document, evidence, and search result. Therefore, do not expose an OIDC-enabled instance to multiple mutually untrusted tenants until the separate tenant-isolation work is complete.
 
 The local development identity is not a production authentication mechanism. Production must set `ENVIRONMENT=production` and `AUTH_ENABLED=true`, then configure the real IdP and roles.
+
+
+## Role and queue notes
+
+Write endpoints enforce coarse role dependencies. The local development principal has elevated development roles only while OIDC is disabled and the environment is not production. When OIDC is enabled, roles are read from the token and must be assigned by the IdP. Durable task dispatch is configured separately with `TASK_QUEUE_ENABLED=true`; production startup requires this setting.
