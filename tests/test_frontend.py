@@ -155,8 +155,10 @@ def test_api_failure_is_actionable_and_does_not_crash_page(ui, monkeypatch):
 def test_api_client_forwards_per_session_bearer_token():
     seen = []
     transport = httpx.MockTransport(
-        lambda request: seen.append(request.headers.get("Authorization")) or httpx.Response(200, json={"status": "ok"})
+        lambda request: seen.append((request.headers.get("Authorization"), request.headers.get("X-Project-ID")))
+        or httpx.Response(200, json={"status": "ok"})
     )
-    client = APIClient("http://api.test", transport=transport, access_token="session-access-token")
+    client = APIClient("http://api.test", transport=transport, access_token="session-access-token",
+                       project_id="00000000-0000-0000-0000-000000000001")
     assert client.health() == {"status": "ok"}
-    assert seen == ["Bearer session-access-token"]
+    assert seen == [("Bearer session-access-token", "00000000-0000-0000-0000-000000000001")]
