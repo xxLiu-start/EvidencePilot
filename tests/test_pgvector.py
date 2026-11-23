@@ -179,7 +179,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         connection.execute(text(f'CREATE ROLE "{role}" NOLOGIN'))
         schema_name = connection.scalar(text("SELECT current_schema()"))
         connection.execute(text(f'GRANT USAGE ON SCHEMA "{schema_name}" TO "{role}"'))
-        connection.execute(text(f'GRANT SELECT ON research_tasks TO "{role}"'))
+        connection.execute(text(f'GRANT SELECT, INSERT ON research_tasks TO "{role}"'))
 
     try:
         with postgres.connect() as connection:
@@ -193,6 +193,24 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                 assert visible == ["tenant-a-secret"]
                 connection.execute(text("SELECT set_config('app.tenant_id', '', true)"))
                 assert connection.execute(text("SELECT COUNT(*) FROM research_tasks")).scalar_one() == 0
+
+        # Verify the SQLAlchemy Session hook binds tenant context transaction-locally.
+        with Session(postgres) as scoped:
+            scoped.info["tenant_id"] = tenant_a_id
+            scoped.execute(text(f'SET LOCAL ROLE "{role}"'))
+            assert scoped.execute(text("SELECT query FROM research_tasks ORDER BY query")).scalars().all() == ["tenant-a-secret"]
+
+        # WITH CHECK must reject a cross-tenant insert even when raw SQL bypasses ORM guards.
+        from sqlalchemy.exc import DBAPIError
+        with Session(postgres) as scoped:
+            scoped.info["tenant_id"] = tenant_a_id
+            scoped.execute(text(f'SET LOCAL ROLE "{role}"'))
+            with pytest.raises(DBAPIError):
+                scoped.execute(text(
+                    "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id) "
+                    "VALUES (:id, :tenant, :project, 'forbidden-cross-tenant', 'queued', 2, 'general_research')"
+                ), {"id": uuid4(), "tenant": tenant_b_id, "project": project_b_id})
+            scoped.rollback()
     finally:
         with postgres.begin() as connection:
             connection.execute(text(f'DROP OWNED BY "{role}"'))
