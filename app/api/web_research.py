@@ -16,6 +16,8 @@ from app.search.research import replay_snapshot, run_web_research
 from app.search.web_search import SearchError
 
 
+from app.auth.oidc import require_roles
+
 router = APIRouter()
 
 
@@ -26,7 +28,7 @@ class WebResearchRequest(BaseModel):
     max_pages: int = Field(default=4, ge=1, le=10)
 
 
-@router.post("/web-research/queries")
+@router.post("/web-research/queries", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def create_queries(request: WebResearchRequest):
     try:
         plan, trace = generate_queries(request.claims, max_queries=request.max_queries)
@@ -37,7 +39,7 @@ def create_queries(request: WebResearchRequest):
         raise HTTPException(status_code=422, detail="Invalid claim/query configuration") from None
 
 
-@router.post("/web-research")
+@router.post("/web-research", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def web_research(request: WebResearchRequest, db: Annotated[Session, Depends(get_db)]):
     try:
         return run_web_research(db, request.claims, max_queries=request.max_queries,
@@ -50,7 +52,7 @@ def web_research(request: WebResearchRequest, db: Annotated[Session, Depends(get
         raise HTTPException(status_code=422, detail="Invalid claim/query configuration") from None
 
 
-@router.post("/web-research/{run_id}/replay")
+@router.post("/web-research/{run_id}/replay", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def replay(run_id: UUID, db: Annotated[Session, Depends(get_db)]):
     try:
         return replay_snapshot(db, str(run_id))
@@ -72,7 +74,7 @@ def list_evidence(claim_id: str, db: Annotated[Session, Depends(get_db)]):
              "quote_start": row.quote_start, "quote_end": row.quote_end} for row, claim in rows]
 
 
-@router.post("/llm/probe")
+@router.post("/llm/probe", dependencies=[Depends(require_roles("TENANT_ADMIN", "SUPER_ADMIN"))])
 def probe():
     try:
         plan, trace = generate_queries([ClaimInput(claim_id="PROBE", claim_text="Qwen official documentation")], max_queries=2)
