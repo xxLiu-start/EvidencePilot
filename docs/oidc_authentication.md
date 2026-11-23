@@ -52,7 +52,7 @@ Audit events are available to tenant/project administrators at `GET /api/v1/audi
 
 ## Streamlit frontend
 
-The Streamlit API client forwards a per-session bearer token and the selected `X-Project-ID`. The UI includes project selection. The OIDC browser sign-in/callback flow that obtains and populates `st.session_state["oidc_access_token"]` is not implemented yet. Until that flow is integrated, use a separately authenticated frontend/API client for OIDC-enabled deployments.
+Streamlit now supports opt-in built-in OIDC browser login and logout (`STREAMLIT_OIDC_ENABLED=true`). The frontend uses the IdP-issued **access token** from `st.user.tokens` rather than forwarding an ID token, and FastAPI independently validates JWT signature, issuer, audience and expiry. Configure a confidential IdP client and `expose_tokens=["access"]` in `.streamlit/secrets.toml`; see [Streamlit SSO](streamlit_sso.md). Actual IdP/browser integration acceptance is still required before production use.
 
 ## Local Keycloak development provider
 
