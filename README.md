@@ -1178,3 +1178,13 @@ DATABASE_URL='postgresql+psycopg://USER:PASSWORD@HOST:5432/DB' alembic upgrade h
 ```
 
 The Compose `migration` service runs this command before the API starts. Production must set `DB_AUTO_MIGRATE=false`; the API checks for an applied Alembic version and refuses to perform schema DDL during startup. The first baseline is non-destructive and intentionally has no destructive downgrade. See [Database Migrations](docs/database_migrations.md).
+
+
+### Metrics and monitoring
+
+The API exports low-cardinality HTTP and LLM metrics at `/metrics`. With the Compose `apps` profile, Prometheus scrapes the API over the internal network and Grafana is provisioned with a Prometheus datasource:
+
+- Prometheus: `http://127.0.0.1:9090`
+- Grafana: `http://127.0.0.1:3000`
+
+Change `GRAFANA_ADMIN_PASSWORD` before shared use. Keep `/metrics` restricted to an internal monitoring network. This is a first metrics increment; distributed OpenTelemetry traces, alert rules and log aggregation are still pending. See [Observability](docs/observability.md).
