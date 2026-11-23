@@ -21,4 +21,4 @@ The existing Agent Web Search path now uses `WebSearchConnector` for discovery w
 
 ## Not yet implemented
 
-PostgreSQL, S3/MinIO, SharePoint, Confluence, GitHub and enterprise knowledge-base connectors are extension targets, not current capabilities. Per-user permission delegation and source-system ACL propagation must be implemented before these connectors are used with multi-tenant enterprise data. Passing an `access_context` is an interface contract, not proof that a connector enforces an upstream ACL.
+S3/MinIO, SharePoint, Confluence, GitHub and enterprise knowledge-base connectors are extension targets, not current capabilities. Per-user permission delegation and source-system ACL propagation must be implemented before these connectors are used with multi-tenant enterprise data. Passing an `access_context` is an interface contract, not proof that a connector enforces an upstream ACL.
