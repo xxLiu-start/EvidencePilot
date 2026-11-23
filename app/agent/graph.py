@@ -50,7 +50,11 @@ class AgentRuntime:
         try:
             profile = get_domain_profile(state.get("domain_id", "general_research"))
             plan, repaired, _ = decompose_claims(state["user_query"], client=self.client, profile=profile)
-            claims = [{**claim.model_dump(mode="json"), "weight": PRIORITY_WEIGHTS[claim.priority.value]} for claim in plan.claims]
+            claims = [{**claim.model_dump(mode="json"), "weight": PRIORITY_WEIGHTS[claim.priority.value],
+                       "min_independent_sources": profile.verification_policy.min_independent_sources,
+                       "max_evidence_age_days": profile.freshness_policy.default_max_age_days,
+                       "human_review_required": profile.verification_policy.require_human_review}
+                      for claim in plan.claims]
             for claim in claims:
                 record = self.db.scalar(select(ClaimRecord).where(
                     ClaimRecord.claim_id == claim["id"], ClaimRecord.claim_text == claim["claim"]
