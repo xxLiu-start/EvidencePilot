@@ -28,8 +28,11 @@ def _apply_tenant_project_filters(execute_state):
         model = mapper.class_
         columns = mapper.columns
         if "tenant_id" in columns:
+            tenant_filter = model.tenant_id == tenant_id
+            if model.__name__ == "EvaluationResult":
+                tenant_filter = or_(model.tenant_id.is_(None), tenant_filter)
             statement = statement.options(
-                with_loader_criteria(model, model.tenant_id == tenant_id, include_aliases=True)
+                with_loader_criteria(model, tenant_filter, include_aliases=True)
             )
         if "project_id" in columns:
             if project_ids:
