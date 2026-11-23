@@ -51,6 +51,7 @@ class AgentRuntime:
             profile = get_domain_profile(state.get("domain_id", "general_research"))
             plan, repaired, _ = decompose_claims(state["user_query"], client=self.client, profile=profile)
             claims = [{**claim.model_dump(mode="json"), "weight": PRIORITY_WEIGHTS[claim.priority.value],
+                       "domain_id": profile.domain_id,
                        "min_independent_sources": profile.verification_policy.min_independent_sources,
                        "max_evidence_age_days": profile.freshness_policy.default_max_age_days,
                        "human_review_required": profile.verification_policy.require_human_review}
