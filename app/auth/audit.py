@@ -30,9 +30,12 @@ def record_audit_event(
     metadata: dict[str, Any] | None = None,
 ) -> AuditEvent:
     """Append a minimal audit record; never store tokens, secrets or full document bodies."""
+    resolved_project_id = project_id if project_id is not None else context.selected_project_id
+    if resolved_project_id is None and len(context.project_ids) == 1:
+        resolved_project_id = context.project_ids[0]
     event = AuditEvent(
         tenant_id=context.tenant_id,
-        project_id=project_id if project_id is not None else context.selected_project_id,
+        project_id=resolved_project_id,
         actor_user_id=context.user_id,
         action=action[:100],
         resource_type=resource_type[:100],
