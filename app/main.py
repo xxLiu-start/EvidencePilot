@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import agent, documents, domains, evaluations, evidences, feedback, research, search, tasks, web_research
-from app.auth.oidc import get_current_principal, validate_auth_configuration
+from app.auth.oidc import get_request_context, validate_auth_configuration
 from app.db.schema import initialize_database
 from app.db.session import SessionLocal, engine, get_db
 from app.evaluation.store import import_reports
@@ -55,7 +55,7 @@ app = FastAPI(
     redoc_url=None if settings.environment == "production" else "/redoc",
     openapi_url=None if settings.environment == "production" else "/openapi.json",
 )
-app.include_router(research.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(research.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(domains.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 app.include_router(tasks.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 app.include_router(documents.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
