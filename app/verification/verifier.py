@@ -17,7 +17,7 @@ from app.llm_client import LLMError
 from app.search.cache import digest
 from app.verification.contradiction import detect_contradiction
 from app.verification.freshness import evidence_is_fresh
-from app.verification.scope import EvidenceScope, scope_of, normalized
+from app.verification.scope import EvidenceScope, scope_of, scope_attributes_of, normalized
 from app.verification.source_registry import DEFAULT_SOURCE_REGISTRY
 
 
@@ -58,6 +58,10 @@ def eligible_source(claim, row):
     expected, actual = scope_of(claim), scope_of(row)
     if any(expected.get(key) and actual.get(key) and normalized(expected[key]) != normalized(actual[key])
            for key in ("model_name", "model_version", "deployment_mode")):
+        return False
+    expected_attributes, actual_attributes = scope_attributes_of(claim), scope_attributes_of(row)
+    if any(key not in actual_attributes or normalized(value) != normalized(actual_attributes[key])
+           for key, value in expected_attributes.items() if value is not None):
         return False
     required = claim.get("required_source", "any")
     kind = source_class(row)
