@@ -4,6 +4,7 @@ Run after migrations and deploy/postgres/grant_runtime.sql with the dedicated
 non-owner runtime and outbox-dispatcher roles.
 """
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 import os
 from uuid import uuid4
 
@@ -51,58 +52,59 @@ def rls_database():
     dispatcher = create_engine(DISPATCHER_URL, pool_pre_ping=True)
 
     suffix = uuid4().hex[:10]
-    tenant_a = Tenant(slug=f"rls-a-{suffix}", name="RLS Tenant A", external_id=f"rls-a-{suffix}")
-    tenant_b = Tenant(slug=f"rls-b-{suffix}", name="RLS Tenant B", external_id=f"rls-b-{suffix}")
-    user_a = User(issuer="https://rls.example.test", subject=f"user-a-{suffix}", email="a@example.test")
-    user_b = User(issuer="https://rls.example.test", subject=f"user-b-{suffix}", email="b@example.test")
-    project_a = Project(tenant_id=tenant_a.id, slug=f"project-a-{suffix}", name="Project A")
-    project_b = Project(tenant_id=tenant_b.id, slug=f"project-b-{suffix}", name="Project B")
-    task_a = ResearchTask(tenant_id=tenant_a.id, project_id=project_a.id, created_by_user_id=user_a.id,
-                          query="private tenant A query", budget=2)
-    task_b = ResearchTask(tenant_id=tenant_b.id, project_id=project_b.id, created_by_user_id=user_b.id,
-                          query="private tenant B query", budget=2)
-    document_a = DocumentRecord(tenant_id=tenant_a.id, project_id=project_a.id, created_by_user_id=user_a.id,
-                                filename="a.txt", source="a.txt", version="1", chunk_count=1)
-    document_b = DocumentRecord(tenant_id=tenant_b.id, project_id=project_b.id, created_by_user_id=user_b.id,
-                                filename="b.txt", source="b.txt", version="1", chunk_count=1)
+    now = datetime.now(timezone.utc)
+    tenant_a = Tenant(id=uuid4(), slug=f"rls-a-{suffix}", name="RLS Tenant A", external_id=f"rls-a-{suffix}")
+    tenant_b = Tenant(id=uuid4(), slug=f"rls-b-{suffix}", name="RLS Tenant B", external_id=f"rls-b-{suffix}")
+    user_a = User(id=uuid4(), issuer="https://rls.example.test", subject=f"user-a-{suffix}", email="a@example.test")
+    user_b = User(id=uuid4(), issuer="https://rls.example.test", subject=f"user-b-{suffix}", email="b@example.test")
+    project_a = Project(id=uuid4(), tenant_id=tenant_a.id, slug=f"project-a-{suffix}", name="Project A")
+    project_b = Project(id=uuid4(), tenant_id=tenant_b.id, slug=f"project-b-{suffix}", name="Project B")
+    task_a = ResearchTask(id=uuid4(), tenant_id=tenant_a.id, project_id=project_a.id, created_by_user_id=user_a.id,
+                          query="private tenant A query", budget=2, created_at=now)
+    task_b = ResearchTask(id=uuid4(), tenant_id=tenant_b.id, project_id=project_b.id, created_by_user_id=user_b.id,
+                          query="private tenant B query", budget=2, created_at=now)
+    document_a = DocumentRecord(id=uuid4(), tenant_id=tenant_a.id, project_id=project_a.id, created_by_user_id=user_a.id,
+                                filename="a.txt", source="a.txt", version="1", chunk_count=1, created_at=now)
+    document_b = DocumentRecord(id=uuid4(), tenant_id=tenant_b.id, project_id=project_b.id, created_by_user_id=user_b.id,
+                                filename="b.txt", source="b.txt", version="1", chunk_count=1, created_at=now)
 
     # IDs are generated before flush and can safely be used by dependent records.
-    chunk_a = DocumentChunk(tenant_id=tenant_a.id, project_id=project_a.id, document_id=document_a.id,
+    chunk_a = DocumentChunk(id=uuid4(), tenant_id=tenant_a.id, project_id=project_a.id, document_id=document_a.id,
                             chunk_index=0, text="tenant A confidential evidence passage", token_count=6,
                             source="a.txt", version="1", embedding=None)
-    chunk_b = DocumentChunk(tenant_id=tenant_b.id, project_id=project_b.id, document_id=document_b.id,
+    chunk_b = DocumentChunk(id=uuid4(), tenant_id=tenant_b.id, project_id=project_b.id, document_id=document_b.id,
                             chunk_index=0, text="tenant B confidential evidence passage", token_count=6,
                             source="b.txt", version="1", embedding=None)
-    claim_a = ClaimRecord(tenant_id=tenant_a.id, project_id=project_a.id,
+    claim_a = ClaimRecord(id=uuid4(), tenant_id=tenant_a.id, project_id=project_a.id,
                           claim_id="C1", claim_text="Tenant A claim")
-    claim_b = ClaimRecord(tenant_id=tenant_b.id, project_id=project_b.id,
+    claim_b = ClaimRecord(id=uuid4(), tenant_id=tenant_b.id, project_id=project_b.id,
                           claim_id="C1", claim_text="Tenant B claim")
     content_a = WebContent(content_hash=("a" * 64), body="tenant A immutable snapshot", cache_path="")
     content_b = WebContent(content_hash=("b" * 64), body="tenant B immutable snapshot", cache_path="")
     evidence_a = EvidenceRecord(
         id=uuid4(), tenant_id=tenant_a.id, project_id=project_a.id, claim_record_id=claim_a.id,
         source_type="document", content_hash=content_a.content_hash, document_id=document_a.id,
-        chunk_id=chunk_a.id, retrieved_at=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+        chunk_id=chunk_a.id, retrieved_at=now,
         supporting_text="tenant A confidential evidence passage", relation="context",
         scope={}, quote_start=0, quote_end=37,
     )
     evidence_b = EvidenceRecord(
         id=uuid4(), tenant_id=tenant_b.id, project_id=project_b.id, claim_record_id=claim_b.id,
         source_type="document", content_hash=content_b.content_hash, document_id=document_b.id,
-        chunk_id=chunk_b.id, retrieved_at=__import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+        chunk_id=chunk_b.id, retrieved_at=now,
         supporting_text="tenant B confidential evidence passage", relation="context",
         scope={}, quote_start=0, quote_end=37,
     )
-    run_a = AgentRun(task_id=task_a.id, state={"status": "queued"}, updated_at=task_a.created_at)
-    run_b = AgentRun(task_id=task_b.id, state={"status": "queued"}, updated_at=task_b.created_at)
-    step_a = AgentStep(task_id=task_a.id, step_index=1, tool_name="rag_retrieve_tool",
-                       arguments={}, status="success", elapsed_ms=1, created_at=task_a.created_at)
-    step_b = AgentStep(task_id=task_b.id, step_index=1, tool_name="rag_retrieve_tool",
-                       arguments={}, status="success", elapsed_ms=1, created_at=task_b.created_at)
-    outbox_a = OutboxEvent(event_type="research_task.created", aggregate_id=task_a.id,
-                           payload={"task_id": str(task_a.id)}, status="pending")
-    outbox_b = OutboxEvent(event_type="research_task.created", aggregate_id=task_b.id,
-                           payload={"task_id": str(task_b.id)}, status="pending")
+    run_a = AgentRun(task_id=task_a.id, state={"status": "queued"}, updated_at=now)
+    run_b = AgentRun(task_id=task_b.id, state={"status": "queued"}, updated_at=now)
+    step_a = AgentStep(id=uuid4(), task_id=task_a.id, step_index=1, tool_name="rag_retrieve_tool",
+                       arguments={}, status="success", elapsed_ms=1, created_at=now)
+    step_b = AgentStep(id=uuid4(), task_id=task_b.id, step_index=1, tool_name="rag_retrieve_tool",
+                       arguments={}, status="success", elapsed_ms=1, created_at=now)
+    outbox_a = OutboxEvent(id=uuid4(), event_type="research_task.created", aggregate_id=task_a.id,
+                           payload={"task_id": str(task_a.id)}, status="pending", created_at=now)
+    outbox_b = OutboxEvent(id=uuid4(), event_type="research_task.created", aggregate_id=task_b.id,
+                           payload={"task_id": str(task_b.id)}, status="pending", created_at=now)
 
     with Session(owner) as db:
         db.add_all([tenant_a, tenant_b, user_a, user_b])
