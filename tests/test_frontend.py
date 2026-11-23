@@ -97,6 +97,7 @@ class UIAPI:
     def __init__(self): self.created = []
     task_id = str(uuid4())
     def health(self): return {"status": "ok"}
+    def me(self): return {"projects": []}
     def system(self): return {"mode": "fixture", "model": "fixture-model"}
     def tasks(self, offset=0): return {"items": [], "total": 0}
     def create(self, query, budget):
