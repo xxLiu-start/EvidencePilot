@@ -12,7 +12,7 @@ def _session_factory(engine):
     return lambda: Session(engine, autoflush=False)
 
 
-def test_outbox_dispatch_publishes_and_marks_event(engine=None):
+def test_outbox_dispatch_publishes_and_marks_event():
     engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     with Session(engine) as db:
