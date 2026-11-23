@@ -25,6 +25,17 @@ def upgrade() -> None:
     bind = op.get_bind()
     if bind.dialect.name != "postgresql":
         return
+    # Upgrade pending outbox events created before worker payloads carried scope.
+    # This is required because RLS-protected workers must know the tenant before
+    # their first lookup of the task row.
+    bind.execute(text(
+        "UPDATE outbox_events AS o SET payload = "
+        "COALESCE(o.payload::jsonb, '{}'::jsonb) || "
+        "jsonb_build_object('tenant_id', t.tenant_id::text, "
+        "'project_id', t.project_id::text, 'user_id', t.created_by_user_id::text) "
+        "FROM research_tasks AS t WHERE o.aggregate_id = t.id "
+        "AND (o.payload::jsonb ->> 'tenant_id') IS NULL"
+    ))
     for table, predicate in TASK_SCOPED_POLICIES.items():
         policy = f"{table}_tenant_isolation"
         bind.execute(text(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY"))
