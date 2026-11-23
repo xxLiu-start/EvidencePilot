@@ -175,6 +175,9 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
         project = Project(tenant_id=tenant.id, slug="default", name="Default Development Project", is_active=True)
         db.add(project)
         db.flush()
+    set_session_scope(db, tenant_id=tenant.id, user_id=user.id, tenant_role=membership.role,
+                      project_ids=(project.id,), selected_project_id=project.id,
+                      identity_issuer="local", identity_subject="local-development")
     project_membership = db.scalar(select(ProjectMembership).where(
         ProjectMembership.project_id == project.id, ProjectMembership.user_id == user.id
     ))
