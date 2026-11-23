@@ -154,13 +154,13 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
     project_a_id, project_b_id = uuid4(), uuid4()
     with postgres.begin() as connection:
         connection.execute(text(
-            "INSERT INTO tenants (id, slug, name, is_active) VALUES "
-            "(:a, :slug_a, 'Tenant A', true), (:b, :slug_b, 'Tenant B', true)"
+            "INSERT INTO tenants (id, slug, name, is_active, created_at) VALUES "
+            "(:a, :slug_a, 'Tenant A', true, now()), (:b, :slug_b, 'Tenant B', true, now())"
         ), {"a": tenant_a_id, "b": tenant_b_id,
             "slug_a": "rls-a-" + uuid4().hex[:8], "slug_b": "rls-b-" + uuid4().hex[:8]})
         connection.execute(text(
-            "INSERT INTO projects (id, tenant_id, slug, name, is_active) VALUES "
-            "(:pa, :a, 'default', 'Project A', true), (:pb, :b, 'default', 'Project B', true)"
+            "INSERT INTO projects (id, tenant_id, slug, name, is_active, created_at) VALUES "
+            "(:pa, :a, 'default', 'Project A', true, now()), (:pb, :b, 'default', 'Project B', true, now())"
         ), {"pa": project_a_id, "pb": project_b_id, "a": tenant_a_id, "b": tenant_b_id})
         connection.execute(text(
             "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id) "
