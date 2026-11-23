@@ -51,39 +51,43 @@ def tenant_db():
 
 def test_database_memberships_scope_tenant_and_project_queries(tenant_db):
     db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, task_a1, task_a2, task_b1 = tenant_db
+    tenant_a_id, project_a1_id = tenant_a.id, project_a1.id
+    task_a1_id, task_a2_id, task_b1_id = task_a1.id, task_a2.id, task_b1.id
     principal = Principal(
         subject="user-a", issuer="https://id.example/realm", audience=("evidencepilot-api",),
         roles=("SUPER_ADMIN",), tenant_id="tenant-a",
     )
     context = get_request_context(db, principal, None)
-    assert context.tenant_id == tenant_a.id
-    assert context.project_ids == (project_a1.id,)
+    assert context.tenant_id == tenant_a_id
+    assert context.project_ids == (project_a1_id,)
     # A forged platform role in the token cannot grant admin access.
     assert "SUPER_ADMIN" not in context.roles
     assert "RESEARCHER" in context.roles
 
     visible = list(db.scalars(select(ResearchTask).order_by(ResearchTask.query)))
-    assert [row.id for row in visible] == [task_a1.id]
-    assert db.get(ResearchTask, task_a2.id) is None
-    assert db.get(ResearchTask, task_b1.id) is None
+    assert [row.id for row in visible] == [task_a1_id]
+    assert db.get(ResearchTask, task_a2_id) is None
+    assert db.get(ResearchTask, task_b1_id) is None
 
 
 def test_tenant_and_project_cross_scope_writes_are_rejected(tenant_db):
     db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, *_ = tenant_db
+    tenant_a_id, tenant_b_id = tenant_a.id, tenant_b.id
+    project_a2_id, project_b1_id = project_a2.id, project_b1.id
     principal = Principal(
         subject="user-a", issuer="https://id.example/realm", audience=("evidencepilot-api",),
         tenant_id="tenant-a",
     )
     get_request_context(db, principal, None)
 
-    db.add(ResearchTask(tenant_id=tenant_b.id, project_id=project_b1.id,
+    db.add(ResearchTask(tenant_id=tenant_b_id, project_id=project_b1_id,
                         query="cross tenant write", budget=2))
     with pytest.raises(PermissionError, match="Cross-tenant"):
         db.flush()
     db.rollback()
     # The user belongs to tenant A but not to project A2.
     get_request_context(db, principal, None)
-    db.add(ResearchTask(tenant_id=tenant_a.id, project_id=project_a2.id,
+    db.add(ResearchTask(tenant_id=tenant_a_id, project_id=project_a2_id,
                         query="cross project write", budget=2))
     with pytest.raises(PermissionError, match="Project membership"):
         db.flush()
