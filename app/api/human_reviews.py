@@ -81,6 +81,8 @@ def submit_claim_review(task_id: UUID, claim_id: str, payload: ReviewDecision,
     result = assessment.result
     if payload.decision == "approved" and not (
         result.get("verified") is True and result.get("verdict") == "SUPPORTED"
+        and current.get("fresh") is True and current.get("source_requirements_met") is True
+        and not current.get("has_conflict")
     ):
         raise HTTPException(status_code=409, detail="Only semantically supported evidence can be approved")
     existing = db.scalar(select(HumanReview).where(
