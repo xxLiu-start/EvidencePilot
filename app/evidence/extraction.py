@@ -90,8 +90,15 @@ def save_evidences(db, evidences, *, before_commit=None):
                     or content.body[evidence.quote_start:evidence.quote_end] != evidence.supporting_text):
                 raise ValueError("Evidence quote is not in the persisted source snapshot")
             if db.get(EvidenceRecord, evidence.evidence_id) is None:
+                # Evidence ownership is explicit at the persistence boundary. Do not
+                # rely only on ORM before_flush hooks to infer tenant/project scope.
+                tenant_id = db.info.get("tenant_id")
+                selected_project_id = db.info.get("selected_project_id")
+                project_ids = tuple(db.info.get("project_ids") or ())
+                project_id = selected_project_id or (project_ids[0] if len(project_ids) == 1 else None)
                 db.add(EvidenceRecord(
                     id=evidence.evidence_id, claim_record_id=claim.id,
+                    tenant_id=tenant_id, project_id=project_id,
                     source_type=evidence.source_type, source_url=evidence.source_url,
                     content_hash=evidence.content_hash, document_id=evidence.document_id,
                     chunk_id=evidence.chunk_id,
