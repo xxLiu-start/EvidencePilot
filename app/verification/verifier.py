@@ -88,9 +88,21 @@ def source_requirements(claim, rows):
     internal = any(row.source_type == "document" for row in eligible)
     external = any(row.source_type == "web" for row in eligible)
     primary = bool(eligible) if required == "any" else any(source_class(row) == required for row in eligible)
-    met = primary and (not internal_needed or internal) and (not external_needed or external)
+    identities = set()
+    for row in eligible:
+        if row.source_type == "web":
+            identities.add((source_class(row), (urlsplit(row.source_url or "").hostname or "").casefold()))
+        elif row.document_id:
+            identities.add(("document", str(row.document_id)))
+        else:
+            identities.add((row.source_type, str(row.id)))
+    minimum = max(1, int(claim.get("min_independent_sources", 1)))
+    independent_count = len(identities)
+    met = (primary and (not internal_needed or internal) and (not external_needed or external)
+           and independent_count >= minimum)
     return {"source_requirements_met": bool(met), "missing_internal": bool(internal_needed and not internal),
             "missing_external": bool(external_needed and not external), "missing_required_source": not primary,
+            "independent_source_count": independent_count, "required_independent_sources": minimum,
             "qualified_evidence_ids": [str(row.id) for row in eligible]}
 
 
@@ -134,11 +146,12 @@ class VerificationDraft(BaseModel):
 
 def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0, config=settings, now=None):
     valid = load_claim_evidence(db, claim, evidence_ids)
-    fresh = [row for row in valid if evidence_is_fresh(row, config.agent_evidence_max_age_days, now,
+    max_age_days = int(claim.get("max_evidence_age_days", config.agent_evidence_max_age_days))
+    fresh = [row for row in valid if evidence_is_fresh(row, max_age_days, now,
              current_version=(claim.get("scope") or {}).get("model_version"))]
     requirements = source_requirements(claim, fresh)
     fingerprint = digest(json.dumps({
-        "policy": "verification-v2", "claim": claim, "max_age_days": config.agent_evidence_max_age_days,
+        "policy": "verification-v3", "claim": claim, "max_age_days": claim.get("max_evidence_age_days", config.agent_evidence_max_age_days),
         "evidence": sorted((str(row.id), row.content_hash, row.relation, source_class(row),
                             row in fresh, str(row.published_at), str(row.retrieved_at),
                             json.dumps(row.scope, sort_keys=True)) for row in valid),
@@ -158,7 +171,11 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
     elif verified and result.get("verdict") == "SUPPORTED" and requirements["source_requirements_met"]:
         by_id = {str(row.id): row for row in fresh}
         support_rows = [by_id[key] for key in result.get("supporting_evidence_ids", []) if key in by_id]
-        status = EvidenceStatus.SUPPORTED if source_requirements(claim, support_rows)["source_requirements_met"] else EvidenceStatus.INSUFFICIENT
+        support_requirements = source_requirements(claim, support_rows)
+        if claim.get("human_review_required") and not result.get("human_review_approved"):
+            status = EvidenceStatus.INSUFFICIENT
+        else:
+            status = EvidenceStatus.SUPPORTED if support_requirements["source_requirements_met"] else EvidenceStatus.INSUFFICIENT
     elif assessment is not None or not requirements["source_requirements_met"]:
         status = EvidenceStatus.INSUFFICIENT
     else:
@@ -171,11 +188,13 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
             "web_evidence_count": sum(row.source_type == "web" for row in fresh),
             "rag_evidence_count": sum(row.source_type == "document" for row in fresh),
             "verification_attempted": assessment is not None, "can_verify": bool(fresh) and assessment is None,
+            "human_review_required": bool(claim.get("human_review_required")),
+            "human_review_approved": bool(result.get("human_review_approved")),
             "verification_error": result.get("error_category"), "fingerprint": fingerprint,
             "verification_status": result.get("status"), **requirements,
             "summary": f"{status.value}: {len(fresh)} fresh, exact excerpts; source requirements "
                        f"{'met' if requirements['source_requirements_met'] else 'not met'}; "
-                       f"semantic verification {'performed' if verified else 'not passed'}. " + result.get("reason", "")[:250]}
+                       f"semantic verification {'performed' if verified else 'not passed'}. " + ("Human review is required before support can count. " if claim.get("human_review_required") and not result.get("human_review_approved") else "") + result.get("reason", "")[:250]}
 
 
 def verify_claim_coverage(db, claim, evidence_ids):
