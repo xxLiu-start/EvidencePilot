@@ -60,7 +60,9 @@ def test_compose_frontend_has_only_api_address_and_no_credentials_mount():
     config = yaml.safe_load(Path("docker-compose.yml").read_text())
     services = config["services"]
     assert {"api", "postgres", "streamlit"} <= services.keys()
-    assert set(services["streamlit"]["environment"]) == {"API_BASE_URL"}
+    assert set(services["streamlit"]["environment"]) == {"API_BASE_URL", "STREAMLIT_OIDC_ENABLED"}
+    assert not any("SECRET" in key or "TOKEN" in key or "PASSWORD" in key
+                   for key in services["streamlit"]["environment"])
     assert not services["streamlit"].get("env_file") and not services["streamlit"].get("volumes")
     assert services["api"]["environment"]["LLM_LOCAL_BASE_URL"].find("host.docker.internal") >= 0
     assert services["postgres"]["volumes"]
