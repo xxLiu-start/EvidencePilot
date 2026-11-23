@@ -25,11 +25,9 @@ def dispatch_once(
     Consumers are idempotent by ResearchTask ID and existing AgentRun state; delivery is
     at-least-once, never advertised as exactly-once.
     """
-    if publish is None:
+    use_default_publisher = publish is None
+    if use_default_publisher:
         from app.queue.tasks import execute_research_task
-
-        def publish(task_identifier: str, celery_task_id: str) -> None:
-            execute_research_task.apply_async(args=[task_identifier], task_id=celery_task_id)
 
     batch_size = batch_size or settings.task_queue_batch_size
     max_attempts = max_attempts or settings.task_queue_max_attempts
@@ -47,7 +45,17 @@ def dispatch_once(
         for event in events:
             try:
                 task_identifier = str(event.aggregate_id)
-                publish(task_identifier, task_identifier)
+                if use_default_publisher:
+                    payload = event.payload or {}
+                    required = ("tenant_id", "project_id", "user_id")
+                    if any(not payload.get(key) for key in required):
+                        raise ValueError("Outbox event is missing tenant execution context")
+                    execute_research_task.apply_async(
+                        args=[task_identifier, payload["tenant_id"], payload["project_id"], payload["user_id"]],
+                        task_id=task_identifier,
+                    )
+                else:
+                    publish(task_identifier, task_identifier)
                 event.status = "published"
                 event.published_at = datetime.now(timezone.utc)
                 event.last_error = None
