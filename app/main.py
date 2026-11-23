@@ -71,7 +71,7 @@ async def database_error(_request: Request, _exc: SQLAlchemyError):
 
 
 @app.get("/api/v1/system")
-def system_info(request: Request):
+def system_info(request: Request, _principal=Depends(get_current_principal)):
     client = getattr(request.app.state, "llm_client", None)
     if client is None:
         raise HTTPException(status_code=503, detail="Inference client not initialized")
