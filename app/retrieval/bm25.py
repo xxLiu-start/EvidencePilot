@@ -98,8 +98,9 @@ class BM25Store:
         index, chunks = self._snapshot(db)
         return [SearchHit(chunk, score, bm25_score=score) for chunk, score in bm25_ranked(
             index, chunks, query, top_k=top_k, document_id=document_id,
-            tenant_id=db.info.get("tenant_id"),
-            project_ids=db.info.get("selected_project_ids") or db.info.get("project_ids"),
+            tenant_id=getattr(db, "info", {}).get("tenant_id"),
+            project_ids=getattr(db, "info", {}).get("selected_project_ids")
+            or getattr(db, "info", {}).get("project_ids"),
         )]
 
 
