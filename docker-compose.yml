@@ -236,6 +236,7 @@ services:
     restart: unless-stopped
     environment:
       API_BASE_URL: http://api:8000
+      STREAMLIT_OIDC_ENABLED: ${STREAMLIT_OIDC_ENABLED:-false}
     ports:
       - "127.0.0.1:${STREAMLIT_PORT:-8501}:8501"
     depends_on:
