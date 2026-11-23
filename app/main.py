@@ -56,15 +56,15 @@ app = FastAPI(
     openapi_url=None if settings.environment == "production" else "/openapi.json",
 )
 app.include_router(research.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
-app.include_router(domains.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(tasks.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(documents.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(search.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(web_research.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(agent.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
-app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(domains.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(tasks.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(documents.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(search.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(web_research.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(agent.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 
 
 @app.middleware("http")
@@ -95,7 +95,7 @@ async def database_error(_request: Request, _exc: SQLAlchemyError):
 
 
 @app.get("/api/v1/system")
-def system_info(request: Request, _principal=Depends(get_current_principal)):
+def system_info(request: Request, _principal=Depends(get_request_context)):
     client = getattr(request.app.state, "llm_client", None)
     if client is None:
         raise HTTPException(status_code=503, detail="Inference client not initialized")
