@@ -69,7 +69,6 @@ services:
       TASK_QUEUE_ENABLED: ${TASK_QUEUE_ENABLED:-false}
       DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-false}
       METRICS_ENABLED: ${METRICS_ENABLED:-true}
-      METRICS_ENABLED: ${METRICS_ENABLED:-true}
       REDIS_URL: redis://redis:6379/0
       CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
       LLM_MODE: ${LLM_MODE:-local}
