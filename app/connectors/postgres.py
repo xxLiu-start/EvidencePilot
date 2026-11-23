@@ -35,6 +35,7 @@ class PostgreSQLTableConnector(SourceConnector):
         searchable_columns: list[str],
         tenant_column: str | None = None,
         filter_columns: list[str] | None = None,
+        exposed_columns: list[str] | None = None,
         schema: str | None = None,
         max_rows: int = 20,
     ) -> None:
@@ -55,8 +56,10 @@ class PostgreSQLTableConnector(SourceConnector):
         configured = {primary_key, *self.searchable_columns, *self.filter_columns}
         if tenant_column:
             configured.add(tenant_column)
-        if not self.searchable_columns or not configured <= allowed:
-            raise ValueError("Configured connector columns must exist in the selected table")
+        self.exposed_columns = tuple(exposed_columns or sorted(configured))
+        if (not self.searchable_columns or not configured <= allowed
+                or not set(self.exposed_columns) <= allowed or not configured <= set(self.exposed_columns)):
+            raise ValueError("Configured connector columns must exist and all query columns must be exposed")
         if len(self.table.primary_key.columns) != 1 or self.table.primary_key.columns[0].name != primary_key:
             raise ValueError("Configured primary key must match the table's single-column primary key")
 
@@ -107,7 +110,7 @@ class PostgreSQLTableConnector(SourceConnector):
             if key not in self.filter_columns:
                 raise ValueError(f"Filter column is not allowed: {key}")
             predicates.append(self.table.c[key] == value)
-        statement = select(self.table).where(*predicates).limit(limit)
+        statement = select(*(self.table.c[name] for name in self.exposed_columns)).where(*predicates).limit(limit)
         rows = self._read(statement)
         return [self._document(str(row[self.primary_key]), self.connector_id,
                                f"{self.table.fullname}/{row[self.primary_key]}", dict(row), access_context)
@@ -118,7 +121,7 @@ class PostgreSQLTableConnector(SourceConnector):
         tenant_clause = self._tenant_clause(access_context)
         if tenant_clause is not None:
             predicates.append(tenant_clause)
-        rows = self._read(select(self.table).where(*predicates).limit(1))
+        rows = self._read(select(*(self.table.c[name] for name in self.exposed_columns)).where(*predicates).limit(1))
         if not rows:
             # Do not reveal whether a row exists outside the caller's tenant.
             raise LookupError("Database source not found")
