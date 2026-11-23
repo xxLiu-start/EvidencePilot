@@ -1155,3 +1155,15 @@ OIDC JWT verification and coarse write-role checks are available in `app/auth/oi
 **Important security boundary:** OIDC authentication and role checks do not yet provide database-backed tenant/project membership or complete object-level isolation. Do not expose this increment to multiple mutually untrusted tenants. A durable task queue, transactional outbox, Alembic migration history, object storage, full observability, human-review workflow, and multi-domain manually reviewed benchmark are also still pending. The exact implementation status is tracked in [Enterprise Upgrade Status](docs/enterprise_upgrade_status.md).
 
 A GitHub Actions workflow now runs Python compilation, pytest, and optional real PostgreSQL/pgvector integration tests on pushes and pull requests.
+
+
+### Durable task queue (new optional production path)
+
+Set `TASK_QUEUE_ENABLED=true` and configure `REDIS_URL` to use the transactional outbox path. Research task creation and the `outbox_events` row are committed in one PostgreSQL transaction. The dispatcher publishes pending events to Celery; the worker executes the existing LangGraph runtime. Compose now includes Redis, an outbox dispatcher, and a Celery research worker under the `apps` profile.
+
+```bash
+TASK_QUEUE_ENABLED=true docker compose --profile apps up -d --build --wait
+docker compose --profile apps ps
+```
+
+Delivery is at-least-once. A crash between broker publish and outbox commit can produce a duplicate message; the worker guards execution using the existing ResearchTask/AgentRun state and task UUID. Late acknowledgements, worker-loss rejection, lease-aware retries, and expired-lease recovery reduce lost work. This is not an exactly-once guarantee. FastAPI BackgroundTasks remains the development fallback when `TASK_QUEUE_ENABLED=false`; production startup rejects that configuration.
