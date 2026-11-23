@@ -36,6 +36,18 @@ import does **not** provision a production-ready confidential Streamlit client.
 Create that OIDC client in the Keycloak admin UI and set its confidential
 client secret in the local Streamlit secrets file.
 
+For the Docker Compose deployment, create `.streamlit/secrets.toml`
+on the host, then launch with the dedicated override:
+
+```bash
+docker compose -f docker-compose.yml -f deploy/compose.sso.yml --profile apps up -d --build
+```
+
+The secrets file is excluded from the Docker build context and mounted
+read-only into the Streamlit container at runtime. Use an orchestrator secret
+store for managed production deployments. Do not embed tokens or IdP client
+secrets in Compose environment variables or Git.
+
 ## Security model
 
 `st.login()` handles the browser authorization redirect, state/nonce and
