@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_vali
 from sqlalchemy import select
 
 from app.config import Settings, settings
+from app.connectors.web import WebSearchConnector
 from app.db.models import AgentAllowedSource, EvidenceRecord, ToolExecutionReceipt, WebContent, WebSource
 from app.memory.checkpoints import fence_tool_commit
 from app.evidence.extraction import extract_evidence, save_evidences
@@ -23,7 +24,6 @@ from app.retrieval.hybrid import hybrid_retrieve
 from app.search.cache import digest
 from app.search.parser import ParsedPage, PageError, fetch_page, normalize_url
 from app.search.query_generator import ClaimInput
-from app.search.web_search import WebSearchClient
 
 
 ToolName = Literal["web_search_tool", "rag_retrieve_tool", "open_source_tool", "verify_claim_tool"]
@@ -135,18 +135,13 @@ def web_search_tool(db, context: ToolContext, query: str):
         "search_timeout_seconds": min(context.config.search_timeout_seconds, context.remaining()),
         "search_max_retries": 0,
     })
-    searcher = WebSearchClient(config)
-    try:
-        results = searcher.search(query, max_results=2)
-    finally:
-        sdk = searcher._sdk
-        if sdk is not None and hasattr(sdk, "session"):
-            sdk.session.close()
+    connector = WebSearchConnector(db, config)
+    results = connector.search(query, limit=2, access_context={"task_id": str(context.task_id)})
     source_ids, failures = [], 0
-    for result in results["results"][:2]:
+    for result in results[:2]:
         context.check()
         try:
-            page = fetch_page(db, result["url"], search_query=query,
+            page = fetch_page(db, result.canonical_location, search_query=query,
                               config=context.config.model_copy(update={
                                   "webpage_timeout_seconds": min(context.config.webpage_timeout_seconds, context.remaining())}),
                               before_commit=lambda: context.before_commit(db))
