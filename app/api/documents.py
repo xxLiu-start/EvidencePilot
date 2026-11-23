@@ -21,11 +21,13 @@ from app.retrieval.ingestion import SUPPORTED_SUFFIXES
 from app.retrieval.embedding import EmbeddingError
 
 
+from app.auth.oidc import require_roles
+
 router = APIRouter()
 
 
-@router.post("/documents", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
-@router.post("/documents/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/documents", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
+@router.post("/documents/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def upload_document(
     file: Annotated[UploadFile, File()],
     db: Annotated[Session, Depends(get_db)],
