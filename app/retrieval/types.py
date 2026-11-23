@@ -18,6 +18,8 @@ class ChunkSnapshot:
     version: str
     embedding_model: str | None
     embedding_dimensions: int | None
+    tenant_id: UUID | None = None
+    project_id: UUID | None = None
 
 
 @dataclass(frozen=True)
