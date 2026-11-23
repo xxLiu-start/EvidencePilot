@@ -16,7 +16,8 @@ def initialize_database(engine: Engine) -> None:
             connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         Base.metadata.create_all(connection)
         # Additive migration for pre-checkpoint deployments, including local SQLite.
-        additions = {"evidences": {"scope": "JSON NOT NULL DEFAULT '{}'"},
+        additions = {"research_tasks": {"domain_id": "VARCHAR(64) NOT NULL DEFAULT 'general_research'"},
+"evidences": {"scope": "JSON NOT NULL DEFAULT '{}'"},
                      "agent_runs": {"owner_token": "VARCHAR(64)",
                                     "lease_expires_at": "TIMESTAMP WITH TIME ZONE" if postgres else "DATETIME",
                                     "checkpoint_seq": "INTEGER NOT NULL DEFAULT 0"}}
