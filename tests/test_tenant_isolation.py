@@ -129,3 +129,41 @@ def test_role_dependencies_use_database_membership_not_token_roles(tenant_db):
         require_roles("SUPER_ADMIN")(context)
     assert denied.value.status_code == 403
     assert require_roles("RESEARCHER")(context) is context
+
+
+
+def test_fastapi_read_routes_apply_tenant_and_project_context(tenant_db):
+    from fastapi.testclient import TestClient
+
+    from app.auth.oidc import get_current_principal
+    from app.db.session import get_db
+    from app.main import app
+
+    db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, task_a1, task_a2, task_b1 = tenant_db
+    principal = Principal(
+        subject="user-a",
+        issuer="https://id.example/realm",
+        audience=("evidencepilot-api",),
+        roles=("SUPER_ADMIN",),
+        tenant_id="tenant-a",
+    )
+    app.dependency_overrides[get_current_principal] = lambda: principal
+
+    def override_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_db
+    client = TestClient(app)
+    try:
+        response = client.get("/api/v1/tasks")
+        assert response.status_code == 200, response.text
+        assert {item["query"] for item in response.json()["items"]} == {"Tenant A project one"}
+        assert client.get(f"/api/v1/tasks/{task_b1.id}").status_code == 404
+        assert client.get(f"/api/v1/tasks/{task_a2.id}").status_code == 404
+
+        selected = client.get("/api/v1/tasks", headers={"X-Project-ID": str(project_a1.id)})
+        assert selected.status_code == 200
+        assert [item["query"] for item in selected.json()["items"]] == ["Tenant A project one"]
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
