@@ -60,7 +60,7 @@ def dispatch_once(
                     task_identifier = str(event.aggregate_id)
                     if use_default_publisher:
                         payload = event.payload or {}
-                        required = ("tenant_id", "project_id", "user_id")
+                        required = ("tenant_id", "project_id")
                         if any(not payload.get(key) for key in required):
                             raise ValueError("Outbox event is missing tenant execution context")
                         execute_research_task.apply_async(
