@@ -163,9 +163,9 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             "(:pa, :a, 'default', 'Project A', true, now()), (:pb, :b, 'default', 'Project B', true, now())"
         ), {"pa": project_a_id, "pb": project_b_id, "a": tenant_a_id, "b": tenant_b_id})
         connection.execute(text(
-            "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id) "
-            "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research'), "
-            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research')"
+            "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id, created_at) "
+            "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research', now()), "
+            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now())"
         ), {"ta": uuid4(), "tb": uuid4(), "a": tenant_a_id, "b": tenant_b_id,
             "pa": project_a_id, "pb": project_b_id})
         connection.execute(text("ALTER TABLE research_tasks ENABLE ROW LEVEL SECURITY"))
@@ -207,8 +207,8 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             scoped.execute(text(f'SET LOCAL ROLE "{role}"'))
             with pytest.raises(DBAPIError):
                 scoped.execute(text(
-                    "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id) "
-                    "VALUES (:id, :tenant, :project, 'forbidden-cross-tenant', 'queued', 2, 'general_research')"
+                    "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id, created_at) "
+                    "VALUES (:id, :tenant, :project, 'forbidden-cross-tenant', 'queued', 2, 'general_research', now())"
                 ), {"id": uuid4(), "tenant": tenant_b_id, "project": project_b_id})
             scoped.rollback()
     finally:
