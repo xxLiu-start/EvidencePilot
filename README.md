@@ -1214,3 +1214,10 @@ Alembic revision `20261123_0004` enables and forces tenant RLS on research tasks
 
 
 For production PostgreSQL RLS deployment, create a dedicated `NOSUPERUSER NOBYPASSRLS` runtime role and set `COMPOSE_RUNTIME_DATABASE_URL`; keep `COMPOSE_DATABASE_URL` for migrations only. See [PostgreSQL RLS Deployment](docs/postgres_rls_deployment.md).
+
+
+### Enterprise SSO and human review
+
+Streamlit provides opt-in OIDC sign-in/logout using `STREAMLIT_OIDC_ENABLED=true` and the IdP **access token** via `st.user.tokens`; configure an IdP client and secure `.streamlit/secrets.toml` per [Streamlit SSO](docs/streamlit_sso.md). Reviewer decisions are immutable, independently audited and tied to a verified Evidence fingerprint; see [Human Review](docs/human_review.md). Real browser/IdP sign-in and external security assessment are not yet certified.
+
+RLS migrations protect tenant-owned and task-linked tables; GitHub Actions tests raw SQL, write denial and pooled transactions with non-owner roles. **RLS alone is not a SQL-injection sandbox:** an arbitrary SQL executor can spoof the session tenant GUC. Global shared-cache tables are not yet tenant RLS protected. See [Tenant and Project Isolation](docs/tenant_project_isolation.md).
