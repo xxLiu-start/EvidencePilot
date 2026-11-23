@@ -53,7 +53,7 @@ class SourceAuthorityRegistry:
             self._academic_hosts.discard(normalized)
 
     def classify(self, source_type: str, source_url: str | None = None) -> str:
-        if source_type == "document":
+        if source_type in {"document", "database", "enterprise_connector"}:
             return "internal"
         host = (urlsplit(source_url or "").hostname or "").lower().rstrip(".")
         if not host:
