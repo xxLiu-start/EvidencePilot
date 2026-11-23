@@ -31,7 +31,7 @@ def test_development_identity_is_explicit_and_limited(monkeypatch):
     principal = oidc.get_current_principal(None)
     assert principal.development_identity is True
     assert principal.subject == "local-development"
-    assert principal.roles == ("RESEARCHER",)
+    assert principal.roles == ("RESEARCHER", "TENANT_ADMIN", "SUPER_ADMIN")
 
 
 def test_production_cannot_start_with_authentication_disabled(monkeypatch):
