@@ -4,6 +4,11 @@ from typing import Literal
 
 class Settings(BaseSettings):
     database_url: str
+    environment: Literal["development", "test", "production"] = "development"
+    auth_enabled: bool = False
+    oidc_issuer: str = ""
+    oidc_audience: str = ""
+    oidc_jwks_url: str = ""
     llm_api_key: SecretStr = Field(default=SecretStr(""), repr=False)
     llm_base_url: str = ""
     llm_model: str = ""
