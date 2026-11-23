@@ -1,0 +1,70 @@
+{
+  "realm": "evidencepilot",
+  "enabled": true,
+  "displayName": "EvidencePilot Development",
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      {"name": "SUPER_ADMIN", "description": "Development platform administrator"},
+      {"name": "TENANT_ADMIN", "description": "Tenant administrator"},
+      {"name": "PROJECT_MANAGER", "description": "Project manager"},
+      {"name": "RESEARCHER", "description": "Research task author"},
+      {"name": "REVIEWER", "description": "Evidence and report reviewer"},
+      {"name": "VIEWER", "description": "Read-only user"}
+    ]
+  },
+  "clientScopes": [
+    {
+      "name": "evidencepilot-api-audience",
+      "description": "Adds the EvidencePilot API audience to access tokens",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": [
+        {
+          "name": "evidencepilot-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "evidencepilot-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "evidencepilot-api",
+      "name": "EvidencePilot API",
+      "enabled": true,
+      "bearerOnly": true,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "evidencepilot-cli",
+      "name": "EvidencePilot Development CLI",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "defaultClientScopes": ["evidencepilot-api-audience", "roles"]
+    }
+  ],
+  "users": [
+    {
+      "username": "developer",
+      "enabled": true,
+      "email": "developer@example.test",
+      "emailVerified": true,
+      "credentials": [
+        {"type": "password", "value": "change_me_before_use", "temporary": true}
+      ],
+      "realmRoles": ["RESEARCHER", "TENANT_ADMIN", "SUPER_ADMIN"]
+    }
+  ]
+}
