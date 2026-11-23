@@ -32,6 +32,13 @@ services:
       - "127.0.0.1:${API_PORT:-8001}:8000"
     environment:
       DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      AUTH_ENABLED: ${AUTH_ENABLED:-false}
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-evidencepilot-api}
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
+      TASK_QUEUE_ENABLED: ${TASK_QUEUE_ENABLED:-false}
+      REDIS_URL: redis://redis:6379/0
       CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
       LLM_MODE: ${LLM_MODE:-local}
       LLM_LOCAL_BASE_URL: ${LLM_CONTAINER_LOCAL_BASE_URL:-http://host.docker.internal:8010/v1}
@@ -63,12 +70,92 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
       interval: 10s
       timeout: 5s
       start_period: 30s
       retries: 10
+
+
+  redis:
+    profiles: [apps]
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  research-worker:
+    profiles: [apps]
+    build:
+      context: .
+      target: api
+    command: ["celery", "-A", "app.queue.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=${WORKER_CONCURRENCY:-2}"]
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
+      REDIS_URL: redis://redis:6379/0
+      TASK_QUEUE_ENABLED: "true"
+      LLM_MODE: ${LLM_MODE:-local}
+      LLM_LOCAL_BASE_URL: ${LLM_CONTAINER_LOCAL_BASE_URL:-http://host.docker.internal:8010/v1}
+      LLM_LOCAL_MODEL: ${LLM_LOCAL_MODEL:-}
+      LLM_REMOTE_BASE_URL: ${LLM_REMOTE_BASE_URL:-}
+      LLM_REMOTE_MODEL: ${LLM_REMOTE_MODEL:-}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-90}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-2}
+      LLM_DISABLE_THINKING: ${LLM_DISABLE_THINKING:-true}
+      EMBEDDING_DEVICE: cpu
+      EMBEDDING_USE_FP16: "false"
+      EMBEDDING_LOCAL_FILES_ONLY: ${EMBEDDING_LOCAL_FILES_ONLY:-false}
+      RERANKER_DEVICE: cpu
+      RERANKER_USE_FP16: "false"
+      RERANKER_LOCAL_FILES_ONLY: ${RERANKER_LOCAL_FILES_ONLY:-false}
+      AGENT_RAG_METHOD: ${AGENT_RAG_METHOD:-hybrid}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - type: bind
+        source: ./.env
+        target: /run/secrets/evidencepilot.env
+        read_only: true
+        bind:
+          create_host_path: false
+      - ./data/cache/models:/workspace/data/cache/models
+      - ./data/cache/web:/workspace/data/cache/web
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  outbox-dispatcher:
+    profiles: [apps]
+    build:
+      context: .
+      target: api
+    command: ["python", "-m", "app.queue.dispatcher"]
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      REDIS_URL: redis://redis:6379/0
+      TASK_QUEUE_ENABLED: "true"
+      TASK_QUEUE_DISPATCH_INTERVAL_SECONDS: ${TASK_QUEUE_DISPATCH_INTERVAL_SECONDS:-1}
+      TASK_QUEUE_BATCH_SIZE: ${TASK_QUEUE_BATCH_SIZE:-20}
+      TASK_QUEUE_MAX_ATTEMPTS: ${TASK_QUEUE_MAX_ATTEMPTS:-10}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   streamlit:
     profiles: [apps]
@@ -91,3 +178,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
