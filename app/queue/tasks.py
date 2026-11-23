@@ -20,11 +20,18 @@ from app.queue.celery_app import celery_app
     retry_jitter=True,
     max_retries=10,
 )
-def execute_research_task(self, task_id: str) -> dict:
+def execute_research_task(self, task_id: str, tenant_id: str | None = None,
+                           project_id: str | None = None, user_id: str | None = None) -> dict:
     from app.agent.graph import run_agent_task
 
     identifier = UUID(str(task_id))
     with SessionLocal() as db:
+        if tenant_id is not None:
+            db.info.update({"tenant_id": UUID(tenant_id), "user_id": UUID(user_id) if user_id else None,
+                            "project_ids": (UUID(project_id),), "selected_project_id": UUID(project_id),
+                            "selected_project_ids": (UUID(project_id),)})
+        elif settings.environment == "production":
+            raise RuntimeError("Tenant context is required for RLS-protected Celery tasks")
         task = db.get(ResearchTask, identifier)
         if task is None:
             return {"task_id": str(identifier), "status": "not_found"}
