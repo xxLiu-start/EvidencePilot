@@ -13,6 +13,8 @@ from app.db.models import (ResearchTask, AgentRun, AgentStep, AgentPolicyDecisio
 from app.db.session import get_db
 from app.agent.background import execute_background
 from app.agent.errors import AgentConflict
+from app.evidence.coverage import calculate_coverage, coverage_items
+from app.verification.verifier import assess_claim
 from app.memory.checkpoints import reserve_recovery
 
 from app.auth.oidc import RequestContext, get_request_context, require_roles
@@ -53,9 +55,26 @@ def get_trace(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
 def get_report(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
     task = require_task(db, task_id)
     run = db.get(AgentRun, task_id)
-    payload = {"task_id": task_id, "status": task.status, "report": run.state.get("final_report") if run else None,
-               "coverage": run.state.get("coverage", 0) if run else 0,
-               "claim_statuses": run.state.get("claim_statuses", {}) if run else {}}
+    state = run.state if run else {}
+    statuses = state.get("claim_statuses", {})
+    # A reviewer may approve evidence after the Agent produced its terminal report.
+    # Recompute the display status without modifying historical checkpoints or
+    # silently re-running a model/tool.
+    if run and task.status in {"completed", "partial", "failed"} and any(
+        claim.get("human_review_required") for claim in state.get("claims", [])
+    ):
+        statuses = {
+            claim["id"]: assess_claim(
+                db, claim, state.get("claim_statuses", {}).get(claim["id"], {}).get("evidence_ids", []),
+                task_id=task_id,
+                retrieval_attempts=state.get("claim_retrieval_counts", {}).get(claim["id"], 0),
+            ) for claim in state["claims"]
+        }
+    current_state = {**state, "claim_statuses": statuses}
+    payload = {"task_id": task_id, "status": task.status, "report": state.get("final_report"),
+               "coverage": calculate_coverage(coverage_items(current_state)) if run and statuses else 0,
+               "claim_statuses": statuses,
+               "coverage_reflects_post_run_reviews": bool(run and statuses != state.get("claim_statuses", {}))}
     return JSONResponse(status_code=200 if payload["report"] else 202, content=jsonable_encoder(payload))
 
 
