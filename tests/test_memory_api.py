@@ -162,13 +162,14 @@ def test_core_fastapi_background_history_trace_report_feedback_upload(db, fake_e
         uploaded_chunk = db.scalar(select(DocumentChunk))
         assert uploaded_chunk is not None
         assert uploaded_chunk.tenant_id is not None and uploaded_chunk.project_id is not None
+        uploaded_tenant_id, uploaded_project_id = uploaded_chunk.tenant_id, uploaded_chunk.project_id
         created = client.post("/api/v1/research", json={"query": "Check fixture deployment", "budget": 4})
         assert created.status_code == 201, created.text
         task_id = created.json()["task_id"]
         assert task_id == created.json()["id"]
         created_task = db.get(ResearchTask, UUID(task_id))
-        assert created_task.tenant_id == uploaded_chunk.tenant_id
-        assert created_task.project_id == uploaded_chunk.project_id
+        assert created_task.tenant_id == uploaded_tenant_id
+        assert created_task.project_id == uploaded_project_id
         task_response = client.get(f"/api/v1/tasks/{task_id}").json()
         run_state = db.get(AgentRun, UUID(task_id)).state
         assert task_response["status"] == "completed", {
