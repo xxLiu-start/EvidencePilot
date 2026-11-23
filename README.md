@@ -1191,3 +1191,16 @@ Change `GRAFANA_ADMIN_PASSWORD` before shared use. Keep `/metrics` restricted to
 
 
 For local OIDC integration testing, an optional Keycloak realm can be started with `docker compose --profile identity up -d keycloak`. The realm includes a development CLI client and placeholder user. This is localhost-only test configuration; rotate all placeholder credentials and do not reuse it in production. See [OIDC Authentication](docs/oidc_authentication.md).
+
+
+### Tenant and project isolation
+
+The API now resolves OIDC identities to database-backed tenants and project memberships. Tenant/project filters are enforced at the SQLAlchemy session boundary, and writes outside the caller's membership are rejected. The Streamlit UI can select a project and sends `X-Project-ID`; the API exposes `/api/v1/auth/me`, `/api/v1/projects`, project membership administration, and `/api/v1/audit/events`.
+
+Provision an OIDC identity using the exact issuer and subject claims:
+
+```bash
+python -m scripts.provision_user --tenant acme --tenant-name "Acme Research" --issuer https://id.example/realms/acme --subject '<sub>' --tenant-role RESEARCHER --project default --project-role RESEARCHER
+```
+
+This is application-level isolation, not PostgreSQL RLS. Cross-tenant penetration tests and database RLS remain required before exposing the system to mutually untrusted organizations. See [Tenant and Project Isolation](docs/tenant_project_isolation.md).
