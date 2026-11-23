@@ -100,3 +100,22 @@ def test_source_authority_registry_handles_non_llm_domains():
     assert source_class(SimpleNamespace(source_type="web", source_url="https://arxiv.org/abs/1234.5678")) == "academic"
     assert source_class(SimpleNamespace(source_type="web", source_url="https://unknown-example.test/article")) == "web"
     assert source_class(SimpleNamespace(source_type="document", source_url=None)) == "internal"
+
+
+
+def test_domain_policy_requires_independent_sources_when_configured():
+    from types import SimpleNamespace
+
+    from app.verification.verifier import source_requirements
+
+    claim = {"id": "C1", "claim": "Compare market share", "required_source": "any",
+             "min_independent_sources": 2}
+    one_source = [SimpleNamespace(id="1", source_type="web", source_url="https://data.example.org/a",
+                                  document_id=None, scope={})]
+    two_sources = [
+        *one_source,
+        SimpleNamespace(id="2", source_type="web", source_url="https://reports.example.net/b",
+                        document_id=None, scope={}),
+    ]
+    assert source_requirements(claim, one_source)["source_requirements_met"] is False
+    assert source_requirements(claim, two_sources)["source_requirements_met"] is True
