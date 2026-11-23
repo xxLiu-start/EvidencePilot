@@ -1,0 +1,18 @@
+# Optional compose override for enterprise OIDC.
+# Invoke from the repository root:
+# docker compose -f docker-compose.yml -f deploy/compose.sso.yml --profile apps up -d --build
+#
+# Create .streamlit/secrets.toml from deploy/streamlit-secrets.toml.example
+# (never commit it). It is excluded from the Docker build context and mounted
+# read-only only at container runtime.
+services:
+  streamlit:
+    environment:
+      STREAMLIT_OIDC_ENABLED: "true"
+    volumes:
+      - type: bind
+        source: ./.streamlit/secrets.toml
+        target: /workspace/.streamlit/secrets.toml
+        read_only: true
+        bind:
+          create_host_path: false
