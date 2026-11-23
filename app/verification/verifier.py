@@ -11,7 +11,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import select
 
 from app.config import settings
-from app.db.models import ClaimRecord, DocumentChunk, EvidenceAssessment, EvidenceRecord, WebContent, WebSource
+from app.db.models import ClaimRecord, DocumentChunk, EvidenceAssessment, EvidenceRecord, HumanReview, WebContent, WebSource
 from app.evidence.coverage import EvidenceStatus
 from app.llm_client import LLMError
 from app.search.cache import digest
@@ -148,6 +148,17 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
     }, sort_keys=True))
     assessment = db.get(EvidenceAssessment, (UUID(str(task_id)), claim["id"], fingerprint)) if task_id else None
     result = assessment.result if assessment else {}
+    # Human approval is persisted as immutable, independently audited decisions.
+    # Never mutate the model's semantic verification result or reuse approval
+    # when the evidence fingerprint changes.
+    review_decisions = []
+    if task_id and assessment and claim.get("human_review_required"):
+        review_decisions = list(db.scalars(select(HumanReview.decision).where(
+            HumanReview.task_id == UUID(str(task_id)),
+            HumanReview.claim_id == claim["id"],
+            HumanReview.fingerprint == fingerprint,
+        )))
+    human_review_approved = "approved" in review_decisions and "rejected" not in review_decisions
     verified = bool(result.get("verified"))
     conflict_check = detect_contradiction(claim, fresh)
     potential_conflict = conflict_check["requires_verification"] and not assessment
@@ -162,7 +173,7 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
         by_id = {str(row.id): row for row in fresh}
         support_rows = [by_id[key] for key in result.get("supporting_evidence_ids", []) if key in by_id]
         support_requirements = source_requirements(claim, support_rows)
-        if claim.get("human_review_required") and not result.get("human_review_approved"):
+        if claim.get("human_review_required") and not human_review_approved:
             status = EvidenceStatus.INSUFFICIENT
         else:
             status = EvidenceStatus.SUPPORTED if support_requirements["source_requirements_met"] else EvidenceStatus.INSUFFICIENT
@@ -179,7 +190,7 @@ def assess_claim(db, claim, evidence_ids, *, task_id=None, retrieval_attempts=0,
             "rag_evidence_count": sum(row.source_type == "document" for row in fresh),
             "verification_attempted": assessment is not None, "can_verify": bool(fresh) and assessment is None,
             "human_review_required": bool(claim.get("human_review_required")),
-            "human_review_approved": bool(result.get("human_review_approved")),
+            "human_review_approved": bool(human_review_approved),
             "verification_error": result.get("error_category"), "fingerprint": fingerprint,
             "verification_status": result.get("status"), **requirements,
             "summary": f"{status.value}: {len(fresh)} fresh, exact excerpts; source requirements "
