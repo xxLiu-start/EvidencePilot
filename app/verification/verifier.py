@@ -18,25 +18,11 @@ from app.search.cache import digest
 from app.verification.contradiction import detect_contradiction
 from app.verification.freshness import evidence_is_fresh
 from app.verification.scope import EvidenceScope, scope_of, normalized
+from app.verification.source_registry import DEFAULT_SOURCE_REGISTRY
 
 
 def source_class(evidence):
-    if evidence.source_type == "document":
-        return "internal"
-    parts = urlsplit(evidence.source_url or "")
-    host = (parts.hostname or "").lower()
-    paths = {"github.com": ("/qwenlm/", "/deepseek-ai/", "/anthropics/", "/vllm-project/", "/pgvector/", "/pydantic/"),
-             "raw.githubusercontent.com": ("/pgvector/", "/pydantic/", "/langchain-ai/"),
-             "huggingface.co": ("/qwen/", "/deepseek-ai/", "/baai/")}
-    if host in paths and parts.path.casefold().startswith(paths[host]):
-        return "official"
-    if host in {"qwen.readthedocs.io", "qwenlm.github.io", "api-docs.deepseek.com", "platform.deepseek.com",
-                "docs.anthropic.com", "platform.claude.com", "docs.vllm.ai", "help.aliyun.com", "fastapi.tiangolo.com",
-                "docs.langchain.com", "www.postgresql.org", "docs.pydantic.dev", "pydantic.dev"}:
-        return "official"
-    if host in {"arxiv.org", "aclanthology.org", "proceedings.neurips.cc"}:
-        return "academic"
-    return "web"
+    return DEFAULT_SOURCE_REGISTRY.classify(evidence.source_type, evidence.source_url)
 
 
 def load_claim_evidence(db, claim, evidence_ids):
