@@ -7,7 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.api import agent, documents, evaluations, evidences, feedback, research, search, tasks, web_research
+from app.api import agent, documents, domains, evaluations, evidences, feedback, research, search, tasks, web_research
 from app.db.schema import initialize_database
 from app.db.session import SessionLocal, engine, get_db
 from app.evaluation.store import import_reports
@@ -35,6 +35,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(research.router, prefix="/api/v1")
+app.include_router(domains.router, prefix="/api/v1")
 app.include_router(tasks.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
 app.include_router(search.router, prefix="/api/v1")
