@@ -30,3 +30,8 @@ The local development identity is not a production authentication mechanism. Pro
 ## Role and queue notes
 
 Write endpoints enforce coarse role dependencies. The local development principal has elevated development roles only while OIDC is disabled and the environment is not production. When OIDC is enabled, roles are read from the token and must be assigned by the IdP. Durable task dispatch is configured separately with `TASK_QUEUE_ENABLED=true`; production startup requires this setting.
+
+
+## Frontend integration status
+
+The Streamlit API client can forward a per-session bearer token from `st.session_state["oidc_access_token"]`. The Streamlit OIDC sign-in/callback flow that obtains and populates this token is not implemented yet. Until that flow is added, OIDC-enabled deployments should use an authenticated API client or a separately integrated frontend; the current Streamlit UI remains suitable for local development with OIDC disabled.
