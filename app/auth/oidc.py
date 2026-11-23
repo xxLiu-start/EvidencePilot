@@ -274,6 +274,8 @@ def get_request_context(
         "selected_project_id": selected_project_id,
         "selected_project_ids": (selected_project_id,) if selected_project_id else project_ids,
     })
+    # Do not let an ORM identity loaded before tenant resolution bypass SQL filters.
+    db.expire_all()
     return context
 
 
