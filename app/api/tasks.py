@@ -79,7 +79,8 @@ def recover_task(task_id: UUID, background_tasks: BackgroundTasks, db: Annotated
     record_audit_event(db, context, action="research_task.recover", resource_type="research_task",
                        resource_id=task_id, project_id=task.project_id)
     db.commit()
-    background_tasks.add_task(execute_background, db.get_bind(), task_id, token)
+    background_tasks.add_task(execute_background, db.get_bind(), task_id, token,
+                                context.tenant_id, task.project_id, context.user_id)
     return {"task_id": task_id, "status": "recovery_scheduled"}
 
 
