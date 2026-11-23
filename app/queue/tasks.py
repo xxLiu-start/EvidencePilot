@@ -1,4 +1,5 @@
 """Idempotent Celery task entry points."""
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,7 +18,7 @@ from app.queue.celery_app import celery_app
     autoretry_for=(SQLAlchemyError, ConnectionError, TimeoutError),
     retry_backoff=True,
     retry_jitter=True,
-    max_retries=5,
+    max_retries=10,
 )
 def execute_research_task(self, task_id: str) -> dict:
     from app.agent.graph import run_agent_task
@@ -33,6 +34,16 @@ def execute_research_task(self, task_id: str) -> dict:
         except AgentConflict:
             db.rollback()
             run = db.get(AgentRun, identifier)
+            if run is not None and run.state.get("status") == "running":
+                lease = run.lease_expires_at
+                now = datetime.now(timezone.utc)
+                if lease is not None and lease.replace(tzinfo=lease.tzinfo or timezone.utc) > now:
+                    raise self.retry(countdown=60, max_retries=10)
+                from app.agent.graph import resume_agent_task
+
+                state = resume_agent_task(db, identifier)
+                return {"task_id": str(identifier), "status": state.get("status", "unknown"),
+                        "recovered": True}
             if run is not None:
-                return {"task_id": str(identifier), "status": run.state.get("status", "running")}
+                return {"task_id": str(identifier), "status": run.state.get("status", "unknown")}
             raise
