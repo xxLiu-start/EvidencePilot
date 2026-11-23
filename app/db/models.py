@@ -15,6 +15,7 @@ class ResearchTask(Base):
         primary_key=True,
         default=uuid.uuid4
     )
+    domain_id: Mapped[str] = mapped_column(String(64), nullable=False, default="general_research")
     query: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[str] = mapped_column(
         String(30),
