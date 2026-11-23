@@ -171,7 +171,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             "pa": project_a_id, "pb": project_b_id})
         connection.execute(text(
             "INSERT INTO agent_runs (task_id, state, updated_at, checkpoint_seq) "
-            "VALUES (:ta, '{}'::json, now(), 0), (:tb, '{\"private\": true}'::json, now())"
+            "VALUES (:ta, '{}'::json, now(), 0), (:tb, '{\"private\": true}'::json, now(), 0)"
         ), {"ta": task_a_id, "tb": task_b_id})
         evidence_hash = __import__("hashlib").sha256(b"tenant A evidence").hexdigest()
         claim_id, evidence_id = uuid4(), uuid4()
