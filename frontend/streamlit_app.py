@@ -16,7 +16,8 @@ from frontend.auth import access_token_from_identity
 st.set_page_config(page_title="EvidencePilot · 证据驱动研究", page_icon="🔎", layout="wide")
 PAGES = {"Research Workspace": "研究工作区", "Document Upload": "文档上传",
          "Agent Trace": "执行轨迹", "Evidence Explorer": "证据浏览器",
-         "Research Report": "研究报告", "Evaluation Dashboard": "评测看板"}
+         "Research Report": "研究报告", "Evaluation Dashboard": "评测看板",
+         "Human Review": "人工审核"}
 TERMINAL = {"completed", "partial", "failed"}
 STATUS = {"queued": "排队中", "running": "研究中", "completed": "已完成", "partial": "证据不足 / 部分完成", "failed": "执行失败"}
 ERRORS = {"timeout": "请求超时。若刚提交了任务或文档，请先查询历史记录，避免重复提交。",
@@ -325,6 +326,45 @@ def evaluations():
         st.json(result, expanded=False)
 
 
+def human_review():
+    st.title("人工审核 · Reviewer")
+    st.caption("审核只适用于要求人工审批的 Claim；审批和拒绝均保留不可变审计记录。")
+    task_id = st.session_state.get("active_task")
+    if not task_id:
+        st.info("请先从研究工作区选择任务。")
+        return
+    report = api().report(task_id)
+    assessments = api().verifications(task_id).get("items", [])
+    statuses = report.get("claim_statuses", {})
+    candidates = [item for item in assessments
+                  if statuses.get(item.get("claim_id"), {}).get("human_review_required")]
+    if not candidates:
+        st.info("该任务没有等待审核的已验证 Claim。")
+        return
+    for item in candidates:
+        claim_id = item["claim_id"]
+        result = item.get("result") or {}
+        with st.expander(f"{claim_id} · {result.get('verdict', result.get('status', 'UNKNOWN'))}", expanded=True):
+            st.caption(f"证据指纹：{item['fingerprint']}")
+            st.write(result.get("reason", "无验证解释"))
+            st.write("当前状态：", statuses.get(claim_id, {}).get("status", "UNKNOWN"))
+            decisions = api().reviews(task_id, claim_id).get("items", [])
+            if decisions:
+                st.write("历史审核", [{"decision": row["decision"], "comment": row["comment"],
+                                      "reviewer": str(row["reviewer_user_id"])}
+                                     for row in decisions])
+            with st.form(f"review-{task_id}-{claim_id}-{item['fingerprint']}"):
+                decision = st.radio("审核结果", ("approved", "rejected"), horizontal=True)
+                comment = st.text_area("审核依据（必填）", max_chars=2000)
+                if st.form_submit_button("提交审核"):
+                    if not comment.strip():
+                        st.error("请填写审核依据。")
+                    else:
+                        api().submit_review(task_id, claim_id, item["fingerprint"], decision, comment.strip())
+                        st.success("审核结果及审计记录已保存。")
+                        st.rerun()
+
+
 def main():
     if os.environ.get("STREAMLIT_OIDC_ENABLED", "false").lower() == "true":
         if not st.user.is_logged_in:
@@ -401,6 +441,7 @@ def main():
             st.title("Research Report")
             if active_task(): current_task("report")
         elif page == "Evaluation Dashboard": evaluations()
+        elif page == "Human Review": human_review()
     except APIError as exc:
         error(exc)
     except ValueError:
