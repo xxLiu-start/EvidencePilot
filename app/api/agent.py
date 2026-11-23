@@ -11,10 +11,12 @@ from app.db.session import get_db
 from app.llm_client import LLMConfigurationError
 
 
+from app.auth.oidc import require_roles
+
 router = APIRouter()
 
 
-@router.post("/tasks/{task_id}/run")
+@router.post("/tasks/{task_id}/run", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def run_task(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
     try:
         state = run_agent_task(db, task_id)
