@@ -185,8 +185,10 @@ def _track_chunk_changes(session, flush_context) -> None:
 
 class ClaimRecord(Base):
     __tablename__ = "claims"
-    __table_args__ = (UniqueConstraint("claim_id", "claim_text"),)
+    __table_args__ = (UniqueConstraint("tenant_id", "project_id", "claim_id", "claim_text", name="uq_claims_tenant_project_claim"),)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=True, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
     claim_id: Mapped[str] = mapped_column(Text, nullable=False)
     claim_text: Mapped[str] = mapped_column(Text, nullable=False)
 
