@@ -69,6 +69,7 @@ def upload_document(
                 db, str(path), filename=filename,
                 source=source.strip() if source is not None else filename,
                 version=version.strip(), chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+                tenant_id=context.tenant_id, project_id=project_id, created_by_user_id=context.user_id,
             )
             record_audit_event(db, context, action="document.upload", resource_type="document",
                                resource_id=document.id, project_id=project_id,
