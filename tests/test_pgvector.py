@@ -287,6 +287,27 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                 assert connection.scalar(text("SELECT count(*) FROM evidences")) == 0
                 assert connection.scalar(text("SELECT count(*) FROM agent_runs")) == 0
 
+        # Independent simultaneous transactions must not contaminate each
+        # other's tenant context even when the engine uses a shared pool.
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Barrier
+        barrier = Barrier(3)
+
+        def concurrent_read(tenant):
+            with postgres.connect() as connection:
+                with connection.begin():
+                    connection.execute(text(f'SET LOCAL ROLE "{role}"'))
+                    connection.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"),
+                                       {"tenant": str(tenant)})
+                    barrier.wait(timeout=10)
+                    return connection.execute(text(
+                        "SELECT query FROM research_tasks ORDER BY query"
+                    )).scalars().all()
+
+        with ThreadPoolExecutor(max_workers=3) as pool:
+            observed = list(pool.map(concurrent_read, (tenant_a_id, tenant_b_id, tenant_a_id)))
+        assert observed == [["tenant-a-secret"], ["tenant-b-secret"], ["tenant-a-secret"]]
+
         with postgres.connect() as connection:
             assert connection.scalar(text("SELECT query FROM research_tasks WHERE id=:id"),
                                      {"id": task_b_id}) == "tenant-b-secret"
