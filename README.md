@@ -1167,3 +1167,14 @@ docker compose --profile apps ps
 ```
 
 Delivery is at-least-once. A crash between broker publish and outbox commit can produce a duplicate message; the worker guards execution using the existing ResearchTask/AgentRun state and task UUID. Late acknowledgements, worker-loss rejection, lease-aware retries, and expired-lease recovery reduce lost work. This is not an exactly-once guarantee. FastAPI BackgroundTasks remains the development fallback when `TASK_QUEUE_ENABLED=false`; production startup rejects that configuration.
+
+
+### Database migrations
+
+An Alembic baseline is now provided in `migrations/versions`. Development can retain the additive startup bootstrap with `DB_AUTO_MIGRATE=true`. Deployment should run:
+
+```bash
+DATABASE_URL='postgresql+psycopg://USER:PASSWORD@HOST:5432/DB' alembic upgrade head
+```
+
+The Compose `migration` service runs this command before the API starts. Production must set `DB_AUTO_MIGRATE=false`; the API checks for an applied Alembic version and refuses to perform schema DDL during startup. The first baseline is non-destructive and intentionally has no destructive downgrade. See [Database Migrations](docs/database_migrations.md).
