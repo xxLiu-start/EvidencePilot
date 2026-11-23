@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, event, false, or_
+from sqlalchemy import create_engine, event, false, or_, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session, with_loader_criteria
 
 from app.config import settings
@@ -11,6 +11,28 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 class Base(DeclarativeBase):
     pass
+
+
+@event.listens_for(Session, "after_begin")
+def _set_postgres_rls_context(session, transaction, connection):
+    """Bind the authenticated tenant to each PostgreSQL transaction."""
+    if connection.dialect.name != "postgresql":
+        return
+    tenant_id = session.info.get("tenant_id")
+    connection.execute(
+        text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+        {"tenant_id": str(tenant_id) if tenant_id is not None else ""},
+    )
+
+
+def apply_rls_context(session: Session, tenant_id) -> None:
+    """Apply tenant context to an already-open transaction after membership resolution."""
+    if session.get_bind().dialect.name != "postgresql":
+        return
+    session.execute(
+        text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+        {"tenant_id": str(tenant_id)},
+    )
 
 
 @event.listens_for(Session, "do_orm_execute")
