@@ -67,7 +67,7 @@ services:
     command: ["alembic", "upgrade", "head"]
     restart: "no"
     environment:
-      DATABASE_URL: ${COMPOSE_APP_DATABASE_URL:-postgresql+psycopg://evidencepilot_app:${POSTGRES_APP_PASSWORD:-change_this_app_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       DB_AUTO_MIGRATE: "false"
     depends_on:
       postgres:
@@ -93,7 +93,7 @@ services:
     volumes:
       - ./deploy/postgres/grant_runtime.sql:/bootstrap/grant_runtime.sql:ro
     depends_on:
-      db-grants:
+      migration:
         condition: service_completed_successfully
 
   api:
@@ -179,7 +179,7 @@ services:
     command: ["celery", "-A", "app.queue.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=${WORKER_CONCURRENCY:-2}"]
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${COMPOSE_DISPATCHER_DATABASE_URL:-postgresql+psycopg://evidencepilot_dispatcher:${POSTGRES_DISPATCHER_PASSWORD:-change_this_dispatcher_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_APP_DATABASE_URL:-postgresql+psycopg://evidencepilot_app:${POSTGRES_APP_PASSWORD:-change_this_app_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
       REDIS_URL: redis://redis:6379/0
       TASK_QUEUE_ENABLED: "true"
@@ -225,7 +225,7 @@ services:
     command: ["python", "-m", "app.queue.dispatcher"]
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_DISPATCHER_DATABASE_URL:-postgresql+psycopg://evidencepilot_dispatcher:${POSTGRES_DISPATCHER_PASSWORD:-change_this_dispatcher_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       REDIS_URL: redis://redis:6379/0
       TASK_QUEUE_ENABLED: "true"
       TASK_QUEUE_DISPATCH_INTERVAL_SECONDS: ${TASK_QUEUE_DISPATCH_INTERVAL_SECONDS:-1}
