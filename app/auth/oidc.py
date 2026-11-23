@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import (DocumentChunk, DocumentRecord, EvidenceRecord, EvaluationResult, Project,
                            ProjectMembership, ResearchTask, TaskFeedback, Tenant, TenantMembership, User)
-from app.db.session import get_db
+from app.db.session import apply_rls_context, get_db
 
 from app.config import settings
 
@@ -284,6 +284,9 @@ def get_request_context(
         "selected_project_id": selected_project_id,
         "selected_project_ids": (selected_project_id,) if selected_project_id else project_ids,
     })
+    # The membership lookup began before the tenant was known. Set the
+    # transaction-local PostgreSQL RLS variable immediately for subsequent SQL.
+    apply_rls_context(db, tenant.id)
     # Do not let an ORM identity loaded before tenant resolution bypass SQL filters.
     db.expunge_all()
     return context
