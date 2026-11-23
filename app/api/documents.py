@@ -13,6 +13,8 @@ from pypdf.errors import PdfReadError
 from sqlalchemy.orm import Session
 
 from app.api.schemas import ChunkResponse, DocumentResponse
+from app.config import settings
+from pypdf import PdfReader
 from app.db.models import DocumentChunk, DocumentRecord
 from app.db.repository import ingest_document, list_document_chunks
 from app.db.session import get_db
@@ -42,13 +44,24 @@ def upload_document(
         raise HTTPException(status_code=415, detail="Supported file types: .pdf, .docx, .md, .txt")
     if chunk_overlap >= chunk_size:
         raise HTTPException(status_code=422, detail="chunk_overlap must be less than chunk_size")
+    if chunk_size > settings.document_max_chunk_size:
+        raise HTTPException(status_code=422, detail="chunk_size exceeds configured maximum")
     if not version.strip() or (source is not None and not source.strip()):
         raise HTTPException(status_code=422, detail="source and version must be non-empty")
     try:
         with TemporaryDirectory(prefix="evidencepilot-upload-") as directory:
             path = Path(directory) / ("document" + suffix)
+            total_bytes = 0
             with path.open("wb") as destination:
-                shutil.copyfileobj(file.file, destination)
+                while block := file.file.read(1024 * 1024):
+                    total_bytes += len(block)
+                    if total_bytes > settings.document_max_upload_bytes:
+                        raise HTTPException(status_code=413, detail="Uploaded document exceeds configured size limit")
+                    destination.write(block)
+            if total_bytes == 0:
+                raise HTTPException(status_code=422, detail="Uploaded document is empty")
+            if suffix == ".pdf" and len(PdfReader(str(path)).pages) > settings.document_max_pages:
+                raise HTTPException(status_code=413, detail="PDF exceeds configured page limit")
             return ingest_document(
                 db, str(path), filename=filename,
                 source=source.strip() if source is not None else filename,
