@@ -21,6 +21,7 @@ from app.agent.policy import ACTION_TO_TOOL, Action, ActionProposal, PolicyDecis
 from app.agent.state import AgentState, initial_state
 from app.agent.tools import ToolContext, ToolDeadline, ToolRegistry, ToolResult
 from app.config import settings
+from app.domains.profiles import get_domain_profile
 from app.db.models import AgentAllowedSource, AgentPolicyDecision, AgentRun, AgentStep, ClaimRecord, EvidenceRecord, ResearchTask, ToolExecutionReceipt, WebSource
 from app.evidence.coverage import PRIORITY_WEIGHTS, calculate_coverage, coverage_items, is_covered
 from app.llm_client import LLMError, get_llm_client
@@ -47,7 +48,8 @@ class AgentRuntime:
 
     def planner(self, state):
         try:
-            plan, repaired, _ = decompose_claims(state["user_query"], client=self.client)
+            profile = get_domain_profile(state.get("domain_id", "general_research"))
+            plan, repaired, _ = decompose_claims(state["user_query"], client=self.client, profile=profile)
             claims = [{**claim.model_dump(mode="json"), "weight": PRIORITY_WEIGHTS[claim.priority.value]} for claim in plan.claims]
             for claim in claims:
                 record = self.db.scalar(select(ClaimRecord).where(
@@ -285,7 +287,7 @@ class AgentRuntime:
     def reporter(self, state):
         status = "failed" if state["status"] == "failed" else (
             "completed" if state["termination_action"] == "STOP" and all(is_covered(item) for item in coverage_items(state)) else "partial")
-        lines = [f"研究问题：{state['user_query']}", f"状态：{status}；工具调用：{state['round_count']}；剩余预算：{state['remaining_budget']}。",
+        lines = [f"研究领域：{state.get('domain_id', 'general_research')}", f"研究问题：{state['user_query']}", f"状态：{status}；工具调用：{state['round_count']}；剩余预算：{state['remaining_budget']}。",
                  f"终止动作：{state['termination_action'] or 'ABSTAIN'}；加权 Coverage：{state['coverage']:.1%}。",
                  "只有显式验证通过且满足来源和时效要求的 Claim 才标为 SUPPORTED；未覆盖部分弃答，不给出确定结论。"]
         for claim in state["claims"]:
@@ -338,7 +340,8 @@ def run_agent_task(db, task_id, *, client=None, registry=None, config=settings, 
     if changed != 1:
         db.rollback()
         raise AgentConflict("Only a queued task can be started")
-    state = initial_state(task_id, task.query, min(task.budget, config.agent_max_steps), config)
+    state = initial_state(task_id, task.query, min(task.budget, config.agent_max_steps), config,
+                          domain_id=getattr(task, "domain_id", "general_research"))
     token = uuid4().hex
     db.add(AgentRun(task_id=task_id, state=state, updated_at=datetime.now(timezone.utc),
                     owner_token=token, lease_expires_at=lease_deadline(config)))
@@ -377,7 +380,8 @@ def resume_agent_task(db, task_id, *, client=None, registry=None, config=setting
     checkpoint = latest_snapshot(db, task_id)
     if checkpoint is None or checkpoint.next_node == "END":
         raise AgentConflict("No unfinished checkpoint")
-    state = {**initial_state(task_id, run.state["user_query"], run.state["remaining_budget"], config),
+    state = {**initial_state(task_id, run.state["user_query"], run.state["remaining_budget"], config,
+                              domain_id=run.state.get("domain_id", "general_research")),
              **json.loads(json.dumps(checkpoint.state))}
     state.update(status="running", stop_reason=None, termination_action=None, final_report=None,
                  recovery_node=None, recovery_count=state.get("recovery_count", 0) + 1)
