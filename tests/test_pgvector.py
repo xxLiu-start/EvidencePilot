@@ -170,7 +170,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         ), {"ta": task_a_id, "tb": task_b_id, "a": tenant_a_id, "b": tenant_b_id,
             "pa": project_a_id, "pb": project_b_id})
         connection.execute(text(
-            "INSERT INTO agent_runs (task_id, state, updated_at) "
+            "INSERT INTO agent_runs (task_id, state, updated_at, checkpoint_seq) "
             "VALUES (:ta, '{}'::json, now()), (:tb, '{\"private\": true}'::json, now())"
         ), {"ta": task_a_id, "tb": task_b_id})
         connection.execute(text("ALTER TABLE research_tasks ENABLE ROW LEVEL SECURITY"))
