@@ -140,6 +140,8 @@ def test_fastapi_read_routes_apply_tenant_and_project_context(tenant_db):
     from app.main import app
 
     db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, task_a1, task_a2, task_b1 = tenant_db
+    task_a2_id, task_b1_id = task_a2.id, task_b1.id
+    project_a1_id = project_a1.id
     principal = Principal(
         subject="user-a",
         issuer="https://id.example/realm",
@@ -158,10 +160,10 @@ def test_fastapi_read_routes_apply_tenant_and_project_context(tenant_db):
         response = client.get("/api/v1/tasks")
         assert response.status_code == 200, response.text
         assert {item["query"] for item in response.json()["items"]} == {"Tenant A project one"}
-        assert client.get(f"/api/v1/tasks/{task_b1.id}").status_code == 404
-        assert client.get(f"/api/v1/tasks/{task_a2.id}").status_code == 404
+        assert client.get(f"/api/v1/tasks/{task_b1_id}").status_code == 404
+        assert client.get(f"/api/v1/tasks/{task_a2_id}").status_code == 404
 
-        selected = client.get("/api/v1/tasks", headers={"X-Project-ID": str(project_a1.id)})
+        selected = client.get("/api/v1/tasks", headers={"X-Project-ID": str(project_a1_id)})
         assert selected.status_code == 200
         assert [item["query"] for item in selected.json()["items"]] == ["Tenant A project one"]
     finally:
