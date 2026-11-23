@@ -14,6 +14,7 @@ from app.db.session import SessionLocal, engine, get_db
 from app.evaluation.store import import_reports
 from app.retrieval.bm25 import get_bm25_store
 from app.llm_client import get_llm_client
+from app.config import settings
 
 
 @asynccontextmanager
@@ -35,6 +36,9 @@ app = FastAPI(
     title="EvidencePilot API",
     version="0.1.0",
     lifespan=lifespan,
+    docs_url=None if settings.environment == "production" else "/docs",
+    redoc_url=None if settings.environment == "production" else "/redoc",
+    openapi_url=None if settings.environment == "production" else "/openapi.json",
 )
 app.include_router(research.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 app.include_router(domains.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
