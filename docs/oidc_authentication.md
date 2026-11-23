@@ -1,71 +1,69 @@
-# OIDC Authentication
+# OIDC Authentication and Authorization
 
-EvidencePilot now has a standard OIDC JWT verification boundary in `app/auth/oidc.py`.
+EvidencePilot validates OIDC access tokens and then resolves the identity against persisted database memberships. A valid token alone does not grant access to a tenant or project.
 
 ## Configuration
 
-Development defaults to a local development principal so existing single-user local workflows continue to work. To enable OIDC:
-
 ```dotenv
-ENVIRONMENT=development
+ENVIRONMENT=production
 AUTH_ENABLED=true
 OIDC_ISSUER=https://identity.example.com/realms/evidencepilot
 OIDC_AUDIENCE=evidencepilot-api
 OIDC_JWKS_URL=https://identity.example.com/realms/evidencepilot/protocol/openid-connect/certs
+DB_AUTO_MIGRATE=false
 ```
 
-Production startup fails if authentication is disabled or the OIDC configuration is incomplete. Production JWKS URLs must use HTTPS.
+The verifier allows RS256 and ES256, checks the JWKS signature, issuer, audience, expiry, issued-at, subject, and required claims. Production issuer and JWKS endpoints must use HTTPS.
 
-The verifier checks an allowlisted asymmetric algorithm (RS256 or ES256), signature using the provider's JWKS, issuer, audience, expiry, issued-at, and required subject claims. JWKS clients cache signing keys. Role extraction accepts a top-level `roles` array or Keycloak-style `realm_access.roles`.
+## Database-backed membership is authoritative
 
-Write operations have role dependencies for the RESEARCHER, REVIEWER, PROJECT_MANAGER, TENANT_ADMIN, and SUPER_ADMIN role families. Role claims must be mapped by the identity provider; a valid token without the required role receives HTTP 403.
+The API resolves the `(issuer, subject)` pair to a provisioned `users` row, then checks:
 
-## Important deployment boundary
+1. An active `tenant_memberships` row.
+2. An active tenant.
+3. An active project membership, unless the tenant membership role is `TENANT_ADMIN` or `SUPER_ADMIN`.
 
-This change implements authentication and coarse role gates only. It does **not** yet implement database-backed Tenant/Project membership, row-level security, or object-level ownership checks for every task, document, evidence, and search result. Therefore, do not expose an OIDC-enabled instance to multiple mutually untrusted tenants until the separate tenant-isolation work is complete.
+OIDC role claims are not used as authorization grants. Tenant and project roles are read from the database. A user who is not provisioned, has no active tenant membership, or has no project membership receives HTTP 403.
 
-The local development identity is not a production authentication mechanism. Production must set `ENVIRONMENT=production` and `AUTH_ENABLED=true`, then configure the real IdP and roles.
+When a token contains `tenant_id`, it must match a tenant's configured `external_id` and the user must have a membership in that tenant. Without that claim, the user must belong to exactly one active tenant. Multi-tenant users select a tenant through an IdP-issued tenant claim; the API does not trust an arbitrary request parameter for tenant selection.
 
+Every API request receives tenant/project filters at the SQLAlchemy session boundary. The `X-Project-ID` header narrows access to one project. Without it, reads are limited to all projects the user belongs to; create operations require an explicit project when the user has more than one project. Cross-tenant and non-member project writes are rejected.
 
-## Role and queue notes
+## Provision a user
 
-Write endpoints enforce coarse role dependencies. The local development principal has elevated development roles only while OIDC is disabled and the environment is not production. When OIDC is enabled, roles are read from the token and must be assigned by the IdP. Durable task dispatch is configured separately with `TASK_QUEUE_ENABLED=true`; production startup requires this setting.
+After the user has been created in the IdP, provision the exact issuer and `sub` claim into EvidencePilot. Do not use email as the identity key.
 
+```bash
+python -m scripts.provision_user \
+  --tenant acme \
+  --tenant-name "Acme Research" \
+  --external-tenant-id acme \
+  --issuer https://identity.example.com/realms/acme \
+  --subject '<exact-sub-claim>' \
+  --email researcher@acme.example \
+  --tenant-role RESEARCHER \
+  --project default \
+  --project-role RESEARCHER
+```
 
-## Frontend integration status
+Tenant administrators can create projects with `POST /api/v1/projects` and assign existing tenant members with `POST /api/v1/projects/{project_id}/members`. The `GET /api/v1/auth/me` endpoint returns the current user's tenant, roles, and accessible projects. Project administration is also available through the API, not by trusting role claims in the token.
 
-The Streamlit API client can forward a per-session bearer token from `st.session_state["oidc_access_token"]`. The Streamlit OIDC sign-in/callback flow that obtains and populates this token is not implemented yet. Until that flow is added, OIDC-enabled deployments should use an authenticated API client or a separately integrated frontend; the current Streamlit UI remains suitable for local development with OIDC disabled.
+Audit events are available to tenant/project administrators at `GET /api/v1/audit/events`.
 
+## Streamlit frontend
+
+The Streamlit API client forwards a per-session bearer token and the selected `X-Project-ID`. The UI includes project selection. The OIDC browser sign-in/callback flow that obtains and populates `st.session_state["oidc_access_token"]` is not implemented yet. Until that flow is integrated, use a separately authenticated frontend/API client for OIDC-enabled deployments.
 
 ## Local Keycloak development provider
 
-The optional Compose `identity` profile imports a development-only realm:
+A localhost-only development realm can be started with:
 
 ```bash
 docker compose --profile identity up -d keycloak
 ```
 
-For an API running on the host/Conda environment, configure:
+For a host-run API, set the issuer and JWKS URLs to the local Keycloak realm. Obtain a development token with the imported CLI client, then provision its exact `sub` using `scripts/provision_user.py`. The imported account and password grant are for local smoke tests only. Rotate placeholder credentials and never expose the Keycloak development service publicly or reuse this realm in production.
 
-```dotenv
-AUTH_ENABLED=true
-OIDC_ISSUER=http://127.0.0.1:8080/realms/evidencepilot
-OIDC_AUDIENCE=evidencepilot-api
-OIDC_JWKS_URL=http://127.0.0.1:8080/realms/evidencepilot/protocol/openid-connect/certs
-```
+## Remaining security boundary
 
-The imported realm contains a development CLI client with direct-access grants and a placeholder developer account. These settings are for localhost testing only. Change both the Keycloak administrator password and developer password immediately, never expose the Keycloak port publicly, and never reuse this realm configuration in production. The API's Streamlit login/token acquisition flow remains a separate pending integration.
-
-
-For a local API smoke test, the development CLI client can request an access token (do not use this password-grant pattern in production):
-
-```bash
-curl -sS -X POST http://127.0.0.1:8080/realms/evidencepilot/protocol/openid-connect/token \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'grant_type=password' \
-  -d 'client_id=evidencepilot-cli' \
-  -d 'username=developer' \
-  -d 'password=change_me_before_use'
-```
-
-Pass the returned `access_token` as `Authorization: Bearer <token>` to the FastAPI endpoints. The placeholder account is a local smoke-test identity only; rotate it before use and never expose the Keycloak development service publicly.
+The current implementation provides application-level tenant/project isolation for ORM queries and writes. It is not yet PostgreSQL row-level security, and it does not replace upstream ACL enforcement in future SharePoint/Confluence/GitHub connectors. Before production use with mutually untrusted organizations, add and verify database RLS as defense in depth, audit every API/service path, and run cross-tenant penetration tests. Do not treat an arbitrary custom connector's `access_context` parameter as proof of upstream authorization.
