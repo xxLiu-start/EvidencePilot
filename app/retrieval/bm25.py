@@ -71,24 +71,29 @@ def bm25_retrieve(index, chunks, query, top_k=10):
 class BM25Store:
     def __init__(self):
         self._lock = Lock()
-        self._revision = None
-        self._chunks = ()
-        self._index = None
+        self._snapshots = {}
 
     def _snapshot(self, db: Session, force: bool = False):
+        tenant_id = getattr(db, "info", {}).get("tenant_id")
+        project_ids = getattr(db, "info", {}).get("selected_project_ids") or getattr(db, "info", {}).get("project_ids") or ()
+        scope_key = (str(tenant_id) if tenant_id is not None else None,
+                     tuple(sorted(str(value) for value in project_ids)))
         with self._lock:
             revision = db.scalar(select(RetrievalIndexRevision.revision).where(
                 RetrievalIndexRevision.id == 1
             )) or 0
-            if force or self._revision != revision:
+            cached = self._snapshots.get(scope_key)
+            if force or cached is None or cached[0] != revision:
                 columns = [column for column in DocumentChunk.__table__.columns if column.name != "embedding"]
                 dimension = case((DocumentChunk.embedding.is_not(None), 1024), else_=None)
                 rows = db.execute(select(*columns, dimension.label("embedding_dimensions")).order_by(DocumentChunk.id))
                 chunks = tuple(ChunkSnapshot(**row._mapping) for row in rows)
                 index = build_bm25_index(chunks)
-                # Publish an immutable snapshot only after a successful rebuild.
-                self._chunks, self._index, self._revision = chunks, index, revision
-            return self._index, self._chunks
+                # A snapshot belongs to exactly one authorization scope. Never
+                # reuse Tenant A's corpus as Tenant B's lexical index.
+                self._snapshots[scope_key] = (revision, index, chunks)
+            _, index, chunks = self._snapshots[scope_key]
+            return index, chunks
 
     def rebuild(self, db: Session) -> int:
         _, chunks = self._snapshot(db, force=True)
