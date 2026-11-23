@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     auth_enabled: bool = False
     db_auto_migrate: bool = True
+    metrics_enabled: bool = True
     task_queue_enabled: bool = False
     redis_url: str = "redis://127.0.0.1:6379/0"
     task_queue_dispatch_interval_seconds: float = Field(default=1.0, gt=0, le=30)
