@@ -196,3 +196,35 @@ def test_project_roles_do_not_leak_between_projects(tenant_db):
     with pytest.raises(HTTPException) as denied_project_b:
         require_roles("RESEARCHER")(context_a2)
     assert denied_project_b.value.status_code == 403
+
+
+
+def test_background_worker_keeps_task_derived_scope_and_denies_cross_tenant(tenant_db, monkeypatch):
+    from app.agent.background import execute_background
+    import app.agent.background as background
+
+    db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, task_a1, task_a2, task_b1 = tenant_db
+    tenant_id, project_id, user_id = tenant_a.id, project_a1.id, user_a.id
+    allowed_task_id, foreign_task_id = task_a1.id, task_b1.id
+    engine = db.get_bind()
+    called = []
+
+    def verify_scope(worker_db, task_id):
+        assert worker_db.info["tenant_id"] == tenant_id
+        assert worker_db.info["selected_project_id"] == project_id
+        assert worker_db.info["user_id"] == user_id
+        assert [row.id for row in worker_db.scalars(select(ResearchTask))] == [allowed_task_id]
+        called.append(task_id)
+        return {"status": "completed"}
+
+    monkeypatch.setattr(background, "run_agent_task", verify_scope)
+
+    # A forged/mismatched task ID cannot escape the tenant context.
+    execute_background(engine, foreign_task_id, None, tenant_id, project_id, user_id)
+    assert not called
+
+    execute_background(engine, allowed_task_id, None, tenant_id, project_id, user_id)
+    assert called == [allowed_task_id]
+    # A background worker never mutates an inaccessible foreign task.
+    db.expire_all()
+    assert db.get(ResearchTask, foreign_task_id).status == "queued"
