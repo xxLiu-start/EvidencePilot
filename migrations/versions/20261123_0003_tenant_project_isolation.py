@@ -77,6 +77,9 @@ def upgrade() -> None:
     tenant_id, project_id = _seed_legacy_tenant_and_project(bind)
     uuid_type = _column_type(bind)
 
+    tenant_value = tenant_id if bind.dialect.name == "postgresql" else tenant_id.hex
+    project_value = project_id if bind.dialect.name == "postgresql" else project_id.hex
+
     for table, extra_columns in OWNED_TABLES.items():
         _ensure_column(table, "tenant_id", uuid_type)
         _ensure_column(table, "project_id", uuid_type)
@@ -85,10 +88,10 @@ def upgrade() -> None:
 
         bind.execute(sa.text(
             f"UPDATE {table} SET tenant_id = :tenant_id WHERE tenant_id IS NULL"
-        ), {"tenant_id": tenant_id})
+        ), {"tenant_id": tenant_value})
         bind.execute(sa.text(
             f"UPDATE {table} SET project_id = :project_id WHERE project_id IS NULL"
-        ), {"project_id": project_id})
+        ), {"project_id": project_value})
 
         for column in ("tenant_id", "project_id"):
             index_name = f"ix_{table}_{column}"
