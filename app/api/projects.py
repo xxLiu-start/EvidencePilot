@@ -30,8 +30,8 @@ class ProjectMemberCreate(BaseModel):
 
 @router.get("/auth/me")
 def current_membership(
+    db: Annotated[Session, Depends(get_db)],
     context: RequestContext = Depends(get_request_context),
-    db: Annotated[Session, Depends(get_db)] = None,
 ):
     projects = list(db.scalars(select(Project).where(Project.id.in_(context.project_ids)).order_by(Project.slug)))
     return {
@@ -49,8 +49,8 @@ def current_membership(
 
 @router.get("/projects")
 def list_projects(
+    db: Annotated[Session, Depends(get_db)],
     context: RequestContext = Depends(get_request_context),
-    db: Annotated[Session, Depends(get_db)] = None,
 ):
     rows = db.scalars(select(Project).where(Project.id.in_(context.project_ids)).order_by(Project.slug))
     return {"items": [{"id": item.id, "slug": item.slug, "name": item.name} for item in rows]}
