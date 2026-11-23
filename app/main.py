@@ -20,6 +20,8 @@ from app.config import settings
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     validate_auth_configuration()
+    if settings.environment == "production" and not settings.task_queue_enabled:
+        raise RuntimeError("TASK_QUEUE_ENABLED must be true in production; use the durable outbox dispatcher and Celery workers")
     reasoning = get_llm_client()
     _app.state.llm_client = reasoning
     try:
