@@ -17,6 +17,7 @@ This document records what is implemented in the current upgrade increment and w
 - Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, PostgreSQL tenant filtering/column allowlists, source classification, corroboration policy, OIDC token verification, role checks, task outbox dispatch, and Alembic baseline migration.
 - Added a Redis/Celery task path with transactional outbox, polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Delivery is at-least-once.
 - Added an Alembic non-destructive baseline and a Compose migration service. Production can disable startup DDL and require an applied Alembic version.
+- Added basic Prometheus HTTP/LLM metrics, an internal `/metrics` endpoint, and Compose Prometheus/Grafana services.
 - Added a GitHub Actions workflow that compiles Python modules, validates Compose YAML, applies the Alembic baseline to PostgreSQL, and runs pytest.
 
 ## Not implemented yet
@@ -27,7 +28,7 @@ This document records what is implemented in the current upgrade increment and w
 - Streamlit OIDC sign-in/callback flow to obtain and populate the per-session access token; APIClient bearer forwarding is implemented, but token acquisition is not.
 - S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
-- OpenTelemetry, Prometheus and Grafana.
+- OpenTelemetry distributed tracing, alert rules, log aggregation and queue/worker SLO dashboards; basic Prometheus metrics and Grafana datasource provisioning are implemented.
 - Multi-domain manually reviewed benchmark and multi-seed evaluation.
 - Queue cancellation, priority scheduling, queue backlog monitoring and full multi-worker chaos acceptance.
 - Production load, chaos, backup/restore and security penetration testing.
