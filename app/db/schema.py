@@ -2,6 +2,7 @@
 
 from sqlalchemy import Engine, inspect, select, text
 from sqlalchemy import Uuid
+import uuid
 
 from app.db.session import Base
 from app.retrieval.embedding import BGE_M3_DIMENSIONS
@@ -62,7 +63,7 @@ def initialize_database(engine: Engine) -> None:
 
         tenant_id = connection.execute(select(Tenant.id).where(Tenant.slug == "legacy-default")).scalar_one_or_none()
         if tenant_id is None:
-            tenant = Tenant(slug="legacy-default", name="Legacy Default Tenant", is_active=True)
+            tenant = Tenant(id=uuid.uuid4(), slug="legacy-default", name="Legacy Default Tenant", is_active=True)
             connection.execute(Tenant.__table__.insert().values(
                 id=tenant.id, slug=tenant.slug, name=tenant.name, external_id=None, is_active=True
             ))
@@ -71,7 +72,7 @@ def initialize_database(engine: Engine) -> None:
             Project.tenant_id == tenant_id, Project.slug == "default"
         )).scalar_one_or_none()
         if project_id is None:
-            project = Project(tenant_id=tenant_id, slug="default", name="Default Legacy Project", is_active=True)
+            project = Project(id=uuid.uuid4(), tenant_id=tenant_id, slug="default", name="Default Legacy Project", is_active=True)
             connection.execute(Project.__table__.insert().values(
                 id=project.id, tenant_id=tenant_id, slug=project.slug, name=project.name, is_active=True
             ))
@@ -80,9 +81,10 @@ def initialize_database(engine: Engine) -> None:
         for table_name in ("research_tasks", "documents", "document_chunks", "evidences",
                            "task_feedback", "evaluation_results"):
             table = Base.metadata.tables[table_name]
-            connection.execute(table.update().where(table.c.tenant_id.is_(None)).values(
-                tenant_id=tenant_id, project_id=project_id
-            ))
+            connection.execute(table.update().where(table.c.tenant_id.is_(None)).values(tenant_id=tenant_id))
+            connection.execute(table.update().where(
+                table.c.tenant_id == tenant_id, table.c.project_id.is_(None)
+            ).values(project_id=project_id))
 
         if postgres:
             connection.execute(text(
