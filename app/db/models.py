@@ -89,8 +89,8 @@ class ResearchTask(Base):
         primary_key=True,
         default=uuid.uuid4
     )
-    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False, index=True)
-    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=False, index=True)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=True, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
     created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     domain_id: Mapped[str] = mapped_column(String(64), nullable=False, default="general_research")
     query: Mapped[str] = mapped_column(Text, nullable=False)
