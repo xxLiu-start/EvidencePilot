@@ -166,13 +166,29 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         connection.execute(text(
             "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id, created_at) "
             "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research', now()), "
-            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now())"
+            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now(), 0)"
         ), {"ta": task_a_id, "tb": task_b_id, "a": tenant_a_id, "b": tenant_b_id,
             "pa": project_a_id, "pb": project_b_id})
         connection.execute(text(
             "INSERT INTO agent_runs (task_id, state, updated_at, checkpoint_seq) "
-            "VALUES (:ta, '{}'::json, now()), (:tb, '{\"private\": true}'::json, now())"
+            "VALUES (:ta, '{}'::json, now(), 0), (:tb, '{\"private\": true}'::json, now())"
         ), {"ta": task_a_id, "tb": task_b_id})
+        evidence_hash = __import__("hashlib").sha256(b"tenant A evidence").hexdigest()
+        claim_id, evidence_id = uuid4(), uuid4()
+        connection.execute(text(
+            "INSERT INTO claims (id, claim_id, claim_text) VALUES (:id, 'C1', 'Tenant A private claim')"
+        ), {"id": claim_id})
+        connection.execute(text(
+            "INSERT INTO web_contents (content_hash, body, cache_path) "
+            "VALUES (:hash, 'tenant A evidence', '')"
+        ), {"hash": evidence_hash})
+        connection.execute(text(
+            "INSERT INTO evidences (id, tenant_id, project_id, claim_record_id, source_type, "
+            "content_hash, retrieved_at, supporting_text, relation, scope, quote_start, quote_end) "
+            "VALUES (:id, :tenant, :project, :claim, 'document', :hash, now(), "
+            "'tenant A evidence', 'context', '{}'::json, 0, 18)"
+        ), {"id": evidence_id, "tenant": tenant_a_id, "project": project_a_id,
+            "claim": claim_id, "hash": evidence_hash})
         connection.execute(text("ALTER TABLE research_tasks ENABLE ROW LEVEL SECURITY"))
         connection.execute(text("ALTER TABLE research_tasks FORCE ROW LEVEL SECURITY"))
         connection.execute(text("DROP POLICY IF EXISTS research_tasks_tenant_isolation ON research_tasks"))
@@ -184,6 +200,14 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         connection.execute(text(f'CREATE ROLE "{role}" NOLOGIN'))
         schema_name = connection.scalar(text("SELECT current_schema()"))
         connection.execute(text(f'GRANT USAGE ON SCHEMA "{schema_name}" TO "{role}"'))
+        connection.execute(text("ALTER TABLE evidences ENABLE ROW LEVEL SECURITY"))
+        connection.execute(text("ALTER TABLE evidences FORCE ROW LEVEL SECURITY"))
+        connection.execute(text(
+            "CREATE POLICY evidences_tenant_isolation ON evidences "
+            "USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) "
+            "WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)"
+        ))
+        connection.execute(text(f'GRANT SELECT ON evidences TO "{role}"'))
         connection.execute(text("ALTER TABLE agent_runs ENABLE ROW LEVEL SECURITY"))
         connection.execute(text("ALTER TABLE agent_runs FORCE ROW LEVEL SECURITY"))
         connection.execute(text(
@@ -207,6 +231,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                 )).scalars().all()
                 assert visible == ["tenant-a-secret"]
                 assert connection.execute(text("SELECT COUNT(*) FROM agent_runs")).scalar_one() == 1
+                assert connection.execute(text("SELECT supporting_text FROM evidences")).scalars().all() == ["tenant A evidence"]
                 connection.execute(text("SELECT set_config('app.tenant_id', '', true)"))
                 assert connection.execute(text("SELECT COUNT(*) FROM research_tasks")).scalar_one() == 0
 
