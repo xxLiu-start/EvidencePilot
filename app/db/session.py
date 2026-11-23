@@ -109,6 +109,32 @@ def _enforce_tenant_project_writes(db, flush_context, instances):
             setattr(obj, "created_by_user_id", user_id)
 
 
+
+def validate_postgres_rls_runtime(engine) -> None:
+    """Fail production startup if the runtime DB role can bypass tenant RLS."""
+    if engine.dialect.name != "postgresql":
+        raise RuntimeError("Production requires PostgreSQL with tenant RLS")
+    required = (
+        "audit_events", "research_tasks", "documents", "document_chunks",
+        "evidences", "task_feedback", "evaluation_results",
+    )
+    with engine.connect() as connection:
+        role = connection.execute(text(
+            "SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user"
+        )).one()
+        if role.rolsuper or role.rolbypassrls:
+            raise RuntimeError("Production database role must not be SUPERUSER or BYPASSRLS")
+        rows = connection.execute(text(
+            "SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity "
+            "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE n.nspname = current_schema() AND c.relname = ANY(:tables)"
+        ), {"tables": list(required)}).all()
+        status = {row.relname: (row.relrowsecurity, row.relforcerowsecurity) for row in rows}
+        missing = [name for name in required if status.get(name) != (True, True)]
+        if missing:
+            raise RuntimeError("Tenant RLS is not enabled and forced for: " + ", ".join(missing))
+
+
 def get_db():
     db = SessionLocal()
     try:
