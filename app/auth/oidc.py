@@ -175,9 +175,10 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
     # Development databases and test fixtures may predate the Alembic ownership
     # migration. Attach only unowned legacy rows to the local development scope.
     for model in (ResearchTask, DocumentRecord, DocumentChunk, EvidenceRecord, TaskFeedback, EvaluationResult):
-        db.execute(update(model).where(model.tenant_id.is_(None)).values(
-            tenant_id=tenant.id, project_id=project.id
-        ))
+        db.execute(update(model).where(model.tenant_id.is_(None)).values(tenant_id=tenant.id))
+        db.execute(update(model).where(
+            model.tenant_id == tenant.id, model.project_id.is_(None)
+        ).values(project_id=project.id))
     db.commit()
     db.refresh(user)
     db.refresh(tenant)
