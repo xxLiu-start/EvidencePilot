@@ -159,14 +159,22 @@ def test_core_fastapi_background_history_trace_report_feedback_upload(db, fake_e
         uploaded = client.post("/api/v1/documents/upload", files={"file": ("guide.md", "The fixture service supports private deployment.")})
         assert uploaded.status_code == 201, uploaded.text
         assert client.get("/api/v1/documents").json()["total"] == 1
+        uploaded_chunk = db.scalar(select(DocumentChunk))
+        assert uploaded_chunk is not None
+        assert uploaded_chunk.tenant_id is not None and uploaded_chunk.project_id is not None
         created = client.post("/api/v1/research", json={"query": "Check fixture deployment", "budget": 4})
         assert created.status_code == 201, created.text
         task_id = created.json()["task_id"]
         assert task_id == created.json()["id"]
+        created_task = db.get(ResearchTask, UUID(task_id))
+        assert created_task.tenant_id == uploaded_chunk.tenant_id
+        assert created_task.project_id == uploaded_chunk.project_id
         task_response = client.get(f"/api/v1/tasks/{task_id}").json()
         run_state = db.get(AgentRun, UUID(task_id)).state
         assert task_response["status"] == "completed", {
             "claim_statuses": run_state.get("claim_statuses"),
+            "evidence_ids": run_state.get("evidence_ids"),
+            "retrieval_counts": run_state.get("claim_retrieval_counts"),
             "stop_reason": run_state.get("stop_reason"),
             "termination_action": run_state.get("termination_action"),
             "evidence_ids": run_state.get("evidence_ids"),
