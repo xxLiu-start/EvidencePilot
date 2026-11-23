@@ -177,7 +177,8 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             "WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)"
         ))
         connection.execute(text(f'CREATE ROLE "{role}" NOLOGIN'))
-        connection.execute(text(f'GRANT USAGE ON SCHEMA "{postgres.url.database}" TO "{role}"'))
+        schema_name = connection.scalar(text("SELECT current_schema()"))
+        connection.execute(text(f'GRANT USAGE ON SCHEMA "{schema_name}" TO "{role}"'))
         connection.execute(text(f'GRANT SELECT ON research_tasks TO "{role}"'))
 
     try:
