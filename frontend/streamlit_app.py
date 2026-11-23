@@ -11,6 +11,7 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from frontend.api_client import APIClient, APIError, safe_http_url
+from frontend.auth import access_token_from_identity
 
 st.set_page_config(page_title="EvidencePilot · 证据驱动研究", page_icon="🔎", layout="wide")
 PAGES = {"Research Workspace": "研究工作区", "Document Upload": "文档上传",
@@ -30,7 +31,10 @@ def api():
     # Keep the legacy one-argument constructor contract so existing APIClient
     # test doubles and injected clients remain compatible.
     client = APIClient(os.environ.get("API_BASE_URL", "http://127.0.0.1:8001"))
-    token = st.session_state.get("oidc_access_token")
+    if os.environ.get("STREAMLIT_OIDC_ENABLED", "false").lower() == "true":
+        token = access_token_from_identity(st.user)
+    else:
+        token = st.session_state.get("oidc_access_token")
     if token and hasattr(client, "access_token"):
         client.access_token = token
     project_id = st.session_state.get("project_id")
@@ -322,6 +326,21 @@ def evaluations():
 
 
 def main():
+    if os.environ.get("STREAMLIT_OIDC_ENABLED", "false").lower() == "true":
+        if not st.user.is_logged_in:
+            st.title("EvidencePilot · 企业登录")
+            st.caption("使用组织的 OIDC 身份提供商完成安全登录。")
+            if st.button("使用企业账号登录", type="primary"):
+                st.login()
+            st.stop()
+        if access_token_from_identity(st.user) is None:
+            st.error("身份提供商未返回 API access token。请配置 Streamlit expose_tokens=['access'] 和正确的 API audience。")
+            st.stop()
+        with st.sidebar:
+            if st.button("退出企业登录"):
+                for key in ("oidc_access_token", "project_id", "active_task"):
+                    st.session_state.pop(key, None)
+                st.logout()
     st.markdown("""<style>
     .block-container {max-width:1200px;padding-top:2rem;padding-bottom:3rem}
     [data-testid="stSidebar"] {border-right:1px solid #dce4ee}
