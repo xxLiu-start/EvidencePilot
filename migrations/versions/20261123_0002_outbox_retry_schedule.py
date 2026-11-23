@@ -18,8 +18,11 @@ def upgrade() -> None:
         op.add_column("outbox_events", sa.Column("next_attempt_at", sa.DateTime(timezone=True), nullable=True))
 
     if bind.dialect.name == "postgresql":
-        foreign_keys = {item.get("name") for item in inspector.get_foreign_keys("outbox_events")}
-        if "fk_outbox_events_aggregate_id_research_tasks" not in foreign_keys:
+        foreign_keys = inspector.get_foreign_keys("outbox_events")
+        has_task_fk = any(item.get("referred_table") == "research_tasks"
+                          and item.get("constrained_columns") == ["aggregate_id"]
+                          for item in foreign_keys)
+        if not has_task_fk:
             op.create_foreign_key(
                 "fk_outbox_events_aggregate_id_research_tasks",
                 "outbox_events",
