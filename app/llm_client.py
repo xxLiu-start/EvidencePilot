@@ -14,6 +14,7 @@ from pydantic import BaseModel, ValidationError
 from app.config import Settings, settings
 from app.secrets import read_secret
 from app.telemetry import audit_logger
+from app.observability.metrics import record_llm_trace
 
 
 logger = audit_logger(__name__)
@@ -145,6 +146,7 @@ class ReasoningClient:
                 self.trace_sink(asdict(trace))
             # Never log messages, response text, headers, URLs or exception bodies.
             logger.info("llm_trace %s", json.dumps(asdict(trace)))
+            record_llm_trace(asdict(trace))
 
 
 @lru_cache(maxsize=1)
