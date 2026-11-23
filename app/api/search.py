@@ -13,10 +13,12 @@ from app.retrieval.reranker import RerankerError
 from app.db.models import bump_index_revision
 
 
+from app.auth.oidc import require_roles
+
 router = APIRouter()
 
 
-@router.post("/search", response_model=SearchResponse)
+@router.post("/search", response_model=SearchResponse, dependencies=[Depends(require_roles("RESEARCHER", "REVIEWER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def search(request: SearchRequest, db: Annotated[Session, Depends(get_db)]) -> SearchResponse:
     try:
         if request.method == "dense":
@@ -52,7 +54,7 @@ def search(request: SearchRequest, db: Annotated[Session, Depends(get_db)]) -> S
     )
 
 
-@router.post("/search/rebuild-bm25")
+@router.post("/search/rebuild-bm25", dependencies=[Depends(require_roles("TENANT_ADMIN", "SUPER_ADMIN"))])
 def rebuild_bm25(db: Annotated[Session, Depends(get_db)]):
     # Notify all API workers, including when changes came from direct SQL.
     try:
