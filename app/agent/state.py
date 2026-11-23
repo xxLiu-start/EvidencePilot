@@ -5,6 +5,7 @@ from typing import Any, TypedDict
 
 class AgentState(TypedDict):
     task_id: str
+    domain_id: str
     user_query: str
     claims: list[dict]
     evidence_ids: list[str]
@@ -45,10 +46,10 @@ class AgentState(TypedDict):
     recovery_node: str | None
 
 
-def initial_state(task_id, user_query, budget, config=None) -> AgentState:
+def initial_state(task_id, user_query, budget, config=None, *, domain_id="general_research") -> AgentState:
     from app.config import settings
     config = config or settings
-    return dict(task_id=str(task_id), user_query=user_query, claims=[], evidence_ids=[], source_ids=[],
+    return dict(task_id=str(task_id), domain_id=domain_id, user_query=user_query, claims=[], evidence_ids=[], source_ids=[],
                 selected_action=None, current_claim_id=None, action_args={}, pending_observation=None,
                 search_count=0, retrieval_count=0, remaining_budget=budget, round_count=0,
                 claim_statuses={}, step_summaries=[], final_report=None, status="running",
