@@ -10,3 +10,7 @@ prompts/
 docs/
 start.md
 README.md
+
+# OIDC/client credentials must never enter Docker build layers
+.streamlit/secrets.toml
+**/secrets.toml
