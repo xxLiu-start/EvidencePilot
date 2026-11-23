@@ -14,6 +14,7 @@ This document records what is implemented in the current upgrade increment and w
 - Added a connector contract, explicit registry, root-scoped read-only FileConnector, WebSearchConnector adapter, and tenant-filtered read-only PostgreSQLTableConnector with explicit exposed-column allowlists.
 - Routed Agent web discovery through the WebSearchConnector while retaining existing task authorization and commit fencing.
 - Added OIDC JWT verification using JWKS, issuer/audience checks, asymmetric algorithm allowlisting, development-only local identity, and coarse role dependencies on write operations.
+- Added an optional localhost-only Keycloak development realm and Compose identity profile for API integration testing.
 - Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, PostgreSQL tenant filtering/column allowlists, source classification, corroboration policy, OIDC token verification, role checks, task outbox dispatch, and Alembic baseline migration.
 - Added a Redis/Celery task path with transactional outbox, polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Delivery is at-least-once.
 - Added an Alembic non-destructive baseline and a Compose migration service. Production can disable startup DDL and require an applied Alembic version.
