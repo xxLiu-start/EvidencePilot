@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 import pytest
-from sqlalchemy import create_engine, delete, select
+from sqlalchemy import create_engine, delete, select, text
 from sqlalchemy.orm import Session
 
 from app.agent.errors import AgentConflict, LeaseLost
@@ -180,6 +180,14 @@ def test_core_fastapi_background_history_trace_report_feedback_upload(db, fake_e
             "termination_action": run_state.get("termination_action"),
             "evidence_ids": run_state.get("evidence_ids"),
             "error": run_state.get("last_error"),
+            "step_observations": [step.observation for step in db.scalars(
+                select(AgentStep).where(AgentStep.task_id == UUID(task_id)).order_by(AgentStep.step_index)
+            )],
+            "persisted_evidence_ownership": [tuple(row) for row in db.execute(text(
+                "SELECT id, tenant_id, project_id, document_id, chunk_id FROM evidences"
+            )).all()],
+            "session_scope": {key: str(value) for key, value in db.info.items()
+                              if key in {"tenant_id", "project_ids", "selected_project_id", "selected_project_ids"}},
         }
         assert client.get("/api/v1/tasks").json()["total"] == 1
         trace = client.get(f"/api/v1/tasks/{task_id}/trace").json()
