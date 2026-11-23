@@ -24,6 +24,7 @@ This document records what is implemented in the current upgrade increment and w
 - Database-backed Tenant, User, Membership, Project and ProjectMembership models.
 - Complete tenant/object-level isolation for all task, document, evidence, retrieval, feedback and evaluation APIs.
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
+- Streamlit OIDC sign-in/callback flow to obtain and populate the per-session access token; APIClient bearer forwarding is implemented, but token acquisition is not.
 - S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry, Prometheus and Grafana.
