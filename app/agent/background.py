@@ -10,15 +10,20 @@ from app.telemetry import audit_logger
 logger = audit_logger(__name__)
 
 
-def execute_background(engine, task_id, recovery_token=None):
+def execute_background(engine, task_id, recovery_token=None, tenant_id=None, project_id=None, user_id=None):
     with Session(engine, autoflush=False) as db:
         try:
+            if tenant_id is not None:
+                db.info.update({"tenant_id": tenant_id, "user_id": user_id,
+                                "project_ids": (project_id,), "selected_project_id": project_id,
+                                "selected_project_ids": (project_id,)})
             task = db.get(ResearchTask, UUID(str(task_id)))
             if task is None:
                 return
-            db.info.update({"tenant_id": task.tenant_id, "user_id": task.created_by_user_id,
-                            "project_ids": (task.project_id,), "selected_project_id": task.project_id,
-                            "selected_project_ids": (task.project_id,)})
+            if tenant_id is None:
+                db.info.update({"tenant_id": task.tenant_id, "user_id": task.created_by_user_id,
+                                "project_ids": (task.project_id,), "selected_project_id": task.project_id,
+                                "selected_project_ids": (task.project_id,)})
             if recovery_token:
                 resume_agent_task(db, task_id, owner_token=recovery_token)
             else:
