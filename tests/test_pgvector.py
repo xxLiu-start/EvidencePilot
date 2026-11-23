@@ -195,4 +195,5 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                 assert connection.execute(text("SELECT COUNT(*) FROM research_tasks")).scalar_one() == 0
     finally:
         with postgres.begin() as connection:
+            connection.execute(text(f'DROP OWNED BY "{role}"'))
             connection.execute(text(f'DROP ROLE IF EXISTS "{role}"'))
