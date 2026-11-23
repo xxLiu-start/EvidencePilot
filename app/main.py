@@ -8,7 +8,7 @@ from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.api import agent, documents, domains, evaluations, evidences, feedback, projects, research, search, tasks, web_research
+from app.api import agent, audit, documents, domains, evaluations, evidences, feedback, projects, research, search, tasks, web_research
 from app.auth.oidc import get_request_context, validate_auth_configuration
 from app.db.schema import initialize_database
 from app.db.session import SessionLocal, engine, get_db
