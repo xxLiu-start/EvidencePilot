@@ -15,6 +15,8 @@ This document records what is implemented in the current upgrade increment and w
 - Routed Agent web discovery through the WebSearchConnector while retaining existing task authorization and commit fencing.
 - Added OIDC JWT verification using JWKS, issuer/audience checks, asymmetric algorithm allowlisting, development-only local identity, and coarse role dependencies on write operations.
 - Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, PostgreSQL tenant filtering/column allowlists, source classification, corroboration policy, OIDC token verification, role checks, task outbox dispatch, and Alembic baseline migration.
+- Added a Redis/Celery task path with transactional outbox, polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Delivery is at-least-once.
+- Added an Alembic non-destructive baseline and a Compose migration service. Production can disable startup DDL and require an applied Alembic version.
 - Added a GitHub Actions workflow that compiles Python modules, validates Compose YAML, applies the Alembic baseline to PostgreSQL, and runs pytest.
 
 ## Not implemented yet
@@ -22,7 +24,7 @@ This document records what is implemented in the current upgrade increment and w
 - Database-backed Tenant, User, Membership, Project and ProjectMembership models.
 - Complete tenant/object-level isolation for all task, document, evidence, retrieval, feedback and evaluation APIs.
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
-- S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending; a read-only PostgreSQL table connector is now implemented.
+- S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry, Prometheus and Grafana.
 - Multi-domain manually reviewed benchmark and multi-seed evaluation.
