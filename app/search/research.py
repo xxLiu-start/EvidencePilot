@@ -77,7 +77,14 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
         except (PageError, CacheMiss, LLMError) as exc:
             errors.append({"source_url": url, "category": getattr(exc, "category", type(exc).__name__)})
     run_id = str(uuid4())
-    result = {"run_id": run_id, "claims": [c.model_dump() for c in claims],
+    tenant_id = db.info.get("tenant_id")
+    selected_project_id = db.info.get("selected_project_id")
+    if selected_project_id is None:
+        project_ids = db.info.get("project_ids") or ()
+        selected_project_id = project_ids[0] if len(project_ids) == 1 else None
+    result = {"run_id": run_id, "tenant_id": str(tenant_id) if tenant_id else None,
+              "project_id": str(selected_project_id) if selected_project_id else None,
+              "claims": [c.model_dump() for c in claims],
               "status": "complete" if evidence and not errors else "partial" if evidence else "no_evidence",
               "queries": plan.model_dump()["queries"], "pages": pages,
               "evidences": [e.model_dump(mode="json") for e in evidence], "errors": errors, "traces": traces}
@@ -91,6 +98,12 @@ def replay_snapshot(db, run_id):
     if not path.is_file():
         raise CacheMiss("No fixed research snapshot")
     snapshot = json.loads(path.read_text(encoding="utf-8"))
+    tenant_id = db.info.get("tenant_id")
+    allowed_projects = {str(value) for value in (db.info.get("project_ids") or ())}
+    if not tenant_id or snapshot.get("tenant_id") != str(tenant_id):
+        raise CacheMiss("Research snapshot is not available in this tenant")
+    if snapshot.get("project_id") not in allowed_projects:
+        raise CacheMiss("Research snapshot is not available in this project")
     evidences = [Evidence.model_validate(value) for value in snapshot["evidences"]]
     save_evidences(db, evidences)
     return {**snapshot, "replayed": True}
