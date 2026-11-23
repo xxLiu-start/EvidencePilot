@@ -155,12 +155,12 @@ def test_postgresql_table_connector_enforces_tenant_filter_and_read_only_queries
     with engine.begin() as connection:
         connection.execute(text(
             "CREATE TABLE research_records (id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL, "
-            "title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL)"
+            "title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL, secret TEXT NOT NULL)"
         ))
         connection.execute(text(
             "INSERT INTO research_records (id, tenant_id, title, body, status) VALUES "
-            "(1, 'tenant-a', 'Market report', 'Market growth evidence', 'approved'), "
-            "(2, 'tenant-b', 'Market plan', 'Private tenant data', 'approved')"
+            "(1, 'tenant-a', 'Market report', 'Market growth evidence', 'approved', 'private-a'), "
+            "(2, 'tenant-b', 'Market plan', 'Private tenant data', 'approved', 'private-b')"
         ))
     connector = PostgreSQLTableConnector(
         engine, table_name="research_records", primary_key="id",
@@ -171,6 +171,7 @@ def test_postgresql_table_connector_enforces_tenant_filter_and_read_only_queries
     assert len(hits) == 1
     assert hits[0].source_type == "database"
     assert hits[0].content_hash
+    assert "secret" not in hits[0].metadata["record"]
     assert connector.fetch("1", access_context={"tenant_id": "tenant-a"}).title == "Market report"
     with pytest.raises(LookupError):
         connector.fetch("2", access_context={"tenant_id": "tenant-a"})
