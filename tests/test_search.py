@@ -3,8 +3,11 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
-from app.db.session import get_db
+from app.db.session import Base, get_db
 from app.main import app
 from app.retrieval.dense import SearchHit
 from app.retrieval.embedding import EmbeddingError
@@ -12,10 +15,15 @@ from app.retrieval.embedding import EmbeddingError
 
 @pytest.fixture
 def client():
-    app.dependency_overrides[get_db] = lambda: None
-    client = TestClient(app)
-    yield client
-    client.close()
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(engine)
+    db = Session(engine)
+    app.dependency_overrides[get_db] = lambda: db
+    test_client = TestClient(app)
+    yield test_client
+    test_client.close()
+    db.close()
+    engine.dispose()
     app.dependency_overrides.clear()
 
 
