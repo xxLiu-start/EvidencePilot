@@ -24,3 +24,14 @@ def scope_of(item):
 
 def normalized(value):
     return str(value).strip().casefold() if value is not None else None
+
+
+
+def scope_attributes_of(item):
+    """Return explicit domain attributes, excluding legacy model scope keys."""
+    scope = value(item, "scope", {}) or {}
+    raw = scope.model_dump(exclude_none=True) if isinstance(scope, EvidenceScope) else dict(scope)
+    attributes = raw.pop("attributes", {}) or {}
+    for key in ("model_name", "model_version", "deployment_mode", "domain_id"):
+        raw.pop(key, None)
+    return {**raw, **attributes}
