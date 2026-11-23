@@ -230,6 +230,8 @@ def get_request_context(
         ))
         if user is None:
             raise HTTPException(status_code=403, detail="User is not provisioned")
+        db.info["user_id"] = user.id
+        apply_rls_context(db.connection(), db.info)
         memberships = list(db.scalars(select(TenantMembership).where(
             TenantMembership.user_id == user.id, TenantMembership.is_active.is_(True)
         )))
