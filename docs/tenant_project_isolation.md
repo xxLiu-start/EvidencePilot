@@ -41,7 +41,7 @@ Local development creates a single development user, tenant, and default project
 
 ## PostgreSQL Row-Level Security
 
-Alembic revision `20261123_0004` enables and forces RLS on `research_tasks`, `documents`, `document_chunks`, `evidences`, `task_feedback`, `evaluation_results`, and `audit_events`. Policies compare each row's `tenant_id` with the transaction-local PostgreSQL setting `app.tenant_id`. Missing context fails closed. The SQLAlchemy Session `after_begin` hook binds this setting from `Session.info`; request authentication sets it immediately after membership resolution, and worker messages carry the task's tenant/project/user context before the first protected query.
+Alembic revisions `20261123_0004` through `20261123_0006` enable and force RLS on tenant-owned resources, task-linked Agent/queue state, and `human_reviews`. Policies compare each row's `tenant_id` with the transaction-local PostgreSQL setting `app.tenant_id`. Missing context fails closed. The SQLAlchemy Session `after_begin` hook binds this setting from `Session.info`; request authentication sets it immediately after membership resolution, and worker messages carry the task's tenant/project/user context before the first protected query.
 
 The application DB role must not be a PostgreSQL superuser and must not have `BYPASSRLS`. `FORCE ROW LEVEL SECURITY` subjects table owners to policies, but superusers and roles with `BYPASSRLS` still bypass them. Use a dedicated least-privilege runtime role; keep migration ownership credentials separate where possible. The migration is additive and its downgrade intentionally retains security policies.
 
@@ -50,3 +50,10 @@ The application DB role must not be a PostgreSQL superuser and must not have `BY
 RLS currently enforces tenant boundaries on the listed tenant-owned tables and task-owned Agent/queue state; project-level authorization remains enforced by the application ORM/session layer. Global identity/membership tables and shared immutable cache tables (`claims`, `web_contents`, `web_sources`, `web_searches`) are not tenant-RLS protected and must not be exposed directly by tenant-facing endpoints. Document bodies are accessible to tenant APIs through the protected `document_chunks`/`evidences` ownership path; a future hardening pass should split or tenant-scope shared cache storage. The PostgreSQL integration test creates a non-owner role and verifies raw SQL cannot read another tenant's rows or see rows without a tenant setting. This is not yet a full penetration test or production security certification.
 
 Future connectors must enforce upstream per-user/per-tenant ACLs; passing `access_context` through an interface is not enough. Add project-level database policies, full raw-SQL/write/worker/concurrency penetration tests, and end-to-end tests for every endpoint before production deployment to mutually untrusted tenants.
+
+
+## Security verification and threat model
+
+GitHub Actions runs real PostgreSQL migration checks and non-owner role isolation tests, including raw SELECT/UPDATE/DELETE, denied cross-tenant inserts, Evidence reads, task-run state, transaction-local GUC reset on reused connections, and simultaneous requests with separate connections. These tests are not equivalent to independent red-team penetration testing.
+
+The application runtime role must not be a superuser or possess BYPASSRLS; use separate migration credentials. RLS relies on `app.tenant_id` set by trusted application code. **A caller who can execute arbitrary SQL including `set_config('app.tenant_id', ...)` can spoof that setting**, so parameterized SQL, restricted SQL execution surfaces, a least-privilege runtime role, and SQL injection testing remain essential. Shared `web_contents`/`web_sources` cache rows are not yet tenant-RLS protected; treat this as a residual security gap requiring tenant-scoped content storage or a complete access-boundary audit before mutually untrusted production tenants.
