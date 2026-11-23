@@ -218,7 +218,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             "AND t.tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid))"
         ))
         connection.execute(text(f'GRANT SELECT ON agent_runs TO "{role}"'))
-        connection.execute(text(f'GRANT SELECT, INSERT ON research_tasks TO "{role}"'))
+        connection.execute(text(f'GRANT SELECT, INSERT, UPDATE, DELETE ON research_tasks TO "{role}"'))
 
     try:
         with postgres.connect() as connection:
@@ -252,6 +252,44 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                     "VALUES (:id, :tenant, :project, 'forbidden-cross-tenant', 'queued', 2, 'general_research', now())"
                 ), {"id": uuid4(), "tenant": tenant_b_id, "project": project_b_id})
             scoped.rollback()
+
+        # RLS protects direct DML even without ORM before_flush checks.
+        with postgres.connect() as connection:
+            with connection.begin():
+                connection.execute(text(f'SET LOCAL ROLE "{role}"'))
+                connection.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"),
+                                   {"tenant": str(tenant_a_id)})
+                assert connection.scalar(text(
+                    "SELECT count(*) FROM research_tasks WHERE id = :foreign"
+                ), {"foreign": task_b_id}) == 0
+                assert connection.execute(text(
+                    "UPDATE research_tasks SET query='tampered' WHERE id=:foreign"
+                ), {"foreign": task_b_id}).rowcount == 0
+                assert connection.execute(text(
+                    "DELETE FROM research_tasks WHERE id=:foreign"
+                ), {"foreign": task_b_id}).rowcount == 0
+                assert connection.execute(text(
+                    "SELECT supporting_text FROM evidences"
+                )).scalars().all() == ["tenant A evidence"]
+                connection.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"),
+                                   {"tenant": str(tenant_b_id)})
+                assert connection.execute(text(
+                    "SELECT query FROM research_tasks ORDER BY query"
+                )).scalars().all() == ["tenant-b-secret"]
+                assert connection.scalar(text("SELECT count(*) FROM agent_runs")) == 1
+                assert connection.scalar(text("SELECT count(*) FROM evidences")) == 0
+
+        # SET LOCAL must not survive transaction boundaries on pooled connections.
+        with postgres.connect() as connection:
+            with connection.begin():
+                connection.execute(text(f'SET LOCAL ROLE "{role}"'))
+                assert connection.scalar(text("SELECT count(*) FROM research_tasks")) == 0
+                assert connection.scalar(text("SELECT count(*) FROM evidences")) == 0
+                assert connection.scalar(text("SELECT count(*) FROM agent_runs")) == 0
+
+        with postgres.connect() as connection:
+            assert connection.scalar(text("SELECT query FROM research_tasks WHERE id=:id"),
+                                     {"id": task_b_id}) == "tenant-b-secret"
     finally:
         with postgres.begin() as connection:
             connection.execute(text(f'DROP OWNED BY "{role}"'))
