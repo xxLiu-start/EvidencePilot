@@ -11,27 +11,26 @@ This document records what is implemented in the current upgrade increment and w
 - Applied profile maximum Claim count, freshness window, minimum independent-source count, and fail-closed human-review requirement to new Claims.
 - Generalized EvidenceScope to accept domain-specific attributes while retaining legacy model scope fields.
 - Added a generic source-authority registry for government, standards, academic, known official documentation, and unknown web sources. Classification is a hint, not a trust guarantee.
-- Added a connector contract, explicit registry, root-scoped read-only FileConnector, and WebSearchConnector adapter.
+- Added a connector contract, explicit registry, root-scoped read-only FileConnector, WebSearchConnector adapter, and tenant-filtered read-only PostgreSQLTableConnector with explicit exposed-column allowlists.
 - Routed Agent web discovery through the WebSearchConnector while retaining existing task authorization and commit fencing.
 - Added OIDC JWT verification using JWKS, issuer/audience checks, asymmetric algorithm allowlisting, development-only local identity, and coarse role dependencies on write operations.
-- Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, source classification, corroboration policy, OIDC token verification, and role checks.
+- Added unit tests for domain profiles, extensible scopes, connector registry, file path traversal, PostgreSQL tenant filtering/column allowlists, source classification, corroboration policy, OIDC token verification, role checks, task outbox dispatch, and Alembic baseline migration.
+- Added a GitHub Actions workflow that compiles Python modules, validates Compose YAML, applies the Alembic baseline to PostgreSQL, and runs pytest.
 
 ## Not implemented yet
 
 - Database-backed Tenant, User, Membership, Project and ProjectMembership models.
 - Complete tenant/object-level isolation for all task, document, evidence, retrieval, feedback and evaluation APIs.
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
-- Queue foundation now includes Redis/Celery, a transactional outbox, a polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Cancellation, priorities, queue monitoring, and full multi-worker chaos acceptance remain pending.
-- Alembic baseline migration and a separate deployment migration service are implemented. Production startup can disable automatic DDL and require an applied migration version.
-- Alembic baseline and deployment migration command are implemented. A single non-destructive baseline revision exists; future schema changes still need additional versioned revisions and migration-specific integration coverage.
 - S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending; a read-only PostgreSQL table connector is now implemented.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry, Prometheus and Grafana.
 - Multi-domain manually reviewed benchmark and multi-seed evaluation.
+- Queue cancellation, priority scheduling, queue backlog monitoring and full multi-worker chaos acceptance.
 - Production load, chaos, backup/restore and security penetration testing.
 
 ## Readiness statement
 
 The current increment is an architectural foundation, not a production-readiness declaration. The migration baseline is intentionally non-destructive and has no destructive downgrade; subsequent schema changes must be delivered as new Alembic revisions. The queue path uses at-least-once delivery with idempotent consumers; it does not claim exactly-once execution. OIDC protects API authentication and selected write-role boundaries, but without tenant/object-level authorization it is not safe for multiple mutually untrusted organizations. Compliance and business profiles require human review but no review workflow is implemented yet; their Claims therefore remain uncounted as supported until a future approval workflow is added.
 
-The repository's existing tests have not been re-run by the GitHub file-editing connection. The new tests are committed and must pass in CI or a local development environment before this increment is considered verified.
+GitHub Actions is now the verification path because the repository editing connection cannot execute code in the user's checkout. Each commit triggers the workflow; the final head SHA and run conclusion should be checked before treating the latest increment as verified.
