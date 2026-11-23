@@ -35,3 +35,23 @@ Write endpoints enforce coarse role dependencies. The local development principa
 ## Frontend integration status
 
 The Streamlit API client can forward a per-session bearer token from `st.session_state["oidc_access_token"]`. The Streamlit OIDC sign-in/callback flow that obtains and populates this token is not implemented yet. Until that flow is added, OIDC-enabled deployments should use an authenticated API client or a separately integrated frontend; the current Streamlit UI remains suitable for local development with OIDC disabled.
+
+
+## Local Keycloak development provider
+
+The optional Compose `identity` profile imports a development-only realm:
+
+```bash
+docker compose --profile identity up -d keycloak
+```
+
+For an API running on the host/Conda environment, configure:
+
+```dotenv
+AUTH_ENABLED=true
+OIDC_ISSUER=http://127.0.0.1:8080/realms/evidencepilot
+OIDC_AUDIENCE=evidencepilot-api
+OIDC_JWKS_URL=http://127.0.0.1:8080/realms/evidencepilot/protocol/openid-connect/certs
+```
+
+The imported realm contains a development CLI client with direct-access grants and a placeholder developer account. These settings are for localhost testing only. Change both the Keycloak administrator password and developer password immediately, never expose the Keycloak port publicly, and never reuse this realm configuration in production. The API's Streamlit login/token acquisition flow remains a separate pending integration.
