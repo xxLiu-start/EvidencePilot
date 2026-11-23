@@ -165,7 +165,13 @@ def test_core_fastapi_background_history_trace_report_feedback_upload(db, fake_e
         assert task_id == created.json()["id"]
         task_response = client.get(f"/api/v1/tasks/{task_id}").json()
         run_state = db.get(AgentRun, UUID(task_id)).state
-        assert task_response["status"] == "completed", run_state
+        assert task_response["status"] == "completed", {
+            "claim_statuses": run_state.get("claim_statuses"),
+            "stop_reason": run_state.get("stop_reason"),
+            "termination_action": run_state.get("termination_action"),
+            "evidence_ids": run_state.get("evidence_ids"),
+            "error": run_state.get("last_error"),
+        }
         assert client.get("/api/v1/tasks").json()["total"] == 1
         trace = client.get(f"/api/v1/tasks/{task_id}/trace").json()
         assert len(trace["steps"]) == 2 and trace["checkpoints"]
