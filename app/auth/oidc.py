@@ -16,10 +16,11 @@ import jwt
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError, PyJWKClient
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.db.models import Project, ProjectMembership, Tenant, TenantMembership, User
+from app.db.models import (DocumentChunk, DocumentRecord, EvidenceRecord, EvaluationResult, Project,
+                           ProjectMembership, ResearchTask, TaskFeedback, Tenant, TenantMembership, User)
 from app.db.session import get_db
 
 from app.config import settings
@@ -140,6 +141,8 @@ class RequestContext:
 
 def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
     """Create a single local-only identity in a non-production database."""
+    for key in ("tenant_id", "user_id", "project_ids", "selected_project_id", "selected_project_ids"):
+        db.info.pop(key, None)
     tenant = db.scalar(select(Tenant).where(Tenant.slug == "legacy-default"))
     if tenant is None:
         tenant = db.scalar(select(Tenant).where(Tenant.slug == "local-development"))
@@ -169,6 +172,12 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
     ))
     if project_membership is None:
         db.add(ProjectMembership(project_id=project.id, user_id=user.id, role="SUPER_ADMIN", is_active=True))
+    # Development databases and test fixtures may predate the Alembic ownership
+    # migration. Attach only unowned legacy rows to the local development scope.
+    for model in (ResearchTask, DocumentRecord, DocumentChunk, EvidenceRecord, TaskFeedback, EvaluationResult):
+        db.execute(update(model).where(model.tenant_id.is_(None)).values(
+            tenant_id=tenant.id, project_id=project.id
+        ))
     db.commit()
     db.refresh(user)
     db.refresh(tenant)
