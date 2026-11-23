@@ -1,0 +1,34 @@
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, inspect
+
+
+def test_alembic_baseline_creates_current_schema_without_dropping_data(tmp_path):
+    database = tmp_path / "migration-test.sqlite"
+    url = f"sqlite:///{database}"
+    config = Config("alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+
+    command.upgrade(config, "head")
+
+    engine = create_engine(url)
+    try:
+        inspector = inspect(engine)
+        tables = set(inspector.get_table_names())
+        assert "research_tasks" in tables
+        assert "outbox_events" in tables
+        assert "evidence_assessments" in tables
+        columns = {column["name"] for column in inspector.get_columns("research_tasks")}
+        assert "domain_id" in columns
+        with engine.begin() as connection:
+            connection.exec_driver_sql(
+                "INSERT INTO research_tasks (id, query, status, budget, domain_id, created_at) "
+                "VALUES ('00000000-0000-0000-0000-000000000001', 'migration smoke test', 'queued', 2, "
+                "'general_research', CURRENT_TIMESTAMP)"
+            )
+        command.upgrade(config, "head")
+        with engine.connect() as connection:
+            count = connection.exec_driver_sql("SELECT COUNT(*) FROM research_tasks").scalar_one()
+        assert count == 1
+    finally:
+        engine.dispose()
