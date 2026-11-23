@@ -24,6 +24,9 @@ def ingest_document(
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
     embedder: BGEEmbeddingService | None = None,
+    tenant_id: UUID | None = None,
+    project_id: UUID | None = None,
+    created_by_user_id: UUID | None = None,
 ) -> DocumentRecord:
     document_id = uuid4()
     source = source if source is not None else str(path)
@@ -38,7 +41,8 @@ def ingest_document(
         embedder.embed_documents([chunk.text for chunk in chunks]), len(chunks)
     )
     document = DocumentRecord(
-        id=document_id, filename=filename or Path(path).name,
+        id=document_id, tenant_id=tenant_id, project_id=project_id,
+        created_by_user_id=created_by_user_id, filename=filename or Path(path).name,
         source=source, version=version, chunk_count=len(chunks),
     )
     try:
@@ -46,6 +50,7 @@ def ingest_document(
         db.flush()
         db.add_all([
             DocumentChunk(
+                tenant_id=tenant_id, project_id=project_id,
                 document_id=document_id, chunk_index=chunk.chunk_index,
                 text=chunk.text, token_count=chunk.token_count,
                 page=chunk.page, section=chunk.section,
