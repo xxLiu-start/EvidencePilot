@@ -16,7 +16,7 @@ def value(item, key, default=None):
 
 
 def scope_of(item):
-    scope = value(item, "scope", {}) or {}
+    scope = item if isinstance(item, EvidenceScope) else (value(item, "scope", {}) or {})
     raw = scope.model_dump() if isinstance(scope, EvidenceScope) else dict(scope)
     attributes = raw.pop("attributes", {}) or {}
     return {**raw, **attributes}
@@ -29,7 +29,7 @@ def normalized(value):
 
 def scope_attributes_of(item):
     """Return explicit domain attributes, excluding legacy model scope keys."""
-    scope = value(item, "scope", {}) or {}
+    scope = item if isinstance(item, EvidenceScope) else (value(item, "scope", {}) or {})
     raw = scope.model_dump(exclude_none=True) if isinstance(scope, EvidenceScope) else dict(scope)
     attributes = raw.pop("attributes", {}) or {}
     for key in ("model_name", "model_version", "deployment_mode", "domain_id"):
