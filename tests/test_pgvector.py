@@ -140,3 +140,58 @@ def test_empty_search_does_not_load_model(postgres, fake_embedder):
     with Session(postgres) as db:
         assert search_chunks(db, "query") == []
     assert fake_embedder.calls == []
+
+
+
+def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
+    """Exercise RLS as a non-owner role so table-owner bypass cannot hide policy bugs."""
+    from uuid import uuid4
+
+    from app.db.models import Project, ResearchTask, Tenant
+
+    role = "ep_rls_" + uuid4().hex[:12]
+    tenant_a_id, tenant_b_id = uuid4(), uuid4()
+    project_a_id, project_b_id = uuid4(), uuid4()
+    with postgres.begin() as connection:
+        connection.execute(text(
+            "INSERT INTO tenants (id, slug, name, is_active) VALUES "
+            "(:a, :slug_a, 'Tenant A', true), (:b, :slug_b, 'Tenant B', true)"
+        ), {"a": tenant_a_id, "b": tenant_b_id,
+            "slug_a": "rls-a-" + uuid4().hex[:8], "slug_b": "rls-b-" + uuid4().hex[:8]})
+        connection.execute(text(
+            "INSERT INTO projects (id, tenant_id, slug, name, is_active) VALUES "
+            "(:pa, :a, 'default', 'Project A', true), (:pb, :b, 'default', 'Project B', true)"
+        ), {"pa": project_a_id, "pb": project_b_id, "a": tenant_a_id, "b": tenant_b_id})
+        connection.execute(text(
+            "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id) "
+            "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research'), "
+            "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research')"
+        ), {"ta": uuid4(), "tb": uuid4(), "a": tenant_a_id, "b": tenant_b_id,
+            "pa": project_a_id, "pb": project_b_id})
+        connection.execute(text("ALTER TABLE research_tasks ENABLE ROW LEVEL SECURITY"))
+        connection.execute(text("ALTER TABLE research_tasks FORCE ROW LEVEL SECURITY"))
+        connection.execute(text("DROP POLICY IF EXISTS research_tasks_tenant_isolation ON research_tasks"))
+        connection.execute(text(
+            "CREATE POLICY research_tasks_tenant_isolation ON research_tasks "
+            "USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid) "
+            "WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)"
+        ))
+        connection.execute(text(f'CREATE ROLE "{role}" NOLOGIN'))
+        connection.execute(text(f'GRANT USAGE ON SCHEMA "{postgres.url.database}" TO "{role}"'))
+        connection.execute(text(f'GRANT SELECT ON research_tasks TO "{role}"'))
+
+    try:
+        with postgres.connect() as connection:
+            with connection.begin():
+                connection.execute(text(f'SET LOCAL ROLE "{role}"'))
+                connection.execute(text("SELECT set_config('app.tenant_id', :tenant, true)"),
+                                   {"tenant": str(tenant_a_id)})
+                visible = connection.execute(text(
+                    "SELECT query FROM research_tasks ORDER BY query"
+                )).scalars().all()
+                assert visible == ["tenant-a-secret"]
+                connection.execute(text("SELECT set_config('app.tenant_id', '', true)"))
+                assert connection.execute(text("SELECT COUNT(*) FROM research_tasks")).scalar_one() == 0
+    finally:
+        with postgres.begin() as connection:
+            connection.execute(text(f'DROP ROLE IF EXISTS "{role}"'))
