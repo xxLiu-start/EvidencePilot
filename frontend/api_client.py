@@ -76,6 +76,10 @@ class APIClient:
     def evidence(self, task_id, evidence_id): return self.request("GET", f"/api/v1/tasks/{identifier(task_id)}/evidences/{identifier(evidence_id)}")
     def verifications(self, task_id): return self.request("GET", f"/api/v1/tasks/{identifier(task_id)}/verifications")
     def recover(self, task_id): return self.request("POST", f"/api/v1/tasks/{identifier(task_id)}/recover")
+    def reviews(self, task_id, claim_id): return self.request("GET", f"/api/v1/tasks/{identifier(task_id)}/claims/{claim_id}/reviews")
+    def submit_review(self, task_id, claim_id, fingerprint, decision, comment):
+        return self.request("POST", f"/api/v1/tasks/{identifier(task_id)}/claims/{claim_id}/reviews",
+                            json={"fingerprint": fingerprint, "decision": decision, "comment": comment})
     def feedback(self, task_id, rating, comment): return self.request("POST", f"/api/v1/tasks/{identifier(task_id)}/feedback", json={"rating": rating, "comment": comment})
     def documents(self, offset=0): return self.request("GET", "/api/v1/documents", params={"offset": offset, "limit": 20})
     def chunks(self, doc_id): return self.request("GET", f"/api/v1/documents/{identifier(doc_id)}/chunks")
