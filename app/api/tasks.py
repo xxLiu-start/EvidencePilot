@@ -15,7 +15,8 @@ from app.agent.background import execute_background
 from app.agent.errors import AgentConflict
 from app.memory.checkpoints import reserve_recovery
 
-from app.auth.oidc import require_roles
+from app.auth.oidc import RequestContext, get_request_context, require_roles
+from app.auth.audit import record_audit_event
 
 router = APIRouter()
 
@@ -68,12 +69,16 @@ def get_verifications(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.post("/tasks/{task_id}/recover", status_code=202, dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
-def recover_task(task_id: UUID, background_tasks: BackgroundTasks, db: Annotated[Session, Depends(get_db)]):
-    require_task(db, task_id)
+def recover_task(task_id: UUID, background_tasks: BackgroundTasks, db: Annotated[Session, Depends(get_db)],
+                 context: RequestContext = Depends(get_request_context)):
+    task = require_task(db, task_id)
     try:
         token = reserve_recovery(db, task_id)
     except AgentConflict as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from None
+    record_audit_event(db, context, action="research_task.recover", resource_type="research_task",
+                       resource_id=task_id, project_id=task.project_id)
+    db.commit()
     background_tasks.add_task(execute_background, db.get_bind(), task_id, token)
     return {"task_id": task_id, "status": "recovery_scheduled"}
 
