@@ -118,7 +118,7 @@ def validate_postgres_rls_runtime(engine) -> None:
         "audit_events", "research_tasks", "documents", "document_chunks",
         "evidences", "task_feedback", "evaluation_results", "agent_runs", "agent_steps",
         "agent_allowed_sources", "evidence_assessments", "agent_policy_decisions",
-        "state_snapshots", "agent_reflections", "outbox_events", "tool_execution_receipts",
+        "state_snapshots", "agent_reflections", "outbox_events", "tool_execution_receipts", "human_reviews",
     )
     with engine.connect() as connection:
         role = connection.execute(text(
