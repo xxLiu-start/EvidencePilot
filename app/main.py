@@ -11,9 +11,7 @@ from sqlalchemy.orm import Session
 from app.api import agent, audit, documents, domains, evaluations, evidences, feedback, projects, research, search, tasks, web_research
 from app.auth.oidc import get_request_context, validate_auth_configuration
 from app.db.schema import initialize_database
-from app.db.session import SessionLocal, engine, get_db
-from app.evaluation.store import import_reports
-from app.retrieval.bm25 import get_bm25_store
+from app.db.session import engine, get_db
 from app.llm_client import get_llm_client
 from app.config import settings
 from app.observability.metrics import record_http_request
@@ -39,9 +37,8 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
                 version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
                 if not version:
                     raise RuntimeError("Database migration version is missing")
-        with SessionLocal() as db:
-            get_bm25_store(engine).rebuild(db)
-            import_reports(db)
+        # BM25 indexes are built lazily per authenticated tenant/project scope.
+        # A global startup scan would either bypass RLS or cache only the first tenant.
         yield
     finally:
         reasoning.close()
