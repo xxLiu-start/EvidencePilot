@@ -211,3 +211,23 @@ def test_bm25_api_automatic_refresh_and_explicit_rebuild(client, db):
     assert response.json()["results"][0]["bm25_score"] is not None
     rebuilt = client.post("/api/v1/search/rebuild-bm25")
     assert rebuilt.status_code == 200 and rebuilt.json()["indexed_chunks"] == 1
+
+
+
+def test_upload_enforces_streamed_byte_limit(client, monkeypatch):
+    from app.api.documents import settings
+
+    monkeypatch.setattr(settings, "document_max_upload_bytes", 4)
+    response = client.post("/api/v1/documents", files={"file": ("oversized.txt", b"12345")})
+    assert response.status_code == 413
+    assert response.json()["detail"] == "Uploaded document exceeds configured size limit"
+
+
+def test_upload_enforces_configured_chunk_size_limit(client, monkeypatch):
+    from app.api.documents import settings
+
+    monkeypatch.setattr(settings, "document_max_chunk_size", 100)
+    response = client.post("/api/v1/documents", files={"file": ("small.txt", b"short text")},
+                           data={"chunk_size": "101", "chunk_overlap": "0"})
+    assert response.status_code == 422
+    assert response.json()["detail"] == "chunk_size exceeds configured maximum"
