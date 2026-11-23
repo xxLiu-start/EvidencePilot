@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, event, false
+from sqlalchemy import create_engine, event, false, or_
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session, with_loader_criteria
 
 from app.config import settings
@@ -33,12 +33,16 @@ def _apply_tenant_project_filters(execute_state):
             )
         if "project_id" in columns:
             if project_ids:
+                project_filter = model.project_id.in_(tuple(project_ids))
+                if columns["project_id"].nullable:
+                    project_filter = or_(model.project_id.is_(None), project_filter)
                 statement = statement.options(
-                    with_loader_criteria(model, model.project_id.in_(tuple(project_ids)), include_aliases=True)
+                    with_loader_criteria(model, project_filter, include_aliases=True)
                 )
             else:
+                project_filter = model.project_id.is_(None) if columns["project_id"].nullable else false()
                 statement = statement.options(
-                    with_loader_criteria(model, false(), include_aliases=True)
+                    with_loader_criteria(model, project_filter, include_aliases=True)
                 )
     execute_state.statement = statement
 
