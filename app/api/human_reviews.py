@@ -12,6 +12,7 @@ from app.auth.audit import record_audit_event
 from app.auth.oidc import RequestContext, get_request_context, require_roles
 from app.db.models import AgentRun, EvidenceAssessment, HumanReview, ResearchTask
 from app.db.session import get_db
+from app.verification.verifier import assess_claim
 
 router = APIRouter()
 
@@ -63,11 +64,17 @@ def submit_claim_review(task_id: UUID, claim_id: str, payload: ReviewDecision,
                         db: Annotated[Session, Depends(get_db)],
                         context: RequestContext = Depends(get_request_context)):
     task = _task(db, task_id)
-    _claim_in_plan(db, task_id, claim_id)
+    claim = _claim_in_plan(db, task_id, claim_id)
     if task.created_by_user_id == context.user_id:
         raise HTTPException(status_code=403, detail="Authors cannot approve their own research")
     if task.project_id != context.selected_project_id and len(context.project_ids) > 1:
         raise HTTPException(status_code=400, detail="Select the task's project with X-Project-ID")
+    run = db.get(AgentRun, task_id)
+    evidence_ids = (run.state.get("claim_statuses", {}).get(claim_id, {})
+                    .get("evidence_ids", []))
+    current = assess_claim(db, claim, evidence_ids, task_id=task_id)
+    if current["fingerprint"] != payload.fingerprint:
+        raise HTTPException(status_code=409, detail="Evidence fingerprint changed; re-review required")
     assessment = db.get(EvidenceAssessment, (task_id, claim_id, payload.fingerprint))
     if assessment is None:
         raise HTTPException(status_code=409, detail="Evidence fingerprint is stale or not verified")
