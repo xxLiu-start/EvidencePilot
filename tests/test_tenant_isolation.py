@@ -32,7 +32,7 @@ def tenant_db():
         db.flush()
 
         db.add_all([
-            TenantMembership(tenant_id=tenant_a.id, user_id=user_a.id, role="RESEARCHER", is_active=True),
+            TenantMembership(tenant_id=tenant_a.id, user_id=user_a.id, role="VIEWER", is_active=True),
             TenantMembership(tenant_id=tenant_b.id, user_id=user_b.id, role="RESEARCHER", is_active=True),
             ProjectMembership(project_id=project_a1.id, user_id=user_a.id, role="RESEARCHER", is_active=True),
             ProjectMembership(project_id=project_b1.id, user_id=user_b.id, role="RESEARCHER", is_active=True),
@@ -167,3 +167,30 @@ def test_fastapi_read_routes_apply_tenant_and_project_context(tenant_db):
     finally:
         client.close()
         app.dependency_overrides.clear()
+
+
+
+def test_project_roles_do_not_leak_between_projects(tenant_db):
+    db, tenant_a, tenant_b, user_a, user_b, project_a1, project_a2, project_b1, *_ = tenant_db
+    db.add(ProjectMembership(project_id=project_a2.id, user_id=user_a.id,
+                             role="VIEWER", is_active=True))
+    db.commit()
+    principal = Principal(
+        subject="user-a", issuer="https://id.example/realm",
+        audience=("evidencepilot-api",), tenant_id="tenant-a",
+    )
+
+    context_without_selection = get_request_context(db, principal, None)
+    assert set(context_without_selection.project_ids) == {project_a1.id, project_a2.id}
+    assert "RESEARCHER" not in context_without_selection.roles
+    with pytest.raises(HTTPException) as denied:
+        require_roles("RESEARCHER")(context_without_selection)
+    assert denied.value.status_code == 403
+
+    context_a1 = get_request_context(db, principal, str(project_a1.id))
+    assert require_roles("RESEARCHER")(context_a1) is context_a1
+    context_a2 = get_request_context(db, principal, str(project_a2.id))
+    assert "RESEARCHER" not in context_a2.roles
+    with pytest.raises(HTTPException) as denied_project_b:
+        require_roles("RESEARCHER")(context_a2)
+    assert denied_project_b.value.status_code == 403
