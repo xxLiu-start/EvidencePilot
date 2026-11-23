@@ -15,6 +15,8 @@ from app.agent.background import execute_background
 from app.agent.errors import AgentConflict
 from app.memory.checkpoints import reserve_recovery
 
+from app.auth.oidc import require_roles
+
 router = APIRouter()
 
 
@@ -65,7 +67,7 @@ def get_verifications(task_id: UUID, db: Annotated[Session, Depends(get_db)]):
         "result": row.result, "trace": row.trace, "created_at": row.created_at} for row in rows]}
 
 
-@router.post("/tasks/{task_id}/recover", status_code=202)
+@router.post("/tasks/{task_id}/recover", status_code=202, dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
 def recover_task(task_id: UUID, background_tasks: BackgroundTasks, db: Annotated[Session, Depends(get_db)]):
     require_task(db, task_id)
     try:
