@@ -156,7 +156,24 @@ def upgrade() -> None:
         user_id = NULLIF(current_setting('app.user_id', true), '')::uuid
         OR (tenant_id = {tenant_id} AND {tenant_admin})
     )"""
-    _policy("tenant_memberships", "rls_tenant_memberships_self_or_admin", membership_visibility)
+    op.execute(sa.text('DROP POLICY IF EXISTS "rls_tenant_memberships_self_or_admin" ON tenant_memberships'))
+    membership_check = f"""(
+        tenant_id = {tenant_id}
+        AND (
+            {tenant_admin}
+            OR (
+                user_id = NULLIF(current_setting('app.user_id', true), '')::uuid
+                AND current_setting('app.identity_issuer', true) = 'local'
+                AND current_setting('app.identity_subject', true) = 'local-development'
+            )
+        )
+    )"""
+    op.execute(sa.text(f"""
+        CREATE POLICY rls_tenant_memberships_self_or_admin
+        ON tenant_memberships FOR ALL
+        USING ({membership_visibility})
+        WITH CHECK ({membership_check})
+    """))
 
     _enable_force_rls("projects")
     project_visibility = f"""(
@@ -172,7 +189,23 @@ def upgrade() -> None:
             )
         )
     )"""
-    _policy("projects", "rls_projects_membership", project_visibility)
+    op.execute(sa.text('DROP POLICY IF EXISTS "rls_projects_membership" ON projects'))
+    project_check = f"""(
+        tenant_id = {tenant_id}
+        AND (
+            {tenant_admin}
+            OR (
+                current_setting('app.identity_issuer', true) = 'local'
+                AND current_setting('app.identity_subject', true) = 'local-development'
+            )
+        )
+    )"""
+    op.execute(sa.text(f"""
+        CREATE POLICY rls_projects_membership
+        ON projects FOR ALL
+        USING ({project_visibility})
+        WITH CHECK ({project_check})
+    """))
 
     _enable_force_rls("project_memberships")
     project_membership_visibility = f"""(
@@ -180,11 +213,16 @@ def upgrade() -> None:
         OR ({tenant_admin} AND project_id::text = ANY({project_ids}))
     )"""
     project_membership_check = f"""(
-        user_id = NULLIF(current_setting('app.user_id', true), '')::uuid
-        OR (
+        (
             {tenant_admin}
             AND project_id::text = ANY({project_ids})
             AND user_id IN (SELECT user_id FROM tenant_memberships WHERE tenant_id = {tenant_id})
+        )
+        OR (
+            current_setting('app.identity_issuer', true) = 'local'
+            AND current_setting('app.identity_subject', true) = 'local-development'
+            AND user_id = NULLIF(current_setting('app.user_id', true), '')::uuid
+            AND project_id::text = ANY({project_ids})
         )
     )"""
     op.execute(sa.text('DROP POLICY IF EXISTS "rls_project_memberships_self_or_admin" ON project_memberships'))
