@@ -1204,3 +1204,10 @@ python -m scripts.provision_user --tenant acme --tenant-name "Acme Research" --i
 ```
 
 This is application-level isolation, not PostgreSQL RLS. Cross-tenant penetration tests and database RLS remain required before exposing the system to mutually untrusted organizations. See [Tenant and Project Isolation](docs/tenant_project_isolation.md).
+
+
+### PostgreSQL Row-Level Security
+
+Alembic revision `20261123_0004` enables and forces tenant RLS on research tasks, documents, chunks, evidence, feedback, evaluation results, and audit events. Each PostgreSQL transaction receives a local `app.tenant_id`; missing context returns no tenant rows and rejects tenant-owned writes. Background and Celery execution messages carry tenant context before accessing protected rows.
+
+**Deployment requirement:** run the API/worker with a dedicated least-privilege PostgreSQL role that is not a superuser and does not have `BYPASSRLS`. Superusers and BYPASSRLS roles bypass RLS even when FORCE is enabled. Project-level RLS and full penetration testing are still pending. See [Tenant and Project Isolation](docs/tenant_project_isolation.md).
