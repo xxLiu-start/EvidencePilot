@@ -195,6 +195,8 @@ def get_request_context(
     Token role claims are not authorization grants. Database memberships are the
     authority for tenant and project access.
     """
+    for key in ("tenant_id", "user_id", "project_ids", "selected_project_id", "selected_project_ids"):
+        db.info.pop(key, None)
     if principal.development_identity:
         if settings.environment == "production":
             raise HTTPException(status_code=503, detail="Development identity is unavailable in production")
