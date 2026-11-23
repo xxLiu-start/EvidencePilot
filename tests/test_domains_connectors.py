@@ -143,3 +143,40 @@ def test_explicit_domain_scope_attributes_must_match_evidence():
     )
     assert eligible_source(claim, matching) is True
     assert eligible_source(claim, mismatched) is False
+
+
+
+def test_postgresql_table_connector_enforces_tenant_filter_and_read_only_queries():
+    from sqlalchemy import create_engine, text
+
+    from app.connectors.postgres import PostgreSQLTableConnector
+
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.execute(text(
+            "CREATE TABLE research_records (id INTEGER PRIMARY KEY, tenant_id TEXT NOT NULL, "
+            "title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL)"
+        ))
+        connection.execute(text(
+            "INSERT INTO research_records (id, tenant_id, title, body, status) VALUES "
+            "(1, 'tenant-a', 'Market report', 'Market growth evidence', 'approved'), "
+            "(2, 'tenant-b', 'Market plan', 'Private tenant data', 'approved')"
+        ))
+    connector = PostgreSQLTableConnector(
+        engine, table_name="research_records", primary_key="id",
+        searchable_columns=["title", "body"], tenant_column="tenant_id",
+        filter_columns=["status"], max_rows=10,
+    )
+    hits = connector.search("market", access_context={"tenant_id": "tenant-a"})
+    assert len(hits) == 1
+    assert hits[0].source_type == "database"
+    assert hits[0].content_hash
+    assert connector.fetch("1", access_context={"tenant_id": "tenant-a"}).title == "Market report"
+    with pytest.raises(LookupError):
+        connector.fetch("2", access_context={"tenant_id": "tenant-a"})
+    with pytest.raises(PermissionError):
+        connector.search("market")
+    with pytest.raises(ValueError, match="Filter column is not allowed"):
+        connector.search("market", filters={"body": "Private tenant data"},
+                         access_context={"tenant_id": "tenant-a"})
+    engine.dispose()
