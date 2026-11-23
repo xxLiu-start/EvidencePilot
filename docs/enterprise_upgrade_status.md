@@ -22,7 +22,8 @@ This document records what is implemented in the current upgrade increment and w
 - Complete tenant/object-level isolation for all task, document, evidence, retrieval, feedback and evaluation APIs.
 - Human-review UI, reviewer assignment, approval/rejection audit trail and signed review events.
 - Queue foundation now includes Redis/Celery, a transactional outbox, a polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Cancellation, priorities, queue monitoring, and full multi-worker chaos acceptance remain pending.
-- Alembic migration history; current additive schema initialization remains.
+- Alembic baseline migration and a separate deployment migration service are implemented. Production startup can disable automatic DDL and require an applied migration version.
+- Alembic baseline and deployment migration command are implemented. A single non-destructive baseline revision exists; future schema changes still need additional versioned revisions and migration-specific integration coverage.
 - S3/MinIO object storage and enterprise SaaS connectors.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry, Prometheus and Grafana.
@@ -31,6 +32,6 @@ This document records what is implemented in the current upgrade increment and w
 
 ## Readiness statement
 
-The current increment is an architectural foundation, not a production-readiness declaration. The queue path uses at-least-once delivery with idempotent consumers; it does not claim exactly-once execution. OIDC protects API authentication and selected write-role boundaries, but without tenant/object-level authorization it is not safe for multiple mutually untrusted organizations. Compliance and business profiles require human review but no review workflow is implemented yet; their Claims therefore remain uncounted as supported until a future approval workflow is added.
+The current increment is an architectural foundation, not a production-readiness declaration. The migration baseline is intentionally non-destructive and has no destructive downgrade; subsequent schema changes must be delivered as new Alembic revisions. The queue path uses at-least-once delivery with idempotent consumers; it does not claim exactly-once execution. OIDC protects API authentication and selected write-role boundaries, but without tenant/object-level authorization it is not safe for multiple mutually untrusted organizations. Compliance and business profiles require human review but no review workflow is implemented yet; their Claims therefore remain uncounted as supported until a future approval workflow is added.
 
 The repository's existing tests have not been re-run by the GitHub file-editing connection. The new tests are committed and must pass in CI or a local development environment before this increment is considered verified.
