@@ -162,12 +162,17 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
             "INSERT INTO projects (id, tenant_id, slug, name, is_active, created_at) VALUES "
             "(:pa, :a, 'default', 'Project A', true, now()), (:pb, :b, 'default', 'Project B', true, now())"
         ), {"pa": project_a_id, "pb": project_b_id, "a": tenant_a_id, "b": tenant_b_id})
+        task_a_id, task_b_id = uuid4(), uuid4()
         connection.execute(text(
             "INSERT INTO research_tasks (id, tenant_id, project_id, query, status, budget, domain_id, created_at) "
             "VALUES (:ta, :a, :pa, 'tenant-a-secret', 'queued', 2, 'general_research', now()), "
             "(:tb, :b, :pb, 'tenant-b-secret', 'queued', 2, 'general_research', now())"
-        ), {"ta": uuid4(), "tb": uuid4(), "a": tenant_a_id, "b": tenant_b_id,
+        ), {"ta": task_a_id, "tb": task_b_id, "a": tenant_a_id, "b": tenant_b_id,
             "pa": project_a_id, "pb": project_b_id})
+        connection.execute(text(
+            "INSERT INTO agent_runs (task_id, state, updated_at) "
+            "VALUES (:ta, '{}'::json, now()), (:tb, '{\"private\": true}'::json, now())"
+        ), {"ta": task_a_id, "tb": task_b_id})
         connection.execute(text("ALTER TABLE research_tasks ENABLE ROW LEVEL SECURITY"))
         connection.execute(text("ALTER TABLE research_tasks FORCE ROW LEVEL SECURITY"))
         connection.execute(text("DROP POLICY IF EXISTS research_tasks_tenant_isolation ON research_tasks"))
@@ -179,6 +184,16 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
         connection.execute(text(f'CREATE ROLE "{role}" NOLOGIN'))
         schema_name = connection.scalar(text("SELECT current_schema()"))
         connection.execute(text(f'GRANT USAGE ON SCHEMA "{schema_name}" TO "{role}"'))
+        connection.execute(text("ALTER TABLE agent_runs ENABLE ROW LEVEL SECURITY"))
+        connection.execute(text("ALTER TABLE agent_runs FORCE ROW LEVEL SECURITY"))
+        connection.execute(text(
+            "CREATE POLICY agent_runs_tenant_isolation ON agent_runs "
+            "USING (EXISTS (SELECT 1 FROM research_tasks t WHERE t.id = agent_runs.task_id "
+            "AND t.tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)) "
+            "WITH CHECK (EXISTS (SELECT 1 FROM research_tasks t WHERE t.id = agent_runs.task_id "
+            "AND t.tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid))"
+        ))
+        connection.execute(text(f'GRANT SELECT ON agent_runs TO "{role}"'))
         connection.execute(text(f'GRANT SELECT, INSERT ON research_tasks TO "{role}"'))
 
     try:
@@ -191,6 +206,7 @@ def test_postgres_rls_blocks_cross_tenant_raw_sql(postgres):
                     "SELECT query FROM research_tasks ORDER BY query"
                 )).scalars().all()
                 assert visible == ["tenant-a-secret"]
+                assert connection.execute(text("SELECT COUNT(*) FROM agent_runs")).scalar_one() == 1
                 connection.execute(text("SELECT set_config('app.tenant_id', '', true)"))
                 assert connection.execute(text("SELECT COUNT(*) FROM research_tasks")).scalar_one() == 0
 
