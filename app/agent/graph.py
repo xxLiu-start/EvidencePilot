@@ -302,7 +302,9 @@ class AgentRuntime:
                 source = row.source_url or f"document:{row.document_id}#chunk={row.chunk_id}"
                 lines.extend([f"- Evidence {row.id}；关系：{row.relation}；来源：{source}",
                               "> " + row.supporting_text[:400].replace("\n", "\n> ")])
-            if not coverage.get("enough"):
+            if coverage.get("human_review_required") and not coverage.get("human_review_approved"):
+                lines.append("待人工审核：该领域策略要求人工批准后才能将此 Claim 计入已验证覆盖率。")
+            elif not coverage.get("enough"):
                 lines.append(f"待补充：满足 required_source={claim['required_source']} 的证据。")
         if state["last_error"]:
             lines.append(f"最后一次错误类别：{state['last_error']}。")
