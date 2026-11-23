@@ -8,7 +8,7 @@ Use the migration-owner connection only for deployment migrations:
 DATABASE_URL="$COMPOSE_DATABASE_URL" alembic upgrade head
 ```
 
-Revision `20261123_0004` enables and forces tenant RLS on the tenant-owned resource tables.
+Revisions `20261123_0004` and `20261123_0005` enable and force tenant RLS on tenant-owned resource tables and task-owned execution/queue state, including `agent_runs`, `agent_steps`, `evidence_assessments`, `state_snapshots`, and `outbox_events`.
 
 ## 2. Create a separate runtime role
 
