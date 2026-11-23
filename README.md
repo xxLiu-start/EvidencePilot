@@ -1211,3 +1211,6 @@ This is application-level isolation, not PostgreSQL RLS. Cross-tenant penetratio
 Alembic revision `20261123_0004` enables and forces tenant RLS on research tasks, documents, chunks, evidence, feedback, evaluation results, and audit events. Each PostgreSQL transaction receives a local `app.tenant_id`; missing context returns no tenant rows and rejects tenant-owned writes. Background and Celery execution messages carry tenant context before accessing protected rows.
 
 **Deployment requirement:** run the API/worker with a dedicated least-privilege PostgreSQL role that is not a superuser and does not have `BYPASSRLS`. Superusers and BYPASSRLS roles bypass RLS even when FORCE is enabled. Project-level RLS and full penetration testing are still pending. See [Tenant and Project Isolation](docs/tenant_project_isolation.md).
+
+
+For production PostgreSQL RLS deployment, create a dedicated `NOSUPERUSER NOBYPASSRLS` runtime role and set `COMPOSE_RUNTIME_DATABASE_URL`; keep `COMPOSE_DATABASE_URL` for migrations only. See [PostgreSQL RLS Deployment](docs/postgres_rls_deployment.md).
