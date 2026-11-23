@@ -1132,3 +1132,26 @@ python scripts/browser_acceptance.py --api http://127.0.0.1:18002 --ui http://12
 FastAPI BackgroundTasks 不是可靠队列，恢复是数据库快照支持的手动恢复，不宣称生产级分布式恢复。
 API 没有多用户鉴权与租户隔离；服务默认绑定本机，用于开发演示。
 简历项目描述草稿见 [docs/resume.txt](docs/resume.txt)，只包含已经实现或实测的内容。
+
+
+## Universal Research and Enterprise Foundations
+
+New research tasks can select a validated domain profile instead of inheriting a model-infrastructure-only framing:
+
+- `general_research`
+- `technology_research`
+- `market_research`
+- `academic_research`
+- `compliance_research`
+- `business_due_diligence`
+- `model_infrastructure_research`
+
+Use `GET /api/v1/domains` to list profiles and pass `domain_id` to `POST /api/v1/research`. Existing tasks and historical benchmark data default to `general_research` through an additive schema upgrade. Domain policies now influence Claim limits, evidence freshness, independent-source corroboration, and mandatory human-review gates. Compliance and business profiles fail closed until a human approval is available; the approval workflow itself is not yet implemented.
+
+A source connector contract is available in `app/connectors`. The initial adapters are a root-scoped read-only local File Connector and a public Web Search Connector; the Agent's web discovery path uses the Web Connector adapter. Database, S3/MinIO, SharePoint, Confluence, and GitHub enterprise connectors remain future integrations. See [Domain Profiles](docs/domain_profiles.md) and [Source Connectors](docs/source_connectors.md).
+
+OIDC JWT verification and coarse write-role checks are available in `app/auth/oidc.py`. Configure `AUTH_ENABLED=true`, `OIDC_ISSUER`, `OIDC_AUDIENCE`, and `OIDC_JWKS_URL`. Production startup requires OIDC and HTTPS identity endpoints; local development retains an explicit development-only identity. See [OIDC Authentication](docs/oidc_authentication.md).
+
+**Important security boundary:** OIDC authentication and role checks do not yet provide database-backed tenant/project membership or complete object-level isolation. Do not expose this increment to multiple mutually untrusted tenants. A durable task queue, transactional outbox, Alembic migration history, object storage, full observability, human-review workflow, and multi-domain manually reviewed benchmark are also still pending. The exact implementation status is tracked in [Enterprise Upgrade Status](docs/enterprise_upgrade_status.md).
+
+A GitHub Actions workflow now runs Python compilation, pytest, and optional real PostgreSQL/pgvector integration tests on pushes and pull requests.
