@@ -40,7 +40,8 @@ def create_research_task(
     db.flush()
     if settings.task_queue_enabled:
         db.add(OutboxEvent(event_type="research_task.created", aggregate_id=task.id,
-                           payload={"task_id": str(task.id)}, status="pending",
+                           payload={"task_id": str(task.id), "tenant_id": str(context.tenant_id),
+                                    "project_id": str(project_id), "user_id": str(context.user_id)}, status="pending",
                            created_at=datetime.now(timezone.utc)))
     db.flush()
     record_audit_event(db, context, action="research_task.create", resource_type="research_task",
@@ -49,6 +50,7 @@ def create_research_task(
     db.commit()
     db.refresh(task)
     if not settings.task_queue_enabled:
-        background_tasks.add_task(execute_background, db.get_bind(), task.id)
+        background_tasks.add_task(execute_background, db.get_bind(), task.id, None,
+                                    context.tenant_id, project_id, context.user_id)
     return {"id": task.id, "task_id": task.id, "query": task.query, "status": task.status,
             "budget": task.budget, "domain_id": task.domain_id, "created_at": task.created_at}
