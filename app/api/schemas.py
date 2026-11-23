@@ -9,6 +9,7 @@ class ResearchRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     query: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
     budget: int = Field(default=6, gt=0, le=20)
+    domain_id: str = Field(default="general_research", pattern=r"^[a-z][a-z0-9_-]{1,63}$")
 
 
 class ResearchTaskResponse(BaseModel):
@@ -18,6 +19,7 @@ class ResearchTaskResponse(BaseModel):
     query: str
     status: str
     budget: int
+    domain_id: str = "general_research"
     created_at: datetime
 
     @computed_field
