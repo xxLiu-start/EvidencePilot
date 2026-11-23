@@ -16,7 +16,8 @@ from app.search.research import replay_snapshot, run_web_research
 from app.search.web_search import SearchError
 
 
-from app.auth.oidc import require_roles
+from app.auth.oidc import RequestContext, get_request_context, require_roles
+from app.auth.audit import record_audit_event, require_selected_project
 
 router = APIRouter()
 
@@ -40,10 +41,17 @@ def create_queries(request: WebResearchRequest):
 
 
 @router.post("/web-research", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
-def web_research(request: WebResearchRequest, db: Annotated[Session, Depends(get_db)]):
+def web_research(request: WebResearchRequest, db: Annotated[Session, Depends(get_db)],
+                 context: RequestContext = Depends(get_request_context)):
+    project_id = require_selected_project(context)
     try:
-        return run_web_research(db, request.claims, max_queries=request.max_queries,
-                                max_results=request.max_results, max_pages=request.max_pages)
+        result = run_web_research(db, request.claims, max_queries=request.max_queries,
+                                  max_results=request.max_results, max_pages=request.max_pages)
+        record_audit_event(db, context, action="web_research.create", resource_type="web_research_run",
+                           resource_id=result["run_id"], project_id=project_id,
+                           metadata={"claim_count": len(request.claims), "status": result["status"]})
+        db.commit()
+        return result
     except (LLMError, LLMConfigurationError, SearchError) as exc:
         raise HTTPException(status_code=503, detail=getattr(exc, "category", "service_configuration")) from None
     except CacheMiss:
@@ -53,9 +61,14 @@ def web_research(request: WebResearchRequest, db: Annotated[Session, Depends(get
 
 
 @router.post("/web-research/{run_id}/replay", dependencies=[Depends(require_roles("RESEARCHER", "PROJECT_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN"))])
-def replay(run_id: UUID, db: Annotated[Session, Depends(get_db)]):
+def replay(run_id: UUID, db: Annotated[Session, Depends(get_db)],
+           context: RequestContext = Depends(get_request_context)):
     try:
-        return replay_snapshot(db, str(run_id))
+        result = replay_snapshot(db, str(run_id))
+        record_audit_event(db, context, action="web_research.replay", resource_type="web_research_run",
+                           resource_id=run_id, metadata={"replayed": True})
+        db.commit()
+        return result
     except CacheMiss:
         raise HTTPException(status_code=404, detail="Research snapshot not found") from None
     except ValueError:
