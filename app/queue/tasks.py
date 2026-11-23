@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.agent.errors import AgentConflict
 from app.db.models import AgentRun, ResearchTask
 from app.db.session import SessionLocal
+from app.config import settings
 from app.queue.celery_app import celery_app
 
 
