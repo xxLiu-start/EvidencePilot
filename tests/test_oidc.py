@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+import time
 
 import jwt
 import pytest
@@ -14,8 +15,8 @@ def _token(private_key, *, audience="evidencepilot-api"):
             "sub": "user-123",
             "iss": "https://identity.example.test/realms/research",
             "aud": audience,
-            "iat": 1_900_000_000,
-            "exp": 1_900_000_300,
+            "iat": int(time.time()),
+            "exp": int(time.time()) + 300,
             "email": "researcher@example.test",
             "realm_access": {"roles": ["RESEARCHER", "REVIEWER"]},
             "tenant_id": "tenant-a",
