@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+import time
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -15,6 +16,8 @@ from app.evaluation.store import import_reports
 from app.retrieval.bm25 import get_bm25_store
 from app.llm_client import get_llm_client
 from app.config import settings
+from app.observability.metrics import record_http_request
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 
 @asynccontextmanager
@@ -62,6 +65,27 @@ app.include_router(agent.router, prefix="/api/v1", dependencies=[Depends(get_cur
 app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+
+
+@app.middleware("http")
+async def collect_http_metrics(request: Request, call_next):
+    started = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        route = request.scope.get("route")
+        route_template = getattr(route, "path", "unmatched")
+        record_http_request(request.method, route_template, status_code, time.perf_counter() - started)
+
+
+@app.get("/metrics", include_in_schema=False)
+def metrics_endpoint():
+    if not settings.metrics_enabled:
+        raise HTTPException(status_code=404, detail="Metrics endpoint disabled")
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.exception_handler(SQLAlchemyError)
