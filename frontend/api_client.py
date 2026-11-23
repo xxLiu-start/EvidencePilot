@@ -29,6 +29,7 @@ class APIClient:
     base_url: str
     transport: object = None
     access_token: str | None = None
+    project_id: str | None = None
 
     def __post_init__(self):
         if not safe_http_url(self.base_url) or urlsplit(self.base_url).query or urlsplit(self.base_url).fragment:
@@ -41,6 +42,8 @@ class APIClient:
         headers = dict(kwargs.pop("headers", {}) or {})
         if self.access_token:
             headers["Authorization"] = f"Bearer {self.access_token}"
+        if self.project_id:
+            headers["X-Project-ID"] = self.project_id
         if headers:
             kwargs["headers"] = headers
         try:
