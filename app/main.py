@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import agent, documents, domains, evaluations, evidences, feedback, research, search, tasks, web_research
+from app.auth.oidc import get_current_principal, validate_auth_configuration
 from app.db.schema import initialize_database
 from app.db.session import SessionLocal, engine, get_db
 from app.evaluation.store import import_reports
@@ -17,6 +18,7 @@ from app.llm_client import get_llm_client
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    validate_auth_configuration()
     reasoning = get_llm_client()
     _app.state.llm_client = reasoning
     try:
@@ -34,16 +36,16 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
-app.include_router(research.router, prefix="/api/v1")
-app.include_router(domains.router, prefix="/api/v1")
-app.include_router(tasks.router, prefix="/api/v1")
-app.include_router(documents.router, prefix="/api/v1")
-app.include_router(search.router, prefix="/api/v1")
-app.include_router(web_research.router, prefix="/api/v1")
-app.include_router(agent.router, prefix="/api/v1")
-app.include_router(feedback.router, prefix="/api/v1")
-app.include_router(evaluations.router, prefix="/api/v1")
-app.include_router(evidences.router, prefix="/api/v1")
+app.include_router(research.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(domains.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(tasks.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(documents.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(search.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(web_research.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(agent.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
+app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_current_principal)])
 
 
 @app.exception_handler(SQLAlchemyError)
