@@ -60,7 +60,7 @@ services:
     ports:
       - "127.0.0.1:${API_PORT:-8001}:8000"
     environment:
-      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_RUNTIME_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       AUTH_ENABLED: ${AUTH_ENABLED:-false}
       OIDC_ISSUER: ${OIDC_ISSUER:-}
@@ -134,7 +134,7 @@ services:
     command: ["celery", "-A", "app.queue.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=${WORKER_CONCURRENCY:-2}"]
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_RUNTIME_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
       REDIS_URL: redis://redis:6379/0
       TASK_QUEUE_ENABLED: "true"
@@ -180,7 +180,7 @@ services:
     command: ["python", "-m", "app.queue.dispatcher"]
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${COMPOSE_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
+      DATABASE_URL: ${COMPOSE_RUNTIME_DATABASE_URL:-postgresql+psycopg://${POSTGRES_USER:-evidencepilot}:${POSTGRES_PASSWORD:-change_this_password}@postgres:5432/${POSTGRES_DB:-evidencepilot}}
       REDIS_URL: redis://redis:6379/0
       TASK_QUEUE_ENABLED: "true"
       TASK_QUEUE_DISPATCH_INTERVAL_SECONDS: ${TASK_QUEUE_DISPATCH_INTERVAL_SECONDS:-1}
