@@ -45,7 +45,9 @@ jobs:
           python -m pip install -r requirements-runtime.txt -r requirements-frontend.txt
           python -m pip install pytest pytest-asyncio
       - name: Validate Docker Compose configuration
-        run: python -c "import yaml; yaml.safe_load(open('docker-compose.yml', encoding='utf-8'))"
+        run: |
+          python -c "import yaml; yaml.safe_load(open('docker-compose.yml', encoding='utf-8'))"
+          docker compose --profile apps config --quiet
       - name: Apply Alembic baseline to PostgreSQL
         run: DATABASE_URL="$EVIDENCEPILOT_TEST_POSTGRES_URL" alembic upgrade head
       - name: Compile Python modules
