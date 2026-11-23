@@ -24,7 +24,7 @@ This document records what is implemented in the current upgrade increment and w
 - Queue foundation now includes Redis/Celery, a transactional outbox, a polling dispatcher, late acknowledgements, idempotent task IDs, lease-aware retries/recovery, and outbox dead-letter status. Cancellation, priorities, queue monitoring, and full multi-worker chaos acceptance remain pending.
 - Alembic baseline migration and a separate deployment migration service are implemented. Production startup can disable automatic DDL and require an applied migration version.
 - Alembic baseline and deployment migration command are implemented. A single non-destructive baseline revision exists; future schema changes still need additional versioned revisions and migration-specific integration coverage.
-- S3/MinIO object storage and enterprise SaaS connectors.
+- S3/MinIO object storage and enterprise SaaS connectors (SharePoint, Confluence, GitHub) remain pending; a read-only PostgreSQL table connector is now implemented.
 - Full model gateway with provider registry, cost quotas and circuit breakers.
 - OpenTelemetry, Prometheus and Grafana.
 - Multi-domain manually reviewed benchmark and multi-seed evaluation.
