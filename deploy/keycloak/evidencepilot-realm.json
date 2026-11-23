@@ -62,7 +62,7 @@
       "email": "developer@example.test",
       "emailVerified": true,
       "credentials": [
-        {"type": "password", "value": "change_me_before_use", "temporary": true}
+        {"type": "password", "value": "change_me_before_use", "temporary": false}
       ],
       "realmRoles": ["RESEARCHER", "TENANT_ADMIN", "SUPER_ADMIN"]
     }
