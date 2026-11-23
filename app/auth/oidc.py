@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session
 from app.db.models import (DocumentChunk, DocumentRecord, EvidenceRecord, EvaluationResult, Project,
                            ProjectMembership, ResearchTask, TaskFeedback, Tenant, TenantMembership, User)
 from app.db.session import get_db
+from app.db.rls import apply_rls_context, set_session_scope
 
 from app.config import settings
 
@@ -151,17 +152,24 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
                         external_id="local-development", is_active=True)
         db.add(tenant)
         db.flush()
+    set_session_scope(db, tenant_id=tenant.id, identity_issuer="local",
+                      identity_subject="local-development")
     user = db.scalar(select(User).where(User.issuer == "local", User.subject == "local-development"))
     if user is None:
         user = User(issuer="local", subject="local-development", email="developer@localhost", is_active=True)
         db.add(user)
         db.flush()
+    db.info["user_id"] = user.id
+    apply_rls_context(db.connection(), db.info)
     membership = db.scalar(select(TenantMembership).where(
         TenantMembership.tenant_id == tenant.id, TenantMembership.user_id == user.id
     ))
     if membership is None:
         membership = TenantMembership(tenant_id=tenant.id, user_id=user.id, role="SUPER_ADMIN", is_active=True)
         db.add(membership)
+        db.flush()
+    set_session_scope(db, tenant_id=tenant.id, user_id=user.id, tenant_role=membership.role,
+                      identity_issuer="local", identity_subject="local-development")
     project = db.scalar(select(Project).where(Project.tenant_id == tenant.id, Project.slug == "default"))
     if project is None:
         project = Project(tenant_id=tenant.id, slug="default", name="Default Development Project", is_active=True)
@@ -172,6 +180,9 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
     ))
     if project_membership is None:
         db.add(ProjectMembership(project_id=project.id, user_id=user.id, role="SUPER_ADMIN", is_active=True))
+    set_session_scope(db, tenant_id=tenant.id, user_id=user.id, tenant_role=membership.role,
+                      project_ids=(project.id,), selected_project_id=project.id,
+                      identity_issuer="local", identity_subject="local-development")
     # Development databases and test fixtures may predate the Alembic ownership
     # migration. Attach only unowned legacy rows to the local development scope.
     for model in (ResearchTask, DocumentRecord, DocumentChunk, EvidenceRecord, TaskFeedback, EvaluationResult):
@@ -196,8 +207,17 @@ def get_request_context(
     Token role claims are not authorization grants. Database memberships are the
     authority for tenant and project access.
     """
-    for key in ("tenant_id", "user_id", "project_ids", "selected_project_id", "selected_project_ids"):
+    for key in ("tenant_id", "user_id", "project_ids", "selected_project_id", "selected_project_ids",
+                "tenant_role", "tenant_external_id", "identity_issuer", "identity_subject"):
         db.info.pop(key, None)
+    db.info.update({
+        "identity_issuer": principal.issuer,
+        "identity_subject": principal.subject,
+        "tenant_external_id": principal.tenant_id,
+    })
+    # The identity claims are installed before the first SELECT so RLS can
+    # expose only this OIDC subject while memberships are resolved.
+    apply_rls_context(db.connection(), db.info)
     if principal.development_identity:
         if settings.environment == "production":
             raise HTTPException(status_code=503, detail="Development identity is unavailable in production")
@@ -227,6 +247,11 @@ def get_request_context(
             raise HTTPException(status_code=403, detail="Active tenant membership required")
 
     tenant_role = membership.role.upper()
+    set_session_scope(
+        db, tenant_id=tenant.id, user_id=user.id, tenant_role=tenant_role,
+        identity_issuer=principal.issuer, identity_subject=principal.subject,
+        tenant_external_id=principal.tenant_id,
+    )
     if tenant_role in {"TENANT_ADMIN", "SUPER_ADMIN"}:
         projects = list(db.scalars(select(Project).where(
             Project.tenant_id == tenant.id, Project.is_active.is_(True)
@@ -277,13 +302,12 @@ def get_request_context(
         selected_project_id=selected_project_id,
         roles=tuple(sorted(roles)),
     )
-    db.info.update({
-        "tenant_id": tenant.id,
-        "user_id": user.id,
-        "project_ids": project_ids,
-        "selected_project_id": selected_project_id,
-        "selected_project_ids": (selected_project_id,) if selected_project_id else project_ids,
-    })
+    set_session_scope(
+        db, tenant_id=tenant.id, user_id=user.id, tenant_role=tenant_role,
+        project_ids=project_ids, selected_project_id=selected_project_id,
+        identity_issuer=principal.issuer, identity_subject=principal.subject,
+        tenant_external_id=principal.tenant_id,
+    )
     # Do not let an ORM identity loaded before tenant resolution bypass SQL filters.
     db.expunge_all()
     return context
