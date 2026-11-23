@@ -33,6 +33,9 @@ def api():
     token = st.session_state.get("oidc_access_token")
     if token and hasattr(client, "access_token"):
         client.access_token = token
+    project_id = st.session_state.get("project_id")
+    if project_id and hasattr(client, "project_id"):
+        client.project_id = project_id
     return client
 
 
@@ -345,6 +348,24 @@ def main():
                 except APIError as exc: error(exc)
         try:
             api().health()
+            membership = api().me()
+            projects = membership.get("projects", [])
+            project_ids = [str(item["id"]) for item in projects]
+            if project_ids:
+                current_project = st.session_state.get("project_id")
+                if current_project not in project_ids:
+                    current_project = project_ids[0]
+                if len(projects) > 1:
+                    selected_project = st.selectbox(
+                        "当前项目", options=project_ids,
+                        index=project_ids.index(current_project),
+                        format_func=lambda value: next((item["name"] for item in projects if str(item["id"]) == value), value),
+                    )
+                    if selected_project != st.session_state.get("project_id"):
+                        st.session_state.project_id = selected_project
+                        st.rerun()
+                else:
+                    st.session_state.project_id = project_ids[0]
             config = api().system()
             st.caption(f"● API 已连接 · {config['mode']}")
             st.caption(config["model"])
