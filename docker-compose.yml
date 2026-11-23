@@ -53,6 +53,7 @@ services:
       OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
       TASK_QUEUE_ENABLED: ${TASK_QUEUE_ENABLED:-false}
       DB_AUTO_MIGRATE: ${DB_AUTO_MIGRATE:-false}
+      METRICS_ENABLED: ${METRICS_ENABLED:-true}
       REDIS_URL: redis://redis:6379/0
       CREDENTIALS_ENV_FILE: /run/secrets/evidencepilot.env
       LLM_MODE: ${LLM_MODE:-local}
@@ -178,6 +179,40 @@ services:
       api:
         condition: service_healthy
 
+
+  prometheus:
+    profiles: [apps]
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  grafana:
+    profiles: [apps]
+    image: grafana/grafana:11.4.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change_this_password}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deploy/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+
   streamlit:
     profiles: [apps]
     build:
@@ -200,3 +235,5 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
