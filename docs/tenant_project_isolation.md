@@ -19,7 +19,9 @@ Research tasks, documents, chunks, evidence, feedback, and evaluation results ca
 
 The SQLAlchemy session applies `with_loader_criteria` tenant and project predicates to ORM SELECTs. A `before_flush` guard stamps new tenant-owned records and rejects cross-tenant or non-member project writes. Request sessions expire their identity map after scope resolution so a previously loaded ORM object cannot bypass the filters through `Session.get`.
 
-BackgroundTasks and Celery workers first load the task, then copy its tenant/project scope into the worker session before executing the graph. BM25 snapshots are shared in memory but filtered by the active tenant/project at retrieval time; dense retrieval uses the scoped ORM query.
+Tenant and project roles are evaluated for the selected project, not unioned across all of a user's projects. A role held in Project A cannot authorize a write in Project B. Multi-project write operations must select a project with `X-Project-ID`.
+
+BackgroundTasks and Celery workers first load the task, then copy its tenant/project scope into the worker session before executing the graph. The LangGraph runtime also propagates the same scope into every isolated tool Session; otherwise RAG retrieval and Evidence persistence would silently execute outside the request's tenant boundary. Evidence records are explicitly stamped with tenant/project ownership at persistence time. BM25 snapshots are shared in memory but filtered by the active tenant/project at retrieval time; dense retrieval uses the scoped ORM query.
 
 The API uses `X-Project-ID` to narrow a request to one of the caller's memberships. Reads without that header are limited to the caller's accessible projects. New task/document/web-research writes require a selected project if the user has more than one.
 
