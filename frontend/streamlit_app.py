@@ -27,7 +27,8 @@ ERRORS = {"timeout": "请求超时。若刚提交了任务或文档，请先查�
 
 
 def api():
-    return APIClient(os.environ.get("API_BASE_URL", "http://127.0.0.1:8001"))
+    return APIClient(os.environ.get("API_BASE_URL", "http://127.0.0.1:8001"),
+                     access_token=st.session_state.get("oidc_access_token"))
 
 
 def error(exc):
