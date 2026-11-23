@@ -24,6 +24,10 @@ jobs:
           --health-retries 20
     env:
       EVIDENCEPILOT_TEST_POSTGRES_URL: postgresql+psycopg://postgres:postgres@localhost:5432/evidencepilot_test
+      EVIDENCEPILOT_TEST_POSTGRES_APP_URL: postgresql+psycopg://evidencepilot_app:evidencepilot_app_test_password@localhost:5432/evidencepilot_test
+      EVIDENCEPILOT_TEST_POSTGRES_DISPATCHER_URL: postgresql+psycopg://evidencepilot_dispatcher:evidencepilot_dispatcher_test_password@localhost:5432/evidencepilot_test
+      EVIDENCEPILOT_APP_PASSWORD: evidencepilot_app_test_password
+      EVIDENCEPILOT_DISPATCHER_PASSWORD: evidencepilot_dispatcher_test_password
       DATABASE_URL: sqlite://
       ENVIRONMENT: test
       AUTH_ENABLED: "false"
@@ -49,8 +53,20 @@ jobs:
           cp .env.example .env
           python -c "import yaml; yaml.safe_load(open('docker-compose.yml', encoding='utf-8'))"
           docker compose --profile apps config --quiet
-      - name: Apply Alembic baseline to PostgreSQL
+      - name: Bootstrap least-privilege PostgreSQL roles
+        run: |
+          psql "postgresql://postgres:postgres@localhost:5432/evidencepilot_test" \
+            -v ON_ERROR_STOP=1 \
+            -v app_password="$EVIDENCEPILOT_APP_PASSWORD" \
+            -v dispatcher_password="$EVIDENCEPILOT_DISPATCHER_PASSWORD" \
+            -f deploy/postgres/bootstrap_roles.sql
+      - name: Apply Alembic migrations and forced RLS policies
         run: DATABASE_URL="$EVIDENCEPILOT_TEST_POSTGRES_URL" alembic upgrade head
+      - name: Grant least-privilege runtime table access
+        run: |
+          psql "postgresql://postgres:postgres@localhost:5432/evidencepilot_test" \
+            -v ON_ERROR_STOP=1 -v migration_role=postgres \
+            -f deploy/postgres/grant_runtime.sql
       - name: Compile Python modules
         run: python -m compileall -q app frontend tests migrations
       - name: Run test suite
