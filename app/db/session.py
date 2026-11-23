@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine, event, false, or_
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session, with_loader_criteria
 
+from app.db.rls import apply_rls_context, set_session_scope
+
 from app.config import settings
 
 
@@ -11,6 +13,35 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 class Base(DeclarativeBase):
     pass
+
+
+@event.listens_for(Session, "after_begin")
+def _install_transaction_rls_context(session, transaction, connection):
+    # SET LOCAL values disappear at COMMIT/ROLLBACK; restore them for every
+    # transaction so pooled connections cannot carry one request into another.
+    apply_rls_context(connection, session.info)
+
+
+def load_task_with_scope(db: Session, task_id):
+    """Load one queued task through a one-row bootstrap policy, then scope the Session."""
+    from uuid import UUID
+    from app.db.models import ResearchTask
+
+    db.info["bootstrap_task_id"] = str(UUID(str(task_id)))
+    apply_rls_context(db.connection(), db.info)
+    task = db.get(ResearchTask, UUID(str(task_id)))
+    db.info.pop("bootstrap_task_id", None)
+    if task is None:
+        apply_rls_context(db.connection(), db.info)
+        return None
+    set_session_scope(
+        db,
+        tenant_id=task.tenant_id,
+        user_id=task.created_by_user_id,
+        project_ids=(task.project_id,) if task.project_id else (),
+        selected_project_id=task.project_id,
+    )
+    return task
 
 
 @event.listens_for(Session, "do_orm_execute")
