@@ -5,8 +5,8 @@ from uuid import UUID
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.agent.errors import AgentConflict
-from app.db.models import AgentRun, ResearchTask
-from app.db.session import SessionLocal
+from app.db.models import AgentRun
+from app.db.session import SessionLocal, load_task_with_scope
 from app.queue.celery_app import celery_app
 
 
@@ -25,12 +25,9 @@ def execute_research_task(self, task_id: str) -> dict:
 
     identifier = UUID(str(task_id))
     with SessionLocal() as db:
-        task = db.get(ResearchTask, identifier)
+        task = load_task_with_scope(db, identifier)
         if task is None:
             return {"task_id": str(identifier), "status": "not_found"}
-        db.info.update({"tenant_id": task.tenant_id, "user_id": task.created_by_user_id,
-                        "project_ids": (task.project_id,), "selected_project_id": task.project_id,
-                        "selected_project_ids": (task.project_id,)})
         try:
             state = run_agent_task(db, identifier)
             return {"task_id": str(identifier), "status": state.get("status", "unknown")}
