@@ -18,7 +18,7 @@ def detect_contradiction(claim, evidences):
         qb = set(re.findall(r"\b\d+(?:\.\d+)?\s*[kKmMgG]\b", value(right, "supporting_text", "")))
         if not has_opposing_relations([left, right]) and not (qa and qb and qa != qb):
             continue
-        keys = ("model_name", "model_version", "deployment_mode")
+        keys = set(("model_name", "model_version", "deployment_mode")) | (set(a) | set(b))
         mismatches = [key for key in keys if a.get(key) and b.get(key) and normalized(a[key]) != normalized(b[key])]
         unknown = [key for key in keys if not a.get(key) or not b.get(key)]
         dates_differ = bool(value(left, "published_at") and value(right, "published_at")
