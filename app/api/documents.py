@@ -23,7 +23,8 @@ from app.retrieval.ingestion import SUPPORTED_SUFFIXES
 from app.retrieval.embedding import EmbeddingError
 
 
-from app.auth.oidc import require_roles
+from app.auth.oidc import RequestContext, get_request_context, require_roles
+from app.auth.audit import record_audit_event, require_selected_project
 
 router = APIRouter()
 
@@ -33,11 +34,13 @@ router = APIRouter()
 def upload_document(
     file: Annotated[UploadFile, File()],
     db: Annotated[Session, Depends(get_db)],
+    context: RequestContext = Depends(get_request_context),
     source: Annotated[str | None, Form()] = None,
     version: Annotated[str, Form(min_length=1)] = "1",
     chunk_size: Annotated[int, Form(gt=0)] = DEFAULT_CHUNK_SIZE,
     chunk_overlap: Annotated[int, Form(ge=0)] = DEFAULT_CHUNK_OVERLAP,
 ) -> DocumentRecord:
+    project_id = require_selected_project(context)
     filename = Path((file.filename or "").replace("\\", "/")).name
     suffix = Path(filename).suffix.lower()
     if suffix not in SUPPORTED_SUFFIXES:
@@ -62,11 +65,16 @@ def upload_document(
                 raise HTTPException(status_code=422, detail="Uploaded document is empty")
             if suffix == ".pdf" and len(PdfReader(str(path)).pages) > settings.document_max_pages:
                 raise HTTPException(status_code=413, detail="PDF exceeds configured page limit")
-            return ingest_document(
+            document = ingest_document(
                 db, str(path), filename=filename,
                 source=source.strip() if source is not None else filename,
                 version=version.strip(), chunk_size=chunk_size, chunk_overlap=chunk_overlap,
             )
+            record_audit_event(db, context, action="document.upload", resource_type="document",
+                               resource_id=document.id, project_id=project_id,
+                               metadata={"filename": filename, "chunk_count": document.chunk_count})
+            db.commit()
+            return document
     except EmbeddingError:
         raise HTTPException(
             status_code=503, detail="Embedding service unavailable; document was not saved"
