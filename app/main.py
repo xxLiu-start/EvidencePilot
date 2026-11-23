@@ -25,7 +25,17 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     reasoning = get_llm_client()
     _app.state.llm_client = reasoning
     try:
-        initialize_database(engine)
+        if settings.environment == "production" and settings.db_auto_migrate:
+            raise RuntimeError("DB_AUTO_MIGRATE must be false in production; run alembic upgrade head before starting the API")
+        if settings.db_auto_migrate:
+            initialize_database(engine)
+        else:
+            with engine.connect() as connection:
+                if not inspect(connection).has_table("alembic_version"):
+                    raise RuntimeError("Database migrations are missing; run alembic upgrade head")
+                version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one_or_none()
+                if not version:
+                    raise RuntimeError("Database migration version is missing")
         with SessionLocal() as db:
             get_bm25_store(engine).rebuild(db)
             import_reports(db)
