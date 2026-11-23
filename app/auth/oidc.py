@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Callable
+from urllib.parse import urlsplit
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -45,8 +46,13 @@ def validate_auth_configuration() -> None:
         return
     if not settings.oidc_issuer or not settings.oidc_audience or not settings.oidc_jwks_url:
         raise RuntimeError("OIDC_ISSUER, OIDC_AUDIENCE and OIDC_JWKS_URL are required")
-    if settings.environment == "production" and not settings.oidc_jwks_url.startswith("https://"):
-        raise RuntimeError("Production OIDC_JWKS_URL must use HTTPS")
+    issuer = urlsplit(settings.oidc_issuer)
+    jwks = urlsplit(settings.oidc_jwks_url)
+    for value, parsed in (("OIDC_ISSUER", issuer), ("OIDC_JWKS_URL", jwks)):
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password or parsed.fragment:
+            raise RuntimeError(f"{value} must be a valid HTTP(S) URL without embedded credentials or fragments")
+    if settings.environment == "production" and (issuer.scheme != "https" or jwks.scheme != "https"):
+        raise RuntimeError("Production OIDC issuer and JWKS URLs must use HTTPS")
 
 
 def _roles_from_claims(claims: dict) -> tuple[str, ...]:
@@ -78,6 +84,8 @@ def verify_access_token(token: str) -> Principal:
             options={"require": ["exp", "iat", "iss", "sub", "aud"]},
             leeway=30,
         )
+        if not isinstance(claims.get("sub"), str) or not claims["sub"].strip():
+            raise InvalidTokenError("Missing subject")
         audiences = claims.get("aud", [])
         if isinstance(audiences, str):
             audiences = [audiences]
@@ -106,7 +114,7 @@ def get_current_principal(
         if settings.environment == "production":
             raise HTTPException(status_code=503, detail="Authentication is not configured")
         return Principal(subject="local-development", issuer="local", audience=("evidencepilot-api",),
-                         roles=("RESEARCHER",), development_identity=True)
+                         roles=("RESEARCHER", "TENANT_ADMIN", "SUPER_ADMIN"), development_identity=True)
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Bearer token required",
                             headers={"WWW-Authenticate": "Bearer"})
