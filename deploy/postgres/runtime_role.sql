@@ -1,7 +1,7 @@
 -- Run as the database/schema owner after migrations have created the schema.
 -- Set a strong password interactively with: \password evidencepilot_runtime
 CREATE ROLE evidencepilot_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
-GRANT CONNECT ON DATABASE evidencepilot TO evidencepilot_runtime;
+SELECT format('GRANT CONNECT ON DATABASE %I TO evidencepilot_runtime', current_database()) \gexec
 GRANT USAGE ON SCHEMA public TO evidencepilot_runtime;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO evidencepilot_runtime;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO evidencepilot_runtime;
