@@ -68,6 +68,20 @@ def test_compose_frontend_has_only_api_address_and_no_credentials_mount():
     assert services["postgres"]["volumes"]
 
 
+def test_streamlit_oidc_secrets_are_runtime_only():
+    ignored = Path(".dockerignore").read_text()
+    assert ".streamlit/secrets.toml" in ignored
+    assert "**/secrets.toml" in ignored
+
+    overlay = yaml.safe_load(Path("deploy/compose.sso.yml").read_text())
+    service = overlay["services"]["streamlit"]
+    assert service["environment"]["STREAMLIT_OIDC_ENABLED"] == "true"
+    secrets_mount = next(mount for mount in service["volumes"]
+                         if mount["target"] == "/workspace/.streamlit/secrets.toml")
+    assert secrets_mount["read_only"] is True
+    assert secrets_mount["bind"]["create_host_path"] is False
+
+
 def test_tavily_timeout_retries_are_bounded_and_never_save_failed_cache(tmp_path, caplog):
     caplog.set_level(logging.INFO)
     cfg = Settings(_env_file=None, database_url="sqlite://", web_cache_dir=str(tmp_path))
