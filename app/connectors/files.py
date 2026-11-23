@@ -37,7 +37,7 @@ class FileConnector(SourceConnector):
                access_context: dict[str, Any] | None = None) -> list[ConnectorDocument]:
         if not query.strip() or not 1 <= limit <= 100:
             raise ValueError("query and limit must be valid")
-        suffixes = set((filters or {}).get("suffixes", SUPPORTED_SUFFIXES))
+        suffixes = set((filters or {}).get("suffixes", SUPPORTED_SUFFIXES)) & SUPPORTED_SUFFIXES
         matches = []
         for path in self.root.rglob("*"):
             if not path.is_file() or path.suffix.lower() not in suffixes:
