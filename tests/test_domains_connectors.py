@@ -119,3 +119,27 @@ def test_domain_policy_requires_independent_sources_when_configured():
     ]
     assert source_requirements(claim, one_source)["source_requirements_met"] is False
     assert source_requirements(claim, two_sources)["source_requirements_met"] is True
+
+
+
+def test_explicit_domain_scope_attributes_must_match_evidence():
+    from types import SimpleNamespace
+
+    from app.verification.verifier import eligible_source
+
+    claim = {
+        "id": "C1",
+        "claim": "What is Company A's US market share in 2025?",
+        "required_source": "official",
+        "scope": {"domain_id": "market_research", "attributes": {"geography": "US", "period": "2025"}},
+    }
+    matching = SimpleNamespace(
+        source_type="web", source_url="https://www.sec.gov/Archives/example",
+        scope={"attributes": {"geography": "US", "period": "2025"}},
+    )
+    mismatched = SimpleNamespace(
+        source_type="web", source_url="https://www.sec.gov/Archives/example",
+        scope={"attributes": {"geography": "EU", "period": "2025"}},
+    )
+    assert eligible_source(claim, matching) is True
+    assert eligible_source(claim, mismatched) is False
