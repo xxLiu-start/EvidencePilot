@@ -158,7 +158,7 @@ def test_postgresql_table_connector_enforces_tenant_filter_and_read_only_queries
             "title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL, secret TEXT NOT NULL)"
         ))
         connection.execute(text(
-            "INSERT INTO research_records (id, tenant_id, title, body, status) VALUES "
+            "INSERT INTO research_records (id, tenant_id, title, body, status, secret) VALUES "
             "(1, 'tenant-a', 'Market report', 'Market growth evidence', 'approved', 'private-a'), "
             "(2, 'tenant-b', 'Market plan', 'Private tenant data', 'approved', 'private-b')"
         ))
