@@ -136,3 +136,57 @@ def test_outbox_retries_use_backoff_before_dead_letter():
     assert result == {"published": 1, "dead_lettered": 0}
     assert len(published) == 1
     engine.dispose()
+
+
+
+def test_default_celery_dispatch_carries_tenant_context(monkeypatch):
+    from uuid import uuid4
+
+    from app.queue.tasks import execute_research_task
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    tenant_id, project_id, user_id = uuid4(), uuid4(), uuid4()
+    with Session(engine) as db:
+        task = ResearchTask(query="Tenant-bound queue task", budget=2,
+                            tenant_id=tenant_id, project_id=project_id,
+                            created_by_user_id=user_id)
+        db.add(task)
+        db.flush()
+        db.add(OutboxEvent(
+            event_type="research_task.created",
+            aggregate_id=task.id,
+            payload={"task_id": str(task.id), "tenant_id": str(tenant_id),
+                     "project_id": str(project_id), "user_id": str(user_id)},
+            status="pending",
+            created_at=datetime.now(timezone.utc),
+        ))
+        task_id = str(task.id)
+        db.commit()
+
+    published = []
+    monkeypatch.setattr(execute_research_task, "apply_async",
+                        lambda *, args, task_id: published.append((args, task_id)))
+    result = dispatch_once(session_factory=_session_factory(engine), batch_size=10)
+    assert result == {"published": 1, "dead_lettered": 0}
+    assert published == [([task_id, str(tenant_id), str(project_id), str(user_id)], task_id)]
+    engine.dispose()
+
+
+def test_default_celery_dispatch_dead_letters_events_without_tenant_context():
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        task = ResearchTask(query="Missing tenant context", budget=2)
+        db.add(task)
+        db.flush()
+        db.add(OutboxEvent(event_type="research_task.created", aggregate_id=task.id,
+                           payload={"task_id": str(task.id)}, status="pending",
+                           created_at=datetime.now(timezone.utc)))
+        db.commit()
+    result = dispatch_once(session_factory=_session_factory(engine), batch_size=10, max_attempts=1)
+    assert result == {"published": 0, "dead_lettered": 1}
+    with Session(engine) as db:
+        event = db.scalar(select(OutboxEvent))
+        assert event.status == "failed" and event.last_error == "ValueError"
+    engine.dispose()
