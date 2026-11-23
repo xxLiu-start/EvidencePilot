@@ -8,6 +8,7 @@ celery_app = Celery(
     "evidencepilot",
     broker=settings.redis_url,
     backend=settings.redis_url,
+    include=["app.queue.tasks"],
 )
 celery_app.conf.update(
     task_serializer="json",
