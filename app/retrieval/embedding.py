@@ -8,6 +8,7 @@ from threading import Lock
 import numpy as np
 
 from app.config import Settings, settings
+from app.retrieval.model_integrity import verified_model_path
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ def _load_model(config: Settings):
     # Avoid importing torch/transformers or downloading weights on API startup.
     from FlagEmbedding import BGEM3FlagModel
 
-    model_path = config.embedding_model
+    model_path = verified_model_path(config, "embedding")
     if not Path(model_path).is_dir():
         from huggingface_hub import snapshot_download
 
