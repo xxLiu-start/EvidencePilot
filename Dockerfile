@@ -23,7 +23,7 @@ EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Build business dependencies in a disposable development stage.
-FROM cgr.dev/chainguard/python:3.12-dev AS business-builder
+FROM cgr.dev/chainguard/python:latest-dev AS business-builder
 WORKDIR /workspace
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken
 RUN python -m venv --without-pip /venv \
@@ -33,7 +33,7 @@ RUN pip --python /venv/bin/python install --no-cache-dir -r requirements-busines
     && /venv/bin/python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
 
 # Distroless Wolfi runtime: no Debian util-linux, perl, shell or package manager.
-FROM cgr.dev/chainguard/python:3.12 AS business
+FROM cgr.dev/chainguard/python:latest AS business
 WORKDIR /workspace
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken PATH="/venv/bin:$PATH"
 COPY --from=business-builder --chown=nonroot:nonroot /venv /venv
@@ -45,7 +45,7 @@ EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Install CPU-only PyTorch and inference dependencies in a throwaway builder.
-FROM cgr.dev/chainguard/python:3.12-dev AS inference-builder
+FROM cgr.dev/chainguard/python:latest-dev AS inference-builder
 WORKDIR /workspace
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 RUN python -m venv --without-pip /venv
@@ -54,7 +54,7 @@ RUN pip --python /venv/bin/python install --no-cache-dir --index-url https://dow
     && pip --python /venv/bin/python install --no-cache-dir -r requirements-inference.txt
 
 # Minimal non-root runtime containing only Python, application and installed wheels.
-FROM cgr.dev/chainguard/python:3.12 AS inference
+FROM cgr.dev/chainguard/python:latest AS inference
 WORKDIR /workspace
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite:// HF_HOME=/tmp/huggingface PATH="/venv/bin:$PATH"
 COPY --from=inference-builder --chown=nonroot:nonroot /venv /venv
