@@ -13,6 +13,7 @@ def config(**overrides):
     return Settings(database_url="sqlite://", **{
         "environment": "test", "inference_mode": "remote",
         "inference_url": "http://inference:8000", "inference_token": "x" * 40,
+        "inference_metrics_token": "m" * 40,
         **overrides,
     })
 
@@ -74,7 +75,10 @@ def test_inference_metrics_and_overload(monkeypatch):
             assert response.headers["Retry-After"] == "1"
         finally:
             service.slots.release()
-        metrics = client.get("/metrics", headers=headers)
+        assert client.get("/metrics", headers=headers).status_code == 401
+        metrics_headers = {"Authorization": "Bearer " + "m" * 40}
+        assert client.post("/v1/embeddings", headers=metrics_headers, json={"texts": ["a"]}).status_code == 401
+        metrics = client.get("/metrics", headers=metrics_headers)
         assert metrics.status_code == 200
         assert "evidencepilot_inference_requests_total" in metrics.text
         assert 'outcome="overloaded"' in metrics.text
