@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     inference_mode: Literal["local", "remote"] = "local"
     inference_url: str = ""
     inference_ca_file: str = ""
+    inference_metrics_token: SecretStr = Field(default=SecretStr(""), repr=False)
     inference_token: SecretStr = Field(default=SecretStr(""), repr=False)
     inference_timeout_seconds: float = Field(default=20, gt=0, le=120)
     embedding_model: str = "BAAI/bge-m3"
