@@ -41,8 +41,9 @@ COPY --from=business-builder --chown=nonroot:nonroot /home/nonroot/workspace/dat
 COPY --chown=nonroot:nonroot app ./app
 COPY --chown=nonroot:nonroot migrations ./migrations
 COPY --chown=nonroot:nonroot alembic.ini ./alembic.ini
+ENTRYPOINT ["/home/nonroot/venv/bin/python"]
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Install CPU-only PyTorch and inference dependencies in a throwaway builder.
 FROM cgr.dev/chainguard/python:latest-dev AS inference-builder
