@@ -36,34 +36,21 @@ def validate_embeddings(vectors, expected_count: int) -> list[list[float]]:
         raise EmbeddingError("Invalid BGE-M3 embedding output") from exc
 
 
-def _load_model(config: Settings):
-    # Avoid importing torch/transformers or downloading weights on API startup.
-    from FlagEmbedding import BGEM3FlagModel
+def _load_model(config):
+    from app.retrieval.native_models import NativeEncoder
 
-    model_path = verified_model_path(config, "embedding")
-    if not Path(model_path).is_dir():
+    path = verified_model_path(config, "embedding")
+    if not Path(path).is_dir():
         from huggingface_hub import snapshot_download
-
-        # FlagEmbedding otherwise downloads the entire repository, including
-        # large ONNX exports that are not used by this PyTorch encoder.
-        model_path = snapshot_download(
-            config.embedding_model, revision=config.embedding_revision, cache_dir=config.embedding_cache_dir,
+        path = snapshot_download(
+            path, revision=config.embedding_revision, cache_dir=config.embedding_cache_dir,
             local_files_only=config.embedding_local_files_only,
-            allow_patterns=[
-                "config.json", "pytorch_model.bin", "pytorch_model.bin.index.json",
-                "pytorch_model-*.bin", "model.safetensors", "model.safetensors.index.json",
-                "model-*.safetensors", "tokenizer.json", "tokenizer_config.json",
-                "special_tokens_map.json", "sentencepiece.bpe.model",
-                "sparse_linear.pt", "colbert_linear.pt",
-            ],
+            allow_patterns=["config.json", "model.safetensors", "model.safetensors.index.json",
+                            "model-*.safetensors", "tokenizer.json", "tokenizer_config.json",
+                            "special_tokens_map.json", "sentencepiece.bpe.model", "tokenizer.model",
+                            "vocab.txt", "vocab.json", "merges.txt"],
         )
-    return BGEM3FlagModel(
-        model_path,
-        devices=config.embedding_device,
-        use_fp16=config.embedding_use_fp16,
-        normalize_embeddings=True,
-        cache_dir=config.embedding_cache_dir,
-    )
+    return NativeEncoder(path, config.embedding_device, config.embedding_use_fp16)
 
 
 class BGEEmbeddingService:
