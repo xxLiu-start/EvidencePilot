@@ -9,6 +9,7 @@ from threading import Lock
 import numpy as np
 
 from app.config import Settings, settings
+from app.retrieval.model_integrity import verified_model_path
 from app.retrieval.types import item_id, item_text
 
 
@@ -22,7 +23,7 @@ class RerankerError(RuntimeError):
 def _load_reranker(config):
     from FlagEmbedding import FlagReranker
 
-    path = config.reranker_model
+    path = verified_model_path(config, "reranker")
     if not Path(path).is_dir():
         from huggingface_hub import snapshot_download
 
