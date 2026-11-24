@@ -126,6 +126,10 @@ def assert_browser(passwords):
                 try:
                     page = context.new_page()
                     page.goto(UI, wait_until="domcontentloaded")
+                    login = page.get_by_role("button", name="使用企业账号登录")
+                    expect(login).to_be_visible(timeout=30000)
+                    expect(login).to_be_enabled()
+                    login.click()
                     page.wait_for_url("**/realms/evidencepilot/protocol/openid-connect/auth**", timeout=60000)
                     try:
                         page.locator("#username").fill(name, timeout=60000)
