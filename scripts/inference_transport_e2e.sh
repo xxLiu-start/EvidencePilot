@@ -6,6 +6,12 @@ suffix=$(python -c 'import secrets; print(secrets.token_hex(6))')
 network="ep-test-$suffix"
 server="ep-inference-$suffix"
 cleanup() {
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    echo "Inference container diagnostics:" >&2
+    docker logs "$server" >&2 || true
+    docker inspect "$server" --format "{{json .State}}" >&2 2>/dev/null || true
+  fi
   docker rm -f "$server" >/dev/null 2>&1 || true
   docker network rm "$network" >/dev/null 2>&1 || true
   rm -rf "$root"
