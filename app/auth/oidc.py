@@ -43,7 +43,7 @@ class Principal:
 
 @lru_cache(maxsize=8)
 def _jwks_client(url: str) -> PyJWKClient:
-    return PyJWKClient(url, cache_keys=True, timeout=5)
+    return PyJWKClient(url, cache_keys=False, lifespan=60, timeout=5)
 
 
 def validate_auth_configuration() -> None:
@@ -104,6 +104,8 @@ def verify_access_token(token: str) -> Principal:
             email=claims.get("email") if isinstance(claims.get("email"), str) else None,
             tenant_id=claims.get("tenant_id") if isinstance(claims.get("tenant_id"), str) else None,
         )
+    except jwt.PyJWKClientConnectionError:
+        raise HTTPException(status_code=503, detail="Identity provider temporarily unavailable") from None
     except (InvalidTokenError, KeyError, ValueError, jwt.PyJWTError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Invalid or expired access token",
