@@ -20,7 +20,7 @@ COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini ./alembic.ini
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Build business dependencies in a disposable development stage.
 FROM cgr.dev/chainguard/python:latest-dev AS business-builder
@@ -62,4 +62,4 @@ COPY --chown=nonroot:nonroot app/config.py ./app/config.py
 COPY --chown=nonroot:nonroot app/retrieval ./app/retrieval
 COPY --chown=nonroot:nonroot app/inference_service.py ./app/inference_service.py
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+CMD ["-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
