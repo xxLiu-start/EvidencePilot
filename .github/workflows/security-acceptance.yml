@@ -164,6 +164,7 @@ jobs:
           format: json
           output: business-vulnerabilities.json
           severity: HIGH,CRITICAL
+          trivy-config: deploy/trivy.yaml
           exit-code: '1'
       - name: Gate inference image on high and critical vulnerabilities
         if: always()
