@@ -46,7 +46,6 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 COPY requirements-inference.txt ./
 RUN pip install --no-cache-dir -r requirements-inference.txt \
     && groupadd -g 10001 ep && useradd -u 10001 -g ep -M ep
-COPY app/__init__.py ./app/__init__.py
 COPY app/config.py ./app/config.py
 COPY app/retrieval ./app/retrieval
 COPY app/inference_service.py ./app/inference_service.py
