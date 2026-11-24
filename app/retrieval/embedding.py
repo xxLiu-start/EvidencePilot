@@ -9,6 +9,7 @@ import numpy as np
 
 from app.config import Settings, settings
 from app.retrieval.model_integrity import verified_model_path
+from app.retrieval.remote import request_inference
 
 
 logger = logging.getLogger(__name__)
@@ -79,6 +80,14 @@ class BGEEmbeddingService:
         if any(not isinstance(text, str) or not text.strip() for text in texts):
             raise ValueError("Embedding inputs must be non-empty strings")
         try:
+            if self.config.inference_mode == "remote":
+                vectors = []
+                size = min(self.config.embedding_batch_size, 32)
+                for start in range(0, len(texts), size):
+                    batch = texts[start:start + size]
+                    output = request_inference(self.config, "/v1/embeddings", {"texts": batch}, "embedding")
+                    vectors.extend(validate_embeddings(output, len(batch)))
+                return vectors
             with self._lock:
                 if self._model is None:
                     self._model = _load_model(self.config)
