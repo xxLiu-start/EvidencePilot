@@ -112,7 +112,7 @@ def main():
         try:
             run("docker","network","create","--internal",network,stdout=subprocess.DEVNULL)
             run("docker","run","--rm","--network","none","--user",f"{os.getuid()}:{os.getgid()}","-v",tmp+":/fixture",
-                "evidencepilot-inference:ci","python","-c",FIXTURE)
+                "evidencepilot-inference:ci","-c",FIXTURE)
             run("openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1",
                 "-subj","/CN=ep-test-ca","-keyout",str(root/"ca.key"),"-out",str(root/"ca.crt"),
                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -163,7 +163,7 @@ def main():
                 "-e","INFERENCE_CA_FILE=/run/secrets/ca.crt",
                 "-v",str(root/"ca.crt")+":/run/secrets/ca.crt:ro",
                 "-v",str(root/"token")+":/run/secrets/inference_token:ro",
-                "evidencepilot-business:ci","python","-c"]
+                "evidencepilot-business:ci","-c"]
             run(*client,CLIENT)
             run("docker","restart",name,stdout=subprocess.DEVNULL)
             run(*client,CLIENT)
