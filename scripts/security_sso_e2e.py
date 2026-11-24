@@ -130,7 +130,15 @@ def assert_browser(passwords):
                     expect(login).to_be_visible(timeout=30000)
                     expect(login).to_be_enabled()
                     login.click()
-                    page.wait_for_url("**/realms/evidencepilot/protocol/openid-connect/auth**", timeout=60000)
+                    try:
+                        page.wait_for_url("**/realms/evidencepilot/protocol/openid-connect/auth**", timeout=60000)
+                    except Exception:
+                        from urllib.parse import urlsplit
+                        print("OIDC browser redirect diagnostic:",
+                              "url=" + urlsplit(page.url).netloc + urlsplit(page.url).path,
+                              "buttons=" + repr(page.get_by_role("button").all_text_contents()),
+                              "body=" + page.locator("body").inner_text()[:1000])
+                        raise
                     try:
                         page.locator("#username").fill(name, timeout=60000)
                     except Exception:
@@ -248,9 +256,16 @@ def main():
                 try:
                     assert_browser(passwords)
                 except Exception:
-                    # Report only exception class names, never OAuth URLs or credentials.
-                    import re
-                    print("Streamlit exception classes:", sorted(set(re.findall(r"(?m)^([A-Za-z][A-Za-z0-9_.]*(?:Error|Exception)):", (root / "ui.log").read_text()))))
+                    # Report actionable server messages without credentials or OAuth query strings.
+                    ui_lines = (root / "ui.log").read_text(errors="replace").splitlines()[-100:]
+                    for line in ui_lines:
+                        lower = line.lower()
+                        if any(word in lower for word in ("client_secret", "access_token", "id_token",
+                                                           "authorization", "cookie_secret", "password")):
+                            line = "[redacted sensitive Streamlit log line]"
+                        elif "?" in line and ("http://" in line or "https://" in line):
+                            line = line.split("?", 1)[0] + "?[redacted]"
+                        print("Streamlit log:", line[:500])
                     raise
                 print("PASS: actual Chromium OIDC redirect/callback, two-user UI isolation and logout")
     finally:
