@@ -237,7 +237,7 @@ def main():
                 + 'cookie_secret = "' + cookie_secret + '"\n'
                 + 'client_id = "evidencepilot-streamlit"\nclient_secret = "' + client_secret + '"\n'
                 + 'server_metadata_url = "' + ISSUER + '/.well-known/openid-configuration"\n'
-                + 'expose_tokens = ["access"]\n'
+                + 'expose_tokens = ["access"]\nclient_kwargs = { "scope" = "openid" }\n'
             )
             secret_path.chmod(0o600)
             with (root / "api.log").open("w") as api_log, (root / "ui.log").open("w") as ui_log:
