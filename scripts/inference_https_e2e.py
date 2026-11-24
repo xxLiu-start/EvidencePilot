@@ -53,12 +53,13 @@ token = settings.inference_token.get_secret_value()
 headers = {"Authorization":"Bearer "+token}
 tls = ssl.create_default_context(cafile=settings.inference_ca_file)
 with httpx.Client(verify=tls, timeout=30, trust_env=False) as client:
+    last_error = "no response"
     for attempt in range(90):
         try:
             if client.get(base+"/health").status_code == 200: break
-        except httpx.HTTPError: pass
+        except httpx.HTTPError as exc: last_error = str(exc)
         time.sleep(1)
-    else: raise RuntimeError("TLS health check timed out")
+    else: raise RuntimeError("TLS health check timed out: " + last_error)
     assert client.post(base+"/v1/embeddings",json={"texts":["hello"]}).status_code == 401
     assert client.post(base+"/v1/embeddings",json={"texts":["hello"]},headers={"Authorization":"Bearer wrong"}).status_code == 401
     assert client.get(base+"/metrics",headers=headers).status_code == 401
@@ -131,12 +132,16 @@ def main():
                 env += ["-e",kind.upper()+"_MODEL=/models/"+kind,
                         "-e",kind.upper()+"_REVISION="+revision,
                         "-e",kind.upper()+"_MAX_LENGTH=64"]
-            server=env[:]
+            server=env[:] + ["-e","HF_HOME=/tmp/huggingface","-e","HOME=/tmp"]
+            # Exercise the exact production manifest policy before starting HTTPS.
             for kind in ("embedding","reranker"):
                 digest=hashlib.sha256((root/kind/"manifest.json").read_bytes()).hexdigest()
                 server += ["-e",kind.upper()+"_MANIFEST_SHA256="+digest,
                            "-e",kind.upper()+"_LOCAL_FILES_ONLY=true",
                            "-v",str(root/kind)+":/models/"+kind+":ro"]
+            run("docker","run","--rm","--network","none",*server,
+                "evidencepilot-inference:ci","python","-c",
+                "from app.config import settings; from app.retrieval.model_integrity import verified_model_path; [verified_model_path(settings,k) for k in (\"embedding\",\"reranker\")]; print(\"PASS: native fixture manifests\")")
             run("docker","run","-d","--name",name,"--network",network,
                 "--network-alias","inference","--network-alias","wrong-host",
                 "--read-only","--tmpfs","/tmp:mode=1777","--cap-drop","ALL",
@@ -159,6 +164,10 @@ def main():
             run("docker","restart",name,stdout=subprocess.DEVNULL)
             run(*client,CLIENT)
             print("PASS: inference container restarted and repeat acceptance passed")
+        except Exception:
+            # Synthetic fixture only; report server startup trace before removal.
+            subprocess.run(["docker","logs","--tail","80",name],check=False)
+            raise
         finally:
             subprocess.run(["docker","rm","-f",name],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
             subprocess.run(["docker","network","rm",network],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
