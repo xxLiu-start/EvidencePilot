@@ -66,3 +66,22 @@ def test_no_retry_on_unauthorized(monkeypatch):
     with pytest.raises(httpx.HTTPStatusError):
         remote.request_inference(cfg, "/v1/embeddings", {}, "embedding")
     assert len(calls) == 1
+
+
+def test_stale_success_cannot_close_open_circuit(monkeypatch):
+    clock = [100.0]
+    monkeypatch.setattr(remote, "monotonic", lambda: clock[0])
+    circuit = remote.Circuit()
+    stale = circuit.enter()
+    for _ in range(3):
+        circuit.finish(circuit.enter(), "failure")
+    circuit.finish(stale, "success")
+    with pytest.raises(remote.CircuitOpen):
+        circuit.enter()
+    clock[0] += 16
+    probe = circuit.enter()
+    circuit.finish(stale, "success")
+    with pytest.raises(remote.CircuitOpen):
+        circuit.enter()
+    circuit.finish(probe, "success")
+    circuit.finish(circuit.enter(), "success")
