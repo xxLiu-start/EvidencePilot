@@ -35,7 +35,7 @@ chmod 644 "$root/fixture.py"
 docker network create --internal "$network" >/dev/null
 docker run -d --name "$server" --network "$network" --network-alias inference \
   --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges \
-  -e ENVIRONMENT=test -e "INFERENCE_TOKEN=$token" -e "INFERENCE_METRICS_TOKEN=$metric" \
+  -e DATABASE_URL=sqlite:// -e ENVIRONMENT=test -e "INFERENCE_TOKEN=$token" -e "INFERENCE_METRICS_TOKEN=$metric" \
   -v "$root/fixture.py:/workspace/fixture.py:ro" \
   -v "$root/server.crt:/tls/cert:ro" -v "$root/server.key:/tls/key:ro" \
   evidencepilot-inference:ci -m uvicorn fixture:app --host 0.0.0.0 --port 8000 \
