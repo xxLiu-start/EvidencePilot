@@ -1,5 +1,7 @@
 """Authenticated, bounded internal inference transport; no local fallback."""
 import hmac
+import ssl
+import re
 from urllib.parse import urlsplit
 
 import httpx
@@ -12,6 +14,8 @@ def validate_remote(config):
         raise ValueError("Invalid inference service URL")
     if config.environment == "production" and url.scheme != "https":
         raise ValueError("Production inference requires HTTPS")
+    if config.environment == "production" and any(not re.fullmatch(r"[0-9a-f]{40}", getattr(config, kind + "_revision")) for kind in ("embedding", "reranker")):
+        raise ValueError("Production remote model revisions must be pinned")
     if len(config.inference_token.get_secret_value()) < 32:
         raise ValueError("Inference service token must contain at least 32 characters")
 
@@ -22,7 +26,8 @@ def authorized(config, authorization):
 
 def request_inference(config, endpoint, payload, kind):
     validate_remote(config)
-    with httpx.Client(timeout=config.inference_timeout_seconds, trust_env=False,
+    tls = ssl.create_default_context(cafile=config.inference_ca_file or None)
+    with httpx.Client(timeout=config.inference_timeout_seconds, trust_env=False, verify=tls,
                       follow_redirects=False) as client:
         with client.stream("POST", config.inference_url.rstrip("/") + endpoint,
                            json=payload, headers={"Authorization": "Bearer " + config.inference_token.get_secret_value()}) as response:
