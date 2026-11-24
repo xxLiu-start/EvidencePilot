@@ -56,6 +56,7 @@ class Circuit:
         self.failures = 0
         self.until = 0.0
         self.probing = False
+        self.generation = 0
 
     def enter(self):
         with self.lock:
@@ -63,17 +64,29 @@ class Circuit:
                 if monotonic() < self.until or self.probing:
                     raise CircuitOpen("Inference circuit open")
                 self.probing = True
+            return self.generation, self.probing
 
-    def finish(self, failed):
+    def finish(self, ticket, outcome):
         with self.lock:
-            self.probing = False
-            if failed:
+            generation, probe = ticket
+            if generation != self.generation:
+                return
+            if probe:
+                self.probing = False
+                self.generation += 1
+                if outcome == "success":
+                    self.failures = 0
+                    self.until = 0.0
+                else:
+                    self.until = monotonic() + 15
+                return
+            if outcome == "failure":
                 self.failures += 1
                 if self.failures >= 3:
                     self.until = monotonic() + 15
-            else:
+                    self.generation += 1
+            elif outcome == "success":
                 self.failures = 0
-                self.until = 0.0
 
 _circuits = {}
 _circuits_lock = Lock()
@@ -82,26 +95,28 @@ def request_inference(config, endpoint, payload, kind):
     validate_remote(config)
     with _circuits_lock:
         circuit = _circuits.setdefault((config.inference_url, kind), Circuit())
-    circuit.enter()
+    ticket = circuit.enter()
+    outcome = "neutral"
     failed = False
     try:
         for attempt in range(config.inference_max_retries + 1):
             try:
                 result = _request_once(config, endpoint, payload, kind)
-                failed = False
+                outcome = "success"
                 return result
             except httpx.HTTPStatusError as exc:
                 failed = exc.response.status_code in (429, 502, 503, 504)
+                outcome = "failure" if failed else "neutral"
                 if not failed or attempt == config.inference_max_retries:
                     raise
             except (httpx.ConnectTimeout, httpx.ConnectError, httpx.PoolTimeout):
-                failed = True
+                outcome = "failure"
                 if attempt == config.inference_max_retries:
                     raise
             sleep(min(1.0, 0.25 * (2 ** attempt) + uniform(0, 0.1)))
         raise RuntimeError("Inference retry budget exhausted")
     except (httpx.ReadTimeout, httpx.ReadError):
-        failed = True
+        outcome = "failure"
         raise
     finally:
-        circuit.finish(failed)
+        circuit.finish(ticket, outcome)
