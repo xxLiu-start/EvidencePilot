@@ -47,6 +47,8 @@ def test_oidc_verifies_signature_issuer_audience_and_extracts_roles(monkeypatch)
         "settings",
         SimpleNamespace(
             auth_enabled=True,
+            environment="test",
+            oidc_introspection_url="",
             oidc_issuer="https://identity.example.test/realms/research",
             oidc_audience="evidencepilot-api",
             oidc_jwks_url="https://identity.example.test/realms/research/protocol/openid-connect/certs",
@@ -71,6 +73,8 @@ def test_oidc_rejects_wrong_audience(monkeypatch):
         "settings",
         SimpleNamespace(
             auth_enabled=True,
+            environment="test",
+            oidc_introspection_url="",
             oidc_issuer="https://identity.example.test/realms/research",
             oidc_audience="evidencepilot-api",
             oidc_jwks_url="https://identity.example.test/jwks",
