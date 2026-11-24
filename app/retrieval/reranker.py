@@ -10,6 +10,7 @@ import numpy as np
 
 from app.config import Settings, settings
 from app.retrieval.model_integrity import verified_model_path
+from app.retrieval.remote import request_inference
 from app.retrieval.types import item_id, item_text
 
 
@@ -53,6 +54,19 @@ class RerankerService:
         if any(not item_text(item).strip() for item in candidates):
             raise ValueError("Candidate content must be non-empty")
         try:
+            if self.config.inference_mode == "remote":
+                scores = []
+                size = min(self.config.reranker_batch_size, 32)
+                for start in range(0, len(candidates), size):
+                    batch = candidates[start:start + size]
+                    output = request_inference(self.config, "/v1/rerank",
+                                               {"query": query, "texts": [item_text(item) for item in batch]}, "reranker")
+                    values = np.asarray(output, dtype=np.float64)
+                    if (values.shape != (len(batch),) or not np.isfinite(values).all()
+                            or ((values < 0) | (values > 1)).any()):
+                        raise RerankerError("Invalid remote reranker scores")
+                    scores.extend(values.tolist())
+                return scores
             with self._lock:
                 if self._model is None:
                     self._model = _load_reranker(self.config)
