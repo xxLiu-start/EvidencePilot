@@ -51,14 +51,12 @@ def _upgrade_legacy(bind):
 
     bind.execute(sa.text("""
         CREATE TEMP TABLE ep_cache_source_owners ON COMMIT DROP AS
-        SELECT DISTINCT e.tenant_id::text AS cache_scope, s.id AS source_id
+        SELECT DISTINCT ON (e.tenant_id, e.source_url)
+               e.tenant_id::text AS cache_scope, s.id AS source_id,
+               e.content_hash, e.published_at, e.retrieved_at
           FROM evidences e JOIN web_sources s ON s.canonical_url=e.source_url
          WHERE e.tenant_id IS NOT NULL AND s.cache_scope='offline'
-        UNION
-        SELECT DISTINCT t.tenant_id::text, s.id
-          FROM agent_allowed_sources a JOIN research_tasks t ON t.id=a.task_id
-          JOIN web_sources s ON s.id=a.source_id
-         WHERE t.tenant_id IS NOT NULL AND s.cache_scope='offline'
+         ORDER BY e.tenant_id, e.source_url, e.retrieved_at DESC, e.id
     """))
     bind.execute(sa.text("""
         CREATE TEMP TABLE ep_cache_claim_owners ON COMMIT DROP AS
@@ -82,25 +80,20 @@ def _upgrade_legacy(bind):
         ON CONFLICT (cache_scope, content_hash) DO NOTHING
     """))
     bind.execute(sa.text("""
-        INSERT INTO web_contents (cache_scope, content_hash, body, cache_path)
-        SELECT o.cache_scope, c.content_hash, c.body, ''
-          FROM ep_cache_source_owners o JOIN web_sources s ON s.id=o.source_id
-          JOIN web_contents c ON c.content_hash=s.content_hash AND c.cache_scope='offline'
-        ON CONFLICT (cache_scope, content_hash) DO NOTHING
-    """))
-    bind.execute(sa.text("""
         INSERT INTO claims (cache_scope, id, claim_id, claim_text)
         SELECT o.cache_scope, gen_random_uuid(), c.claim_id, c.claim_text
           FROM ep_cache_claim_owners o JOIN claims c ON c.id=o.claim_id
         ON CONFLICT (cache_scope, claim_id, claim_text) DO NOTHING
     """))
-    # Never copy global query lists to a tenant. The old query history may
-    # have been contributed by another tenant.
+    # Do not copy mutable global URL metadata or the latest global body.
+    # Only reconstruct a source from the content hash and dates attributed
+    # to a persisted tenant-owned evidence record. Old allowed-source links
+    # without evidence remain inaccessible and must be searched again.
     bind.execute(sa.text("""
         INSERT INTO web_sources (cache_scope, id, canonical_url, fetched_url, title,
                                  content_hash, published_at, retrieved_at, source_type, search_queries)
-        SELECT o.cache_scope, gen_random_uuid(), s.canonical_url, s.fetched_url, s.title,
-               s.content_hash, s.published_at, s.retrieved_at, s.source_type, '[]'::json
+        SELECT o.cache_scope, gen_random_uuid(), s.canonical_url, s.canonical_url, s.canonical_url,
+               o.content_hash, o.published_at, o.retrieved_at, 'web', '[]'::json
           FROM ep_cache_source_owners o JOIN web_sources s ON s.id=o.source_id
         ON CONFLICT (cache_scope, canonical_url) DO NOTHING
     """))
