@@ -50,6 +50,10 @@ services:
     depends_on:
       inference:
         condition: service_healthy
+  grafana:
+    volumes:
+      - ./deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
   prometheus:
     networks: [default, inference_private]
     secrets: [inference_metrics_token, inference_ca]
