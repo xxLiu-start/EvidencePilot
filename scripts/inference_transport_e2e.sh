@@ -65,15 +65,18 @@ token = settings.inference_token.get_secret_value()
 metrics = settings.inference_metrics_token.get_secret_value()
 auth = {"Authorization": "Bearer " + token}
 with httpx.Client(verify=ctx, trust_env=False, timeout=5) as c:
+    last_error = "no response"
     for _ in range(40):
         try:
-            if c.get(base+"/health").status_code == 200:
+            response = c.get(base+"/health")
+            if response.status_code == 200:
                 break
-        except httpx.HTTPError:
-            pass
+            last_error = "unexpected HTTP status " + str(response.status_code)
+        except httpx.HTTPError as exc:
+            last_error = type(exc).__name__ + ": " + str(exc)
         time.sleep(.5)
     else:
-        raise RuntimeError("TLS service unavailable")
+        raise RuntimeError("TLS service unavailable: " + last_error)
     assert c.post(base+"/v1/embeddings", json={"texts":["a"]}).status_code == 401
     assert c.get(base+"/metrics", headers=auth).status_code == 401
     assert c.get(base+"/metrics", headers={"Authorization":"Bearer "+metrics}).status_code == 200
