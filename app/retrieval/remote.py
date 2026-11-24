@@ -2,6 +2,9 @@
 import hmac
 import ssl
 import re
+from threading import Lock
+from time import monotonic, sleep
+from random import uniform
 from urllib.parse import urlsplit
 
 import httpx
@@ -24,7 +27,7 @@ def authorized(config, authorization):
     return len(token) >= 32 and hmac.compare_digest(
         (authorization or "").encode("utf-8"), ("Bearer " + token).encode("utf-8"))
 
-def request_inference(config, endpoint, payload, kind):
+def _request_once(config, endpoint, payload, kind):
     validate_remote(config)
     tls = ssl.create_default_context(cafile=config.inference_ca_file or None)
     with httpx.Client(timeout=config.inference_timeout_seconds, trust_env=False, verify=tls,
@@ -42,3 +45,63 @@ def request_inference(config, endpoint, payload, kind):
     if result.get("model") != getattr(config, kind + "_model") or result.get("revision") != getattr(config, kind + "_revision"):
         raise ValueError("Inference model identity mismatch")
     return result["values"]
+
+
+class CircuitOpen(RuntimeError):
+    pass
+
+class Circuit:
+    def __init__(self):
+        self.lock = Lock()
+        self.failures = 0
+        self.until = 0.0
+        self.probing = False
+
+    def enter(self):
+        with self.lock:
+            if self.until:
+                if monotonic() < self.until or self.probing:
+                    raise CircuitOpen("Inference circuit open")
+                self.probing = True
+
+    def finish(self, failed):
+        with self.lock:
+            self.probing = False
+            if failed:
+                self.failures += 1
+                if self.failures >= 3:
+                    self.until = monotonic() + 15
+            else:
+                self.failures = 0
+                self.until = 0.0
+
+_circuits = {}
+_circuits_lock = Lock()
+
+def request_inference(config, endpoint, payload, kind):
+    validate_remote(config)
+    with _circuits_lock:
+        circuit = _circuits.setdefault((config.inference_url, kind), Circuit())
+    circuit.enter()
+    failed = False
+    try:
+        for attempt in range(config.inference_max_retries + 1):
+            try:
+                result = _request_once(config, endpoint, payload, kind)
+                failed = False
+                return result
+            except httpx.HTTPStatusError as exc:
+                failed = exc.response.status_code in (429, 502, 503, 504)
+                if not failed or attempt == config.inference_max_retries:
+                    raise
+            except (httpx.ConnectTimeout, httpx.ConnectError, httpx.PoolTimeout):
+                failed = True
+                if attempt == config.inference_max_retries:
+                    raise
+            sleep(min(1.0, 0.25 * (2 ** attempt) + uniform(0, 0.1)))
+        raise RuntimeError("Inference retry budget exhausted")
+    except (httpx.ReadTimeout, httpx.ReadError):
+        failed = True
+        raise
+    finally:
+        circuit.finish(failed)
