@@ -61,5 +61,6 @@ COPY --from=inference-builder --chown=nonroot:nonroot /home/nonroot/venv /home/n
 COPY --chown=nonroot:nonroot app/config.py ./app/config.py
 COPY --chown=nonroot:nonroot app/retrieval ./app/retrieval
 COPY --chown=nonroot:nonroot app/inference_service.py ./app/inference_service.py
+ENTRYPOINT ["/home/nonroot/venv/bin/python"]
 EXPOSE 8000
 CMD ["-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
