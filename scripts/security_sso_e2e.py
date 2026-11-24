@@ -72,7 +72,7 @@ def provision(tokens):
                       "issuer_matches=" + str(claims.get("iss") == ISSUER),
                       "api_audience_present=" + str("evidencepilot-api" in audience),
                       "algorithm=" + str(jwt.get_unverified_header(token).get("alg")),
-                      "has_required_claims=" + str(all(key in claims for key in ("exp", "iat", "iss", "sub", "aud"))))
+                      "missing_required_claims=" + ",".join(key for key in ("exp", "iat", "iss", "sub", "aud") if key not in claims))
                 raise
             tenant = Tenant(slug="sso-" + name, name="SSO " + name)
             user = User(issuer=principal.issuer, subject=principal.subject)
@@ -171,12 +171,19 @@ def main():
             # scope; realm imports may resolve default client scopes differently.
             mapper = realm["clientScopes"][0]["protocolMappers"][0]
             cli = next(item for item in realm["clients"] if item["clientId"] == "evidencepilot-cli")
-            cli["protocolMappers"] = [mapper]
+            # Explicit subject mapper: imported realms may omit the basic scope.
+            subject_mapper = {
+                "name": "subject",
+                "protocol": "openid-connect",
+                "protocolMapper": "oidc-sub-mapper",
+                "config": {"access.token.claim": "true", "id.token.claim": "true"},
+            }
+            cli["protocolMappers"] = [mapper, subject_mapper]
             realm["clients"].append({
                 "clientId": "evidencepilot-streamlit", "enabled": True,
                 "protocol": "openid-connect", "publicClient": False, "secret": client_secret,
                 "standardFlowEnabled": True, "directAccessGrantsEnabled": False,
-                "protocolMappers": [mapper],
+                "protocolMappers": [mapper, subject_mapper],
                 "redirectUris": [UI + "/oauth2callback"], "webOrigins": [UI],
                 "attributes": {"post.logout.redirect.uris": UI + "/*"},
                 "defaultClientScopes": ["profile", "email", "roles", "evidencepilot-api-audience"],
