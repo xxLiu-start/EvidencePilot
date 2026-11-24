@@ -57,3 +57,36 @@ def test_inference_endpoint_auth_and_validation(monkeypatch):
         response = client.post("/v1/embeddings", headers=headers, json={"texts": ["a"]})
         assert response.status_code == 200
         assert len(response.json()["values"][0]) == 1024
+
+
+def test_inference_metrics_and_overload(monkeypatch):
+    from app import inference_service as service
+    monkeypatch.setattr(service, "local", config(inference_mode="local"))
+    monkeypatch.setattr(service, "embedding", SimpleNamespace(embed_documents=lambda texts: [[1.] + [0.] * 1023 for _ in texts]))
+    headers = {"Authorization": "Bearer " + "x" * 40}
+    with TestClient(service.app) as client:
+        assert client.get("/metrics").status_code == 401
+        assert client.post("/v1/embeddings", headers=headers, json={"texts": ["private-sentinel"]}).status_code == 200
+        assert service.slots.acquire(blocking=False)
+        try:
+            response = client.post("/v1/embeddings", headers=headers, json={"texts": ["a"]})
+            assert response.status_code == 429
+            assert response.headers["Retry-After"] == "1"
+        finally:
+            service.slots.release()
+        metrics = client.get("/metrics", headers=headers)
+        assert metrics.status_code == 200
+        assert "evidencepilot_inference_requests_total" in metrics.text
+        assert 'outcome="overloaded"' in metrics.text
+        assert "private-sentinel" not in metrics.text
+
+def test_inference_body_limit_and_redacted_validation(monkeypatch):
+    from app import inference_service as service
+    monkeypatch.setattr(service, "local", config(inference_mode="local"))
+    headers = {"Authorization": "Bearer " + "x" * 40}
+    with TestClient(service.app) as client:
+        response = client.post("/v1/embeddings", headers=headers, json={"texts": ["private-sentinel" * 2000]})
+        assert response.status_code == 422
+        assert "private-sentinel" not in response.text
+        response = client.post("/v1/embeddings", headers=headers, content=b"x" * 4_000_001)
+        assert response.status_code == 413
