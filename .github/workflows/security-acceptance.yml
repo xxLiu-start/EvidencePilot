@@ -110,3 +110,63 @@ jobs:
           name: transformers-upgrade-candidate
           path: candidate-security-results/
           if-no-files-found: error
+
+  isolated-runtime-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolated images
+        run: |
+          docker build --target business -t evidencepilot-business:ci .
+          docker build --target inference -t evidencepilot-inference:ci .
+      - name: Verify business imports and absence of model libraries
+        run: |
+          docker run --rm -e DATABASE_URL=sqlite:// evidencepilot-business:ci python -c 'import os, importlib.util; import app.main, app.queue.tasks; assert os.getuid() != 0; assert all(importlib.util.find_spec(m) is None for m in ("torch","transformers","FlagEmbedding","peft"))'
+          docker run --rm evidencepilot-inference:ci python -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
+      - name: Validate isolated Compose overlay
+        run: |
+          cp .env.example .env
+          export EMBEDDING_REVISION=$(printf '%040d' 1) RERANKER_REVISION=$(printf '%040d' 2)
+          export EMBEDDING_MANIFEST_SHA256=$(printf '%064d' 1) RERANKER_MANIFEST_SHA256=$(printf '%064d' 2)
+          export EMBEDDING_BUNDLE_DIR=/tmp/embedding RERANKER_BUNDLE_DIR=/tmp/reranker
+          export INFERENCE_TOKEN_FILE=/tmp/token INFERENCE_CA_PATH=/tmp/ca INFERENCE_TLS_KEY_PATH=/tmp/key INFERENCE_TLS_CERT_PATH=/tmp/cert
+          docker compose -f docker-compose.yml -f deploy/compose.inference.yml --profile apps config --quiet
+      - name: Generate image SBOMs and scan business image
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-business:ci
+          format: cyclonedx
+          output: business-sbom.json
+      - name: Generate inference image SBOM
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-inference:ci
+          format: cyclonedx
+          output: inference-sbom.json
+      - name: Gate business image on high and critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-business:ci
+          format: json
+          output: business-vulnerabilities.json
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+      - name: Gate inference image on high and critical vulnerabilities
+        if: always()
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-inference:ci
+          format: json
+          output: inference-vulnerabilities.json
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+      - name: Publish image evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-runtime-security
+          path: |
+            *-sbom.json
+            *-vulnerabilities.json
+          if-no-files-found: error
