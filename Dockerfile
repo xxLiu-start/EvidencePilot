@@ -24,20 +24,20 @@ CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "
 
 # Build business dependencies in a disposable development stage.
 FROM cgr.dev/chainguard/python:latest-dev AS business-builder
-WORKDIR /workspace
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken
-RUN python -m venv --without-pip /venv \
-    && mkdir -p /workspace/data/cache/web /workspace/data/tiktoken
+WORKDIR /home/nonroot/workspace
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 TIKTOKEN_CACHE_DIR=/home/nonroot/workspace/data/tiktoken PATH="/home/nonroot/venv/bin:$PATH"
+RUN python -m venv --without-pip /home/nonroot/venv \
+    && mkdir -p /home/nonroot/workspace/data/cache/web /home/nonroot/workspace/data/tiktoken
 COPY requirements-business.txt ./
-RUN pip --python /venv/bin/python install --no-cache-dir -r requirements-business.txt \
-    && /venv/bin/python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
+RUN pip --python /home/nonroot/venv/bin/python install --no-cache-dir -r requirements-business.txt \
+    && /home/nonroot/venv/bin/python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
 
 # Distroless Wolfi runtime: no Debian util-linux, perl, shell or package manager.
 FROM cgr.dev/chainguard/python:latest AS business
 WORKDIR /workspace
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken PATH="/venv/bin:$PATH"
-COPY --from=business-builder --chown=nonroot:nonroot /venv /venv
-COPY --from=business-builder --chown=nonroot:nonroot /workspace/data /workspace/data
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken PATH="/home/nonroot/venv/bin:$PATH"
+COPY --from=business-builder --chown=nonroot:nonroot /home/nonroot/venv /home/nonroot/venv
+COPY --from=business-builder --chown=nonroot:nonroot /home/nonroot/workspace/data /workspace/data
 COPY --chown=nonroot:nonroot app ./app
 COPY --chown=nonroot:nonroot migrations ./migrations
 COPY --chown=nonroot:nonroot alembic.ini ./alembic.ini
@@ -48,7 +48,7 @@ CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "
 FROM cgr.dev/chainguard/python:latest-dev AS inference-builder
 WORKDIR /workspace
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-RUN python -m venv --without-pip /venv
+RUN python -m venv --without-pip /home/nonroot/venv
 COPY requirements-inference.txt ./
 RUN pip --python /venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision \
     && pip --python /venv/bin/python install --no-cache-dir -r requirements-inference.txt
@@ -56,8 +56,8 @@ RUN pip --python /venv/bin/python install --no-cache-dir --index-url https://dow
 # Minimal non-root runtime containing only Python, application and installed wheels.
 FROM cgr.dev/chainguard/python:latest AS inference
 WORKDIR /workspace
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite:// HF_HOME=/tmp/huggingface PATH="/venv/bin:$PATH"
-COPY --from=inference-builder --chown=nonroot:nonroot /venv /venv
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite:// HF_HOME=/tmp/huggingface PATH="/home/nonroot/venv/bin:$PATH"
+COPY --from=inference-builder --chown=nonroot:nonroot /home/nonroot/venv /home/nonroot/venv
 COPY --chown=nonroot:nonroot app/config.py ./app/config.py
 COPY --chown=nonroot:nonroot app/retrieval ./app/retrieval
 COPY --chown=nonroot:nonroot app/inference_service.py ./app/inference_service.py
