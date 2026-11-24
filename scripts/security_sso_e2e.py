@@ -127,7 +127,13 @@ def assert_browser(passwords):
                     page = context.new_page()
                     page.goto(UI, wait_until="domcontentloaded")
                     page.get_by_role("button", name="使用企业账号登录").click(timeout=60000)
-                    page.locator("#username").fill(name, timeout=60000)
+                    try:
+                        page.locator("#username").fill(name, timeout=60000)
+                    except Exception:
+                        from urllib.parse import urlsplit
+                        print("Browser diagnostic:", [(urlsplit(p.url).netloc, urlsplit(p.url).path) for p in context.pages])
+                        print("UI exception visible:", page.locator('[data-testid="stException"]').count())
+                        raise
                     page.locator("#password").fill(passwords[name])
                     page.locator("#kc-login").click()
                     expect(page.get_by_text("SSO " + name + " private task", exact=True)).to_be_visible(timeout=90000)
@@ -234,7 +240,13 @@ def main():
                      "--server.address=127.0.0.1", "--server.port=18501", "--server.headless=true"],
                     cwd=ROOT, stdout=ui_log, stderr=subprocess.STDOUT))
                 wait_http(UI + "/_stcore/health")
-                assert_browser(passwords)
+                try:
+                    assert_browser(passwords)
+                except Exception:
+                    # Report only exception class names, never OAuth URLs or credentials.
+                    import re
+                    print("Streamlit exception classes:", sorted(set(re.findall(r"(?m)^([A-Za-z][A-Za-z0-9_.]*(?:Error|Exception)):", (root / "ui.log").read_text()))))
+                    raise
                 print("PASS: actual Chromium OIDC redirect/callback, two-user UI isolation and logout")
     finally:
         for process in processes:
