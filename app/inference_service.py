@@ -4,6 +4,7 @@ from threading import BoundedSemaphore
 from time import monotonic
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response, JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field, StringConstraints
@@ -45,6 +46,41 @@ async def lifespan(app):
     yield
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+
+@app.exception_handler(RequestValidationError)
+async def invalid_request(request, exc):
+    # Pydantic validation errors can contain the original confidential input.
+    return JSONResponse(status_code=422, content={"detail": "Invalid inference request"})
+
+class BodyLimit:
+    """Limit body bytes before parsing, including chunked requests."""
+    def __init__(self, app, limit=4_000_000):
+        self.app = app
+        self.limit = limit
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope["method"] != "POST":
+            return await self.app(scope, receive, send)
+        body = bytearray()
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                return
+            body.extend(message.get("body", b""))
+            if len(body) > self.limit:
+                return await JSONResponse(status_code=413, content={"detail": "Request too large"})(scope, receive, send)
+            if not message.get("more_body", False):
+                break
+        delivered = False
+        async def replay():
+            nonlocal delivered
+            if delivered:
+                return await receive()
+            delivered = True
+            return {"type": "http.request", "body": bytes(body), "more_body": False}
+        return await self.app(scope, replay, send)
+
+app.add_middleware(BodyLimit)
 
 def authenticate(authorization: Annotated[str | None, Header()] = None):
     if not authorized(local, authorization):
