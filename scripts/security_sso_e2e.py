@@ -58,7 +58,22 @@ def provision(tokens):
     ids = {}
     with Session(engine) as db:
         for name in ("alice", "bob"):
-            principal = verify_access_token(tokens[name]["access_token"])
+            token = tokens[name]["access_token"]
+            try:
+                principal = verify_access_token(token)
+            except Exception:
+                # Only report comparisons and error categories, never JWTs,
+                # subject IDs, emails, keys or credentials.
+                import jwt
+                claims = jwt.decode(token, options={"verify_signature": False})
+                audience = claims.get("aud", [])
+                audience = [audience] if isinstance(audience, str) else audience
+                print("OIDC diagnostic:",
+                      "issuer_matches=" + str(claims.get("iss") == ISSUER),
+                      "api_audience_present=" + str("evidencepilot-api" in audience),
+                      "algorithm=" + str(jwt.get_unverified_header(token).get("alg")),
+                      "has_required_claims=" + str(all(key in claims for key in ("exp", "iat", "iss", "sub", "aud"))))
+                raise
             tenant = Tenant(slug="sso-" + name, name="SSO " + name)
             user = User(issuer=principal.issuer, subject=principal.subject)
             db.add_all([tenant, user])
@@ -152,10 +167,16 @@ def main():
                 # A forged high-privilege realm role must not override DB membership.
                 "realmRoles": ["SUPER_ADMIN"],
             } for name, password in passwords.items()]
+            # Use explicit per-client audience mappers as well as the named
+            # scope; realm imports may resolve default client scopes differently.
+            mapper = realm["clientScopes"][0]["protocolMappers"][0]
+            cli = next(item for item in realm["clients"] if item["clientId"] == "evidencepilot-cli")
+            cli["protocolMappers"] = [mapper]
             realm["clients"].append({
                 "clientId": "evidencepilot-streamlit", "enabled": True,
                 "protocol": "openid-connect", "publicClient": False, "secret": client_secret,
                 "standardFlowEnabled": True, "directAccessGrantsEnabled": False,
+                "protocolMappers": [mapper],
                 "redirectUris": [UI + "/oauth2callback"], "webOrigins": [UI],
                 "attributes": {"post.logout.redirect.uris": UI + "/*"},
                 "defaultClientScopes": ["profile", "email", "roles", "evidencepilot-api-audience"],

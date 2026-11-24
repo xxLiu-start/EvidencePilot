@@ -58,7 +58,12 @@ jobs:
         if: always()
         run: |
           mkdir -p security-results
-          pip-audit --format json --output security-results/pip-audit.json
+          result=0
+          pip-audit --format json --output security-results/pip-audit.json || result=$?
+          if test -f security-results/pip-audit.json; then
+            python -c 'import json; d=json.load(open("security-results/pip-audit.json")); print(json.dumps([{"package":p["name"],"version":p["version"],"vulnerabilities":[{"id":v["id"],"fix_versions":v.get("fix_versions",[])} for v in p.get("vulns",[])]} for p in d.get("dependencies",[]) if p.get("vulns")],indent=2))'
+          fi
+          exit "$result"
       - name: Upload security findings
         if: always()
         uses: actions/upload-artifact@v4
