@@ -130,8 +130,11 @@ jobs:
           export EMBEDDING_REVISION=$(printf '%040d' 1) RERANKER_REVISION=$(printf '%040d' 2)
           export EMBEDDING_MANIFEST_SHA256=$(printf '%064d' 1) RERANKER_MANIFEST_SHA256=$(printf '%064d' 2)
           export EMBEDDING_BUNDLE_DIR=/tmp/embedding RERANKER_BUNDLE_DIR=/tmp/reranker
-          export INFERENCE_TOKEN_FILE=/tmp/token INFERENCE_CA_PATH=/tmp/ca INFERENCE_TLS_KEY_PATH=/tmp/key INFERENCE_TLS_CERT_PATH=/tmp/cert
+          export INFERENCE_METRICS_TOKEN_FILE=/tmp/metrics-token INFERENCE_TOKEN_FILE=/tmp/token INFERENCE_CA_PATH=/tmp/ca INFERENCE_TLS_KEY_PATH=/tmp/key INFERENCE_TLS_CERT_PATH=/tmp/cert
           docker compose -f docker-compose.yml -f deploy/compose.inference.yml --profile apps config --quiet
+      - name: Validate Prometheus config and rules
+        run: |
+          docker run --rm --entrypoint /bin/promtool -v "$PWD/deploy:/etc/prometheus:ro" prom/prometheus:v2.55.1 check rules /etc/prometheus/inference-alerts.yml
       - name: Generate image SBOMs and scan business image
         uses: aquasecurity/trivy-action@0.35.0
         with:
