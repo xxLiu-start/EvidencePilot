@@ -175,6 +175,7 @@ jobs:
           format: json
           output: inference-vulnerabilities.json
           severity: HIGH,CRITICAL
+          trivy-config: deploy/trivy.yaml
           exit-code: '1'
       - name: Print actionable vulnerability findings
         if: always()
