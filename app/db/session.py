@@ -155,6 +155,19 @@ def validate_postgres_rls_runtime(engine) -> None:
         )).one()
         if role.rolsuper or role.rolbypassrls:
             raise RuntimeError("Production database role must not be SUPERUSER or BYPASSRLS")
+        privileged = connection.scalar(text(
+            "SELECT EXISTS (SELECT 1 FROM pg_roles r "
+            "WHERE (r.rolsuper OR r.rolbypassrls) AND pg_has_role(current_user, r.oid, 'MEMBER'))"
+        ))
+        if privileged:
+            raise RuntimeError("Runtime role must not inherit or be able to assume privileged database roles")
+        owns_schema_tables = connection.scalar(text(
+            "SELECT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname=current_schema() AND c.relname = ANY(:tables) "
+            "AND pg_has_role(current_user, c.relowner, 'MEMBER'))"
+        ), {"tables": list(required)})
+        if owns_schema_tables:
+            raise RuntimeError("Runtime role must not own protected tables or assume their owner role")
         rows = connection.execute(text(
             "SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity "
             "FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "

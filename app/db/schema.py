@@ -80,7 +80,7 @@ def initialize_database(engine: Engine) -> None:
             ))
             project_id = project.id
 
-        for table_name in ("research_tasks", "documents", "document_chunks", "evidences",
+        for table_name in ("research_tasks", "documents", "document_chunks",
                            "task_feedback", "evaluation_results"):
             table = Base.metadata.tables[table_name]
             connection.execute(table.update().where(table.c.tenant_id.is_(None)).values(tenant_id=tenant_id))

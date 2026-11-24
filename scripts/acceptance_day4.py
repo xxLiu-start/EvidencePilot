@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
 from app.db.models import ClaimRecord, EvidenceRecord, WebContent, WebSource
+from app.db.session import get_cached_content
 from app.db.session import Base
 from app.evaluation.web_benchmark import validate_snapshot
 from app.evidence.schema import Evidence
@@ -76,7 +77,7 @@ def main():
                     for row in stored:
                         claim = db.get(ClaimRecord, row.claim_record_id)
                         source = db.scalar(select(WebSource).where(WebSource.canonical_url == row.source_url))
-                        content = db.get(WebContent, row.content_hash)
+                        content = get_cached_content(db, row.content_hash)
                         assert claim.claim_id == "D4-C1" and source is not None and content is not None
                         assert digest(content.body) == row.content_hash
                         assert content.body[row.quote_start:row.quote_end] == row.supporting_text
