@@ -53,7 +53,10 @@ jobs:
       - name: Static security scan
         run: |
           mkdir -p security-results
-          bandit -r app frontend -ll -ii -f json -o security-results/bandit.json
+          result=0
+          bandit -r app frontend -ll -ii -f json -o security-results/bandit.json || result=$?
+          python -c 'import json; d=json.load(open("security-results/bandit.json")); print(json.dumps([{k:r.get(k) for k in ("filename","line_number","test_id","issue_text","issue_severity")} for r in d["results"]],indent=2))'
+          exit "$result"
       - name: Installed dependency vulnerability scan
         if: always()
         run: |
@@ -84,13 +87,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-          sed 's/^transformers>=4.45,<5$/transformers>=5.10,<6/' requirements-runtime.txt > /tmp/evidencepilot-candidate.txt
-          grep -Fx 'transformers>=5.10,<6' /tmp/evidencepilot-candidate.txt
-          python -m pip install -r /tmp/evidencepilot-candidate.txt -r requirements-frontend.txt pytest pytest-asyncio pip-audit
+          python -m pip install -r requirements-runtime.txt -r requirements-frontend.txt pytest pytest-asyncio pip-audit
           python -m pip check
       - name: Verify real inference library imports
         run: |
-          python -c 'import transformers, peft; from FlagEmbedding import BGEM3FlagModel, FlagReranker; print(transformers.__version__, peft.__version__)'
+          python -c 'import transformers; from transformers import AutoModel, AutoModelForSequenceClassification, AutoTokenizer; from app.retrieval.native_models import NativeEncoder; print(transformers.__version__)'
       - name: Candidate regression tests
         env:
           DATABASE_URL: sqlite://
@@ -164,6 +165,10 @@ jobs:
           output: inference-vulnerabilities.json
           severity: HIGH,CRITICAL
           exit-code: '1'
+      - name: Print actionable vulnerability findings
+        if: always()
+        run: |
+          python -c 'import glob,json; print(json.dumps([{"image":p,"target":r.get("Target"),"id":v.get("VulnerabilityID"),"package":v.get("PkgName"),"installed":v.get("InstalledVersion"),"fixed":v.get("FixedVersion")} for p in glob.glob("*-vulnerabilities.json") for r in json.load(open(p)).get("Results",[]) for v in r.get("Vulnerabilities",[])],indent=2))'
       - name: Publish image evidence
         if: always()
         uses: actions/upload-artifact@v4
