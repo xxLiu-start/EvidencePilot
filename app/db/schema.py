@@ -18,6 +18,8 @@ def initialize_database(engine: Engine) -> None:
         if postgres:
             connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         Base.metadata.create_all(connection)
+        if "cache_scope" not in {c["name"] for c in inspect(connection).get_columns("web_contents")}:
+            raise RuntimeError("Legacy cache schema requires Alembic upgrade; do not start with global cache keys")
 
         additions = {
             "research_tasks": {

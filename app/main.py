@@ -68,6 +68,8 @@ app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_
 app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(human_reviews.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(projects.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(audit.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 
 
 @app.middleware("http")

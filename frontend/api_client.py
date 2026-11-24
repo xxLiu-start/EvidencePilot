@@ -56,7 +56,7 @@ class APIClient:
             raise APIError("unreachable") from None
         if response.is_error or response.is_redirect:
             # Do not show arbitrary upstream response bodies (may contain secrets).
-            category = {404: "not_found", 409: "conflict", 413: "too_large", 415: "file_type",
+            category = {401: "unauthorized", 403: "forbidden", 404: "not_found", 409: "conflict", 413: "too_large", 415: "file_type",
                         422: "validation", 503: "unavailable"}.get(response.status_code, "http_error")
             raise APIError(category, response.status_code)
         try:
@@ -65,6 +65,7 @@ class APIClient:
             raise APIError("invalid_response") from None
 
     def health(self): return self.request("GET", "/health")
+    def me(self): return self.request("GET", "/api/v1/auth/me")
     def system(self): return self.request("GET", "/api/v1/system")
     def create(self, query, budget): return self.request("POST", "/api/v1/research", json={"query": query, "budget": budget})
     def tasks(self, offset=0): return self.request("GET", "/api/v1/tasks", params={"offset": offset, "limit": 20})

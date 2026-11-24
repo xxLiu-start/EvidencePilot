@@ -15,6 +15,7 @@ from app.evidence.extraction import save_evidences
 from app.evidence.schema import Evidence
 from app.llm_client import InferenceTrace, LLMError
 from app.search.cache import digest
+from app.db.session import get_cached_content
 
 
 SCENARIOS = ("missing_evidence", "sufficient_evidence", "conflicting_evidence",
@@ -56,7 +57,7 @@ def emit_fixture(db, context, *, relation="context", web=False, stale_at=None):
     body = ("The fixture service does not support private deployment." if relation == "refutes"
             else "The fixture service supports private deployment.")
     content_hash = digest(body)
-    if db.get(WebContent, content_hash) is None:
+    if get_cached_content(db, content_hash) is None:
         db.add(WebContent(content_hash=content_hash, body=body, cache_path=""))
         db.flush()
     document_id = chunk_id = url = None

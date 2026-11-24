@@ -367,7 +367,7 @@ def human_review():
 
 def main():
     if os.environ.get("STREAMLIT_OIDC_ENABLED", "false").lower() == "true":
-        if not st.user.is_logged_in:
+        if not getattr(st.user, "is_logged_in", False):
             st.title("EvidencePilot · 企业登录")
             st.caption("使用组织的 OIDC 身份提供商完成安全登录。")
             if st.button("使用企业账号登录", type="primary"):
@@ -375,6 +375,19 @@ def main():
             st.stop()
         if access_token_from_identity(st.user) is None:
             st.error("身份提供商未返回 API access token。请配置 Streamlit expose_tokens=['access'] 和正确的 API audience。")
+            st.stop()
+        # Check the actual backend identity before loading application data.
+        # FastAPI validates access-token expiry; Streamlit's identity cookie
+        # alone is not evidence that the API access token is still valid.
+        try:
+            api().me()
+        except APIError as exc:
+            if exc.status_code in (401, 403):
+                st.error("企业身份已过期或未获授权，请重新登录或联系管理员。")
+                if st.button("重新登录"):
+                    st.logout()
+            else:
+                st.error("无法验证企业身份，暂不显示研究数据。")
             st.stop()
         with st.sidebar:
             if st.button("退出企业登录"):

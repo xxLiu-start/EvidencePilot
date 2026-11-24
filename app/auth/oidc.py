@@ -174,7 +174,7 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
         db.add(ProjectMembership(project_id=project.id, user_id=user.id, role="SUPER_ADMIN", is_active=True))
     # Development databases and test fixtures may predate the Alembic ownership
     # migration. Attach only unowned legacy rows to the local development scope.
-    for model in (ResearchTask, DocumentRecord, DocumentChunk, EvidenceRecord, TaskFeedback, EvaluationResult):
+    for model in (ResearchTask, DocumentRecord, DocumentChunk, TaskFeedback, EvaluationResult):
         db.execute(update(model).where(model.tenant_id.is_(None)).values(tenant_id=tenant.id))
         db.execute(update(model).where(
             model.tenant_id == tenant.id, model.project_id.is_(None)
