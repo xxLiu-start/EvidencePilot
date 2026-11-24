@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     document_max_upload_bytes: int = Field(default=20_000_000, gt=0, le=100_000_000)
     document_max_chunk_size: int = Field(default=2_000, ge=1, le=10_000)
     document_max_pages: int = Field(default=1_000, ge=1, le=10_000)
+    inference_mode: Literal["local", "remote"] = "local"
+    inference_url: str = ""
+    inference_token: SecretStr = Field(default=SecretStr(""), repr=False)
+    inference_timeout_seconds: float = Field(default=20, gt=0, le=120)
     embedding_model: str = "BAAI/bge-m3"
     embedding_revision: str = "main"
     embedding_manifest_sha256: str = ""
