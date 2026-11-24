@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     document_max_pages: int = Field(default=1_000, ge=1, le=10_000)
     embedding_model: str = "BAAI/bge-m3"
     embedding_revision: str = "main"
+    embedding_manifest_sha256: str = ""
     embedding_device: str = "cpu"
     embedding_use_fp16: bool = False
     embedding_batch_size: int = Field(default=16, gt=0)
@@ -56,6 +57,7 @@ class Settings(BaseSettings):
     embedding_local_files_only: bool = False
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     reranker_revision: str = "main"
+    reranker_manifest_sha256: str = ""
     reranker_device: str = "cpu"
     reranker_use_fp16: bool = False
     reranker_batch_size: int = Field(default=4, gt=0)
