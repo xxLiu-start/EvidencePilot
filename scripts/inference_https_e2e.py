@@ -154,7 +154,7 @@ def main():
                 "-v",str(root/"metrics")+":/run/secrets/inference_metrics_token:ro",
                 "-v",str(root/"tls.key")+":/run/secrets/tls.key:ro",
                 "-v",str(root/"tls.crt")+":/run/secrets/tls.crt:ro",
-                "evidencepilot-inference:ci","python","-m","uvicorn","app.inference_service:app",
+                "evidencepilot-inference:ci","-m","uvicorn","app.inference_service:app",
                 "--host","0.0.0.0","--port","8000","--ssl-keyfile","/run/secrets/tls.key",
                 "--ssl-certfile","/run/secrets/tls.crt","--no-access-log",
                 stdout=subprocess.DEVNULL)
