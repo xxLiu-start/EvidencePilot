@@ -22,21 +22,20 @@ class RerankerError(RuntimeError):
 
 
 def _load_reranker(config):
-    from FlagEmbedding import FlagReranker
+    from app.retrieval.native_models import NativeEncoder
 
     path = verified_model_path(config, "reranker")
     if not Path(path).is_dir():
         from huggingface_hub import snapshot_download
-
         path = snapshot_download(
             path, revision=config.reranker_revision, cache_dir=config.reranker_cache_dir,
             local_files_only=config.reranker_local_files_only,
             allow_patterns=["config.json", "model.safetensors", "model.safetensors.index.json",
-                            "model-*.safetensors", "pytorch_model.bin", "tokenizer.json",
-                            "tokenizer_config.json", "special_tokens_map.json", "sentencepiece.bpe.model"],
+                            "model-*.safetensors", "tokenizer.json", "tokenizer_config.json",
+                            "special_tokens_map.json", "sentencepiece.bpe.model", "tokenizer.model",
+                            "vocab.txt", "vocab.json", "merges.txt"],
         )
-    return FlagReranker(path, devices=config.reranker_device,
-                        use_fp16=config.reranker_use_fp16, cache_dir=config.reranker_cache_dir)
+    return NativeEncoder(path, config.reranker_device, config.reranker_use_fp16, rerank=True)
 
 
 class RerankerService:
