@@ -38,8 +38,12 @@ for kind, revision, size, heads, klass in [
         num_hidden_layers=1, intermediate_size=64, max_position_embeddings=128, num_labels=1)
     klass(config).save_pretrained(root, safe_serialization=True)
     tokenizer.save_pretrained(root)
+    for item in root.iterdir():
+        item.chmod(0o644)
+    root.chmod(0o755)
     files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in root.iterdir()}
     (root/"manifest.json").write_text(json.dumps({"revision":revision,"files":files}))
+    (root/"manifest.json").chmod(0o644)
 """
 
 CLIENT = r"""
