@@ -130,6 +130,7 @@ jobs:
       - name: Cross-container TLS and native fixture acceptance
         run: python -m scripts.inference_https_e2e
       - name: Validate isolated Compose overlay
+        if: always()
         run: |
           cp .env.example .env
           export EMBEDDING_REVISION=$(printf '%040d' 1) RERANKER_REVISION=$(printf '%040d' 2)
@@ -138,21 +139,25 @@ jobs:
           export INFERENCE_METRICS_TOKEN_FILE=/tmp/metrics-token INFERENCE_TOKEN_FILE=/tmp/token INFERENCE_CA_PATH=/tmp/ca INFERENCE_TLS_KEY_PATH=/tmp/key INFERENCE_TLS_CERT_PATH=/tmp/cert
           docker compose -f docker-compose.yml -f deploy/compose.inference.yml --profile apps config --quiet
       - name: Validate Prometheus config and rules
+        if: always()
         run: |
           docker run --rm --entrypoint /bin/promtool -v "$PWD/deploy:/etc/prometheus:ro" prom/prometheus:v2.55.1 check rules /etc/prometheus/inference-alerts.yml
       - name: Generate image SBOMs and scan business image
+        if: always()
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-business:ci
           format: cyclonedx
           output: business-sbom.json
       - name: Generate inference image SBOM
+        if: always()
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-inference:ci
           format: cyclonedx
           output: inference-sbom.json
       - name: Gate business image on high and critical vulnerabilities
+        if: always()
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-business:ci
