@@ -127,6 +127,8 @@ jobs:
           docker run --rm evidencepilot-inference:ci python -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
       - name: Actual private-network TLS and fault recovery acceptance
         run: bash scripts/inference_transport_e2e.sh
+      - name: Cross-container TLS and native fixture acceptance
+        run: python -m scripts.inference_https_e2e
       - name: Validate isolated Compose overlay
         run: |
           cp .env.example .env
