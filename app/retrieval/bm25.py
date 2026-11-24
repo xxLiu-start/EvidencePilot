@@ -1,5 +1,6 @@
 """Chinese/English BM25 with revision-aware PostgreSQL snapshots."""
 
+from collections import OrderedDict
 from collections.abc import Sequence
 from functools import lru_cache
 import re
@@ -71,24 +72,36 @@ def bm25_retrieve(index, chunks, query, top_k=10):
 class BM25Store:
     def __init__(self):
         self._lock = Lock()
-        self._revision = None
-        self._chunks = ()
-        self._index = None
+        self._snapshots = OrderedDict()
+        self._max_scopes = 32
 
     def _snapshot(self, db: Session, force: bool = False):
+        tenant_id = db.info.get("tenant_id")
+        project_ids = tuple(db.info.get("selected_project_ids") or db.info.get("project_ids") or ())
+        scope = (str(tenant_id), tuple(sorted(str(value) for value in project_ids)))
         with self._lock:
             revision = db.scalar(select(RetrievalIndexRevision.revision).where(
                 RetrievalIndexRevision.id == 1
             )) or 0
-            if force or self._revision != revision:
+            previous = self._snapshots.get(scope)
+            if force or previous is None or previous[0] != revision:
                 columns = [column for column in DocumentChunk.__table__.columns if column.name != "embedding"]
                 dimension = case((DocumentChunk.embedding.is_not(None), 1024), else_=None)
-                rows = db.execute(select(*columns, dimension.label("embedding_dimensions")).order_by(DocumentChunk.id))
+                statement = select(*columns, dimension.label("embedding_dimensions")).order_by(DocumentChunk.id)
+                # Scope SQL before constructing the index; post-ranking filtering
+                # alone exposes other tenants' corpus statistics.
+                if tenant_id is not None:
+                    statement = statement.where(DocumentChunk.tenant_id == tenant_id)
+                    statement = statement.where(DocumentChunk.project_id.in_(project_ids))
+                rows = db.execute(statement)
                 chunks = tuple(ChunkSnapshot(**row._mapping) for row in rows)
                 index = build_bm25_index(chunks)
-                # Publish an immutable snapshot only after a successful rebuild.
-                self._chunks, self._index, self._revision = chunks, index, revision
-            return self._index, self._chunks
+                self._snapshots[scope] = (revision, index, chunks)
+                if len(self._snapshots) > self._max_scopes:
+                    self._snapshots.popitem(last=False)
+            self._snapshots.move_to_end(scope)
+            _, index, chunks = self._snapshots[scope]
+            return index, chunks
 
     def rebuild(self, db: Session) -> int:
         _, chunks = self._snapshot(db, force=True)

@@ -8,6 +8,7 @@ from app.connectors.base import ConnectorDocument, SourceConnector
 from app.config import Settings, settings
 from app.search.parser import fetch_page, normalize_url
 from app.search.web_search import WebSearchClient
+from app.search.cache import scoped_cache_config
 from app.secrets import read_secret
 
 
@@ -28,7 +29,7 @@ class WebSearchConnector(SourceConnector):
                access_context: dict[str, Any] | None = None) -> list[ConnectorDocument]:
         if not query.strip() or not 1 <= limit <= 10:
             raise ValueError("query must be non-empty and limit must be between 1 and 10")
-        client = WebSearchClient(self.config)
+        client = WebSearchClient(scoped_cache_config(self.db, self.config))
         try:
             response = client.search(query, max_results=limit)
         finally:

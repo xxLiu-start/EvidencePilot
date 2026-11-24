@@ -15,7 +15,7 @@ from sqlalchemy import select
 
 from app.config import Settings, settings
 from app.db.models import WebContent, WebSource
-from app.search.cache import CacheMiss, digest, write_json
+from app.search.cache import CacheMiss, digest, write_json, scoped_cache_config
 
 
 class PageError(RuntimeError):
@@ -85,7 +85,7 @@ def download_page(url, config: Settings = settings):
     target = normalize_url(url)
     try:
         with httpx.Client(timeout=config.webpage_timeout_seconds, follow_redirects=False,
-                          headers={"User-Agent": "EvidencePilot/0.1 (research document parser)"}) as client:
+                          trust_env=False, headers={"User-Agent": "EvidencePilot/0.1 (research document parser)"}) as client:
             for _ in range(6):
                 assert_public_url(target)
                 with client.stream("GET", target) as response:
@@ -110,6 +110,7 @@ def download_page(url, config: Settings = settings):
 
 
 def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, config: Settings = settings, before_commit=None):
+    config = scoped_cache_config(db, config)
     canonical = normalize_url(url)
     source = db.scalar(select(WebSource).where(WebSource.canonical_url == canonical))
     if source is not None and not refresh:
@@ -127,6 +128,8 @@ def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, con
     url_path = Path(config.web_cache_dir) / "urls" / (digest(canonical) + ".json")
     if url_path.is_file() and not refresh:
         metadata = json.loads(url_path.read_text(encoding="utf-8"))
+        if not re.fullmatch(r"[0-9a-f]{64}", metadata.get("content_hash", "")):
+            raise PageError("Invalid cached content hash")
         content_path = Path(config.web_cache_dir) / "contents" / (metadata["content_hash"] + ".json")
         if not content_path.is_file():
             raise CacheMiss("Cached URL has no body snapshot")
