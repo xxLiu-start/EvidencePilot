@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     oidc_issuer: str = ""
     oidc_audience: str = ""
     oidc_jwks_url: str = ""
+    oidc_introspection_url: str = ""
+    oidc_introspection_client_id: str = ""
+    oidc_introspection_client_secret: SecretStr = Field(default=SecretStr(""), repr=False)
     llm_api_key: SecretStr = Field(default=SecretStr(""), repr=False)
     llm_base_url: str = ""
     llm_model: str = ""
@@ -51,6 +54,7 @@ class Settings(BaseSettings):
     inference_ca_file: str = ""
     inference_metrics_token: SecretStr = Field(default=SecretStr(""), repr=False)
     inference_token: SecretStr = Field(default=SecretStr(""), repr=False)
+    inference_max_retries: int = Field(default=1, ge=0, le=2)
     inference_timeout_seconds: float = Field(default=20, gt=0, le=120)
     embedding_model: str = "BAAI/bge-m3"
     embedding_revision: str = "main"
