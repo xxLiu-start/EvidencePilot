@@ -1,5 +1,6 @@
 """Private inference API. Deploy behind TLS; never expose directly to tenants."""
 from contextlib import asynccontextmanager
+import hmac
 from threading import BoundedSemaphore
 from time import monotonic
 from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -41,6 +42,9 @@ async def lifespan(app):
     if len(local.inference_token.get_secret_value()) < 32:
         raise RuntimeError("Inference service token is required")
     if local.environment == "production":
+        metric_token = local.inference_metrics_token.get_secret_value()
+        if len(metric_token) < 32 or metric_token == local.inference_token.get_secret_value():
+            raise RuntimeError("Separate inference metrics credential required")
         for kind in ("embedding", "reranker"):
             verified_model_path(local, kind)
     yield
@@ -105,7 +109,12 @@ def run(kind, operation):
         DURATION.labels(kind).observe(monotonic() - started)
         slots.release()
 
-@app.get("/metrics", dependencies=[Depends(authenticate)])
+def authenticate_metrics(authorization: Annotated[str | None, Header()] = None):
+    token = local.inference_metrics_token.get_secret_value()
+    if len(token) < 32 or not hmac.compare_digest((authorization or "").encode(), ("Bearer " + token).encode()):
+        raise HTTPException(401, "Unauthorized")
+
+@app.get("/metrics", dependencies=[Depends(authenticate_metrics)])
 def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
