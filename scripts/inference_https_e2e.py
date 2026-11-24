@@ -103,10 +103,10 @@ def main():
     network = name + "-net"
     with tempfile.TemporaryDirectory(prefix="ep-inference-") as tmp:
         root = Path(tmp)
-        root.chmod(0o777)  # disposable directory for fixture generation by container UID
+        root.chmod(0o755)  # only the disposable fixture is mounted into the test containers
         try:
             run("docker","network","create","--internal",network,stdout=subprocess.DEVNULL)
-            run("docker","run","--rm","--network","none","-v",tmp+":/fixture",
+            run("docker","run","--rm","--network","none","--user",f"{os.getuid()}:{os.getgid()}","-v",tmp+":/fixture",
                 "evidencepilot-inference:ci","python","-c",FIXTURE)
             run("openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1",
                 "-subj","/CN=ep-test-ca","-keyout",str(root/"ca.key"),"-out",str(root/"ca.crt"),
