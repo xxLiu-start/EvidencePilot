@@ -126,7 +126,9 @@ def assert_browser(passwords):
                 try:
                     page = context.new_page()
                     page.goto(UI, wait_until="domcontentloaded")
-                    page.get_by_role("button", name="使用企业账号登录").click(timeout=60000)
+                    login = page.get_by_role("button", name="使用企业账号登录")
+                    expect(login).to_be_enabled(timeout=60000)
+                    login.click(timeout=60000)
                     try:
                         page.locator("#username").fill(name, timeout=60000)
                     except Exception:
@@ -237,7 +239,8 @@ def main():
                 print("PASS: real Keycloak JWKS, issuer/audience, DB role and tenant authorization")
                 processes.append(subprocess.Popen(
                     [sys.executable, "-m", "streamlit", "run", "frontend/streamlit_app.py",
-                     "--server.address=127.0.0.1", "--server.port=18501", "--server.headless=true"],
+                     "--server.address=127.0.0.1", "--server.port=18501", "--server.headless=true",
+                     "--browser.serverAddress=localhost", "--browser.serverPort=18501"],
                     cwd=ROOT, stdout=ui_log, stderr=subprocess.STDOUT))
                 wait_http(UI + "/_stcore/health")
                 try:
