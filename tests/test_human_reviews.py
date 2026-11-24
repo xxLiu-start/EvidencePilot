@@ -74,6 +74,8 @@ def test_human_review_approval_requires_membership_and_current_evidence(tmp_path
                  "coverage": 0, "final_report": "Research completed, awaiting human approval."}
         db.add(AgentRun(task_id=task.id, state=state, updated_at=now))
         db.flush()
+        db.info.update(tenant_id=tenant.id, project_ids=(project.id,),
+                       selected_project_id=project.id, selected_project_ids=(project.id,))
         fingerprint = assess_claim(db, claim, [str(evidence.id)], task_id=task.id)["fingerprint"]
         db.add(EvidenceAssessment(task_id=task.id, claim_id="C1",
                                   fingerprint=fingerprint, created_at=now,

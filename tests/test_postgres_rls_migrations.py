@@ -101,7 +101,7 @@ def test_migrated_cache_rls_isolates_identical_hash_url_and_claim_under_runtime_
                              {"id": uuid4(), "scope": tenant})
                 conn.execute(text("INSERT INTO web_searches (id,cache_scope,claim_record_id,query,"
                                   "elapsed_ms,cache_hit,source_urls) "
-                                  "SELECT :id,:scope,id,:query,1,0,'[]'::json FROM claims "
+                                  "SELECT :id,cache_scope,id,:query,1,0,'[]'::json FROM claims "
                                   "WHERE claim_id='C1' AND cache_scope=:scope"),
                              {"id": uuid4(), "scope": tenant, "query": label})
         with engine.begin() as conn:
