@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     document_max_pages: int = Field(default=1_000, ge=1, le=10_000)
     inference_mode: Literal["local", "remote"] = "local"
     inference_url: str = ""
+    inference_ca_file: str = ""
     inference_token: SecretStr = Field(default=SecretStr(""), repr=False)
     inference_timeout_seconds: float = Field(default=20, gt=0, le=120)
     embedding_model: str = "BAAI/bge-m3"
@@ -71,6 +72,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
+        secrets_dir="/run/secrets",
         extra="ignore"
     )
 
