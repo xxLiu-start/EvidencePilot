@@ -370,7 +370,7 @@ def main():
         if not getattr(st.user, "is_logged_in", False):
             st.title("EvidencePilot · 企业登录")
             st.caption("使用组织的 OIDC 身份提供商完成安全登录。")
-            st.login()
+            st.button("使用企业账号登录", type="primary", on_click=st.login)
             st.stop()
         if access_token_from_identity(st.user) is None:
             st.error("身份提供商未返回 API access token。请配置 Streamlit expose_tokens=['access'] 和正确的 API audience。")
