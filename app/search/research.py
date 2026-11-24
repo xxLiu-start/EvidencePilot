@@ -9,6 +9,7 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.db.models import ClaimRecord, WebSearchRecord
+from app.db.session import cache_scope
 from app.evidence.extraction import extract_evidence, save_evidences
 from app.evidence.schema import Evidence
 from app.llm_client import LLMError
@@ -33,6 +34,7 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
             db.flush()
         records[claim.claim_id] = record
     db.commit()
+    run_id = str(uuid4())
     traces = []
     if fixed_plan is None:
         plan, trace = generate_queries(claims, max_queries=max_queries, client=client)
@@ -72,13 +74,13 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
                 if (claim_id, page.content_hash) in seen:
                     continue
                 seen.add((claim_id, page.content_hash))
-                extracted, trace = extract_evidence(claims_by_id[claim_id], page, client=client)
+                extracted, trace = extract_evidence(claims_by_id[claim_id], page, client=client,
+                    identity_scope=(cache_scope(db) + ':' + run_id) if db.info.get('tenant_id') else None)
                 traces.append(asdict(trace))
                 save_evidences(db, extracted)
                 evidence.extend(extracted)
         except (PageError, CacheMiss, LLMError) as exc:
             errors.append({"source_url": url, "category": getattr(exc, "category", type(exc).__name__)})
-    run_id = str(uuid4())
     tenant_id = db.info.get("tenant_id")
     selected_project_id = db.info.get("selected_project_id")
     if selected_project_id is None:

@@ -4,6 +4,24 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session, with_loader_c
 from app.config import settings
 
 
+CACHE_MODELS = {"ClaimRecord", "WebContent", "WebSource", "WebSearchRecord"}
+
+
+def cache_scope(db):
+    tenant_id = db.info.get("tenant_id")
+    if tenant_id is None:
+        if settings.environment == "production":
+            raise PermissionError("Tenant context required for cache access")
+        return "offline"
+    from uuid import UUID
+    return str(UUID(str(tenant_id)))
+
+
+def get_cached_content(db, content_hash):
+    from app.db.models import WebContent
+    return db.get(WebContent, (cache_scope(db), content_hash))
+
+
 engine = create_engine(settings.database_url, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
@@ -49,6 +67,9 @@ def _apply_tenant_project_filters(execute_state):
     for mapper in Base.registry.mappers:
         model = mapper.class_
         columns = mapper.columns
+        if model.__name__ in CACHE_MODELS:
+            statement = statement.options(with_loader_criteria(
+                model, model.cache_scope == cache_scope(db), include_aliases=True))
         if "tenant_id" in columns:
             tenant_filter = model.tenant_id == tenant_id
             if model.__name__ == "EvaluationResult":
@@ -86,6 +107,13 @@ def _enforce_tenant_project_writes(db, flush_context, instances):
         if mapper is None:
             continue
         columns = mapper.columns
+        if "cache_scope" in columns:
+            current_scope = getattr(obj, "cache_scope", None)
+            expected_scope = cache_scope(db)
+            if current_scope is None:
+                obj.cache_scope = expected_scope
+            elif current_scope != expected_scope:
+                raise PermissionError("Cross-tenant cache write rejected")
         if "tenant_id" in columns:
             current_tenant = getattr(obj, "tenant_id", None)
             if current_tenant is None:
@@ -119,6 +147,7 @@ def validate_postgres_rls_runtime(engine) -> None:
         "evidences", "task_feedback", "evaluation_results", "agent_runs", "agent_steps",
         "agent_allowed_sources", "evidence_assessments", "agent_policy_decisions",
         "state_snapshots", "agent_reflections", "outbox_events", "tool_execution_receipts", "human_reviews",
+        "claims", "web_contents", "web_sources", "web_searches",
     )
     with engine.connect() as connection:
         role = connection.execute(text(

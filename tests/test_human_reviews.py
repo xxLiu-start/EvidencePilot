@@ -47,18 +47,18 @@ def test_human_review_approval_requires_membership_and_current_evidence(tmp_path
                             tenant_id=tenant.id, project_id=project.id,
                             created_by_user_id=author.id)
         claim_text = "The service supports private deployment."
-        claim_record = ClaimRecord(claim_id="C1", claim_text=claim_text)
+        claim_record = ClaimRecord(cache_scope=str(tenant.id), claim_id="C1", claim_text=claim_text)
         db.add_all([task, claim_record])
         db.flush()
         body = claim_text
         hash_value = digest(body)
-        db.add(WebContent(content_hash=hash_value, body=body, cache_path=""))
+        db.add(WebContent(cache_scope=str(tenant.id), content_hash=hash_value, body=body, cache_path=""))
         source_url = "https://example.org/review-evidence"
-        db.add(WebSource(canonical_url=source_url, fetched_url=source_url,
+        db.add(WebSource(cache_scope=str(tenant.id), canonical_url=source_url, fetched_url=source_url,
                          title="Primary evidence", content_hash=hash_value,
                          retrieved_at=now, published_at=now,
                          source_type="web", search_queries=[]))
-        evidence = EvidenceRecord(id=uuid4(), claim_record_id=claim_record.id,
+        evidence = EvidenceRecord(id=uuid4(), cache_scope=str(tenant.id), claim_record_id=claim_record.id,
                                   tenant_id=tenant.id, project_id=project.id,
                                   source_type="web", source_url=source_url,
                                   content_hash=hash_value, retrieved_at=now,

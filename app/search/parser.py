@@ -14,6 +14,7 @@ import trafilatura
 from sqlalchemy import select
 
 from app.config import Settings, settings
+from app.db.session import cache_scope, get_cached_content
 from app.db.models import WebContent, WebSource
 from app.search.cache import CacheMiss, digest, write_json, scoped_cache_config
 
@@ -114,7 +115,7 @@ def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, con
     canonical = normalize_url(url)
     source = db.scalar(select(WebSource).where(WebSource.canonical_url == canonical))
     if source is not None and not refresh:
-        content = db.get(WebContent, source.content_hash)
+        content = get_cached_content(db, source.content_hash)
         if content is None or digest(content.body) != source.content_hash:
             raise PageError("Stored webpage hash mismatch")
         if search_query and search_query not in source.search_queries:
@@ -149,7 +150,7 @@ def fetch_page(db, url, *, search_query="", cache_only=False, refresh=False, con
     metadata.pop("body")
     metadata.pop("cache_hit")
     write_json(url_path, metadata)
-    if db.get(WebContent, page.content_hash) is None:
+    if get_cached_content(db, page.content_hash) is None:
         db.add(WebContent(content_hash=page.content_hash, body=page.body, cache_path=str(content_path)))
         db.flush()
     if source is None:
