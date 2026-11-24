@@ -71,3 +71,42 @@ jobs:
           name: security-findings
           path: security-results/
           if-no-files-found: error
+
+  transformers-upgrade-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve candidate dependency stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          sed 's/^transformers>=4.45,<5$/transformers>=5.10,<6/' requirements-runtime.txt > /tmp/evidencepilot-candidate.txt
+          grep -Fx 'transformers>=5.10,<6' /tmp/evidencepilot-candidate.txt
+          python -m pip install -r /tmp/evidencepilot-candidate.txt -r requirements-frontend.txt pytest pytest-asyncio pip-audit
+          python -m pip check
+      - name: Verify real inference library imports
+        run: |
+          python -c 'import transformers, peft; from FlagEmbedding import BGEM3FlagModel, FlagReranker; print(transformers.__version__, peft.__version__)'
+      - name: Candidate regression tests
+        env:
+          DATABASE_URL: sqlite://
+          ENVIRONMENT: test
+          AUTH_ENABLED: "false"
+        run: python -m pytest -q
+      - name: Candidate vulnerability scan
+        if: always()
+        run: |
+          mkdir -p candidate-security-results
+          python -m pip freeze > candidate-security-results/installed.txt
+          python -m pip_audit --format json --output candidate-security-results/pip-audit.json
+      - name: Upload candidate results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: transformers-upgrade-candidate
+          path: candidate-security-results/
+          if-no-files-found: error
