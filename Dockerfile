@@ -23,10 +23,11 @@ EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Remote-only business runtime. The legacy api target above remains available.
-FROM python:3.12-slim AS business
+FROM python:3.12-slim-bookworm AS business
 WORKDIR /workspace
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/opt/tiktoken
 COPY requirements-business.txt ./
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements-business.txt \
     && mkdir -p /opt/tiktoken /workspace/data/cache/web \
     && python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")' \
@@ -39,9 +40,10 @@ USER 10001:10001
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-FROM python:3.12-slim AS inference
+FROM python:3.12-slim-bookworm AS inference
 WORKDIR /workspace
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite://
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 COPY requirements-inference.txt ./
 RUN pip install --no-cache-dir -r requirements-inference.txt \
