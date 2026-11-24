@@ -124,8 +124,8 @@ jobs:
           docker build --target inference -t evidencepilot-inference:ci .
       - name: Verify business imports and absence of model libraries
         run: |
-          docker run --rm -e DATABASE_URL=sqlite:// evidencepilot-business:ci python -c 'import os, importlib.util; import app.main, app.queue.tasks; assert os.getuid() != 0; assert all(importlib.util.find_spec(m) is None for m in ("torch","transformers","FlagEmbedding","peft"))'
-          docker run --rm evidencepilot-inference:ci python -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
+          docker run --rm -e DATABASE_URL=sqlite:// evidencepilot-business:ci -c 'import os, importlib.util; import app.main, app.queue.tasks; assert os.getuid() != 0; assert all(importlib.util.find_spec(m) is None for m in ("torch","transformers","FlagEmbedding","peft"))'
+          docker run --rm evidencepilot-inference:ci -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
       - name: Actual private-network TLS and fault recovery acceptance
         run: bash scripts/inference_transport_e2e.sh
       - name: Cross-container TLS and native fixture acceptance
