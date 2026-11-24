@@ -80,7 +80,7 @@ services:
       RERANKER_MANIFEST_SHA256: ${RERANKER_MANIFEST_SHA256:?set trusted reranker manifest}
       RERANKER_LOCAL_FILES_ONLY: "true"
       HF_HOME: /tmp/huggingface
-    command: ["python", "-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-keyfile", "/run/secrets/inference_tls_key", "--ssl-certfile", "/run/secrets/inference_tls_cert", "--no-access-log", "--limit-concurrency", "16"]
+    command: ["-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-keyfile", "/run/secrets/inference_tls_key", "--ssl-certfile", "/run/secrets/inference_tls_cert", "--no-access-log", "--limit-concurrency", "16"]
     networks: [inference_private]
     secrets: [inference_token, inference_metrics_token, inference_ca, inference_tls_key, inference_tls_cert]
     volumes:
