@@ -118,6 +118,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build isolated images
+        id: build-images
         run: |
           docker build --target business -t evidencepilot-business:ci .
           docker build --target inference -t evidencepilot-inference:ci .
@@ -143,21 +144,21 @@ jobs:
         run: |
           docker run --rm --entrypoint /bin/promtool -v "$PWD/deploy:/etc/prometheus:ro" prom/prometheus:v2.55.1 check rules /etc/prometheus/inference-alerts.yml
       - name: Generate image SBOMs and scan business image
-        if: always()
+        if: always() && steps.build-images.outcome == 'success'
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-business:ci
           format: cyclonedx
           output: business-sbom.json
       - name: Generate inference image SBOM
-        if: always()
+        if: always() && steps.build-images.outcome == 'success'
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-inference:ci
           format: cyclonedx
           output: inference-sbom.json
       - name: Gate business image on high and critical vulnerabilities
-        if: always()
+        if: always() && steps.build-images.outcome == 'success'
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-business:ci
@@ -167,7 +168,7 @@ jobs:
           trivy-config: deploy/trivy.yaml
           exit-code: '1'
       - name: Gate inference image on high and critical vulnerabilities
-        if: always()
+        if: always() && steps.build-images.outcome == 'success'
         uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: evidencepilot-inference:ci
