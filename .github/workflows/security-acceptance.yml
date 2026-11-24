@@ -125,6 +125,8 @@ jobs:
         run: |
           docker run --rm -e DATABASE_URL=sqlite:// evidencepilot-business:ci python -c 'import os, importlib.util; import app.main, app.queue.tasks; assert os.getuid() != 0; assert all(importlib.util.find_spec(m) is None for m in ("torch","transformers","FlagEmbedding","peft"))'
           docker run --rm evidencepilot-inference:ci python -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
+      - name: Actual private-network TLS and fault recovery acceptance
+        run: bash scripts/inference_transport_e2e.sh
       - name: Validate isolated Compose overlay
         run: |
           cp .env.example .env
