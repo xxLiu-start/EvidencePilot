@@ -22,35 +22,44 @@ COPY alembic.ini ./alembic.ini
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-# Remote-only business runtime. The legacy api target above remains available.
-FROM python:3.12-slim-trixie AS business
+# Build business dependencies in a disposable development stage.
+FROM cgr.dev/chainguard/python:3.12-dev AS business-builder
 WORKDIR /workspace
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/opt/tiktoken
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken
+RUN python -m venv --without-pip /venv \
+    && mkdir -p /workspace/data/cache/web /workspace/data/tiktoken
 COPY requirements-business.txt ./
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir -r requirements-business.txt \
-    && mkdir -p /opt/tiktoken /workspace/data/cache/web \
-    && python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")' \
-    && groupadd -g 10001 ep && useradd -u 10001 -g ep -M ep \
-    && chown -R ep:ep /workspace/data /opt/tiktoken
-COPY app ./app
-COPY migrations ./migrations
-COPY alembic.ini ./alembic.ini
-USER 10001:10001
+RUN pip --python /venv/bin/python install --no-cache-dir -r requirements-business.txt \
+    && /venv/bin/python -c 'import tiktoken; tiktoken.get_encoding("cl100k_base")'
+
+# Distroless Wolfi runtime: no Debian util-linux, perl, shell or package manager.
+FROM cgr.dev/chainguard/python:3.12 AS business
+WORKDIR /workspace
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 INFERENCE_MODE=remote TIKTOKEN_CACHE_DIR=/workspace/data/tiktoken PATH="/venv/bin:$PATH"
+COPY --from=business-builder --chown=nonroot:nonroot /venv /venv
+COPY --from=business-builder --chown=nonroot:nonroot /workspace/data /workspace/data
+COPY --chown=nonroot:nonroot app ./app
+COPY --chown=nonroot:nonroot migrations ./migrations
+COPY --chown=nonroot:nonroot alembic.ini ./alembic.ini
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-FROM python:3.12-slim-trixie AS inference
+# Install CPU-only PyTorch and inference dependencies in a throwaway builder.
+FROM cgr.dev/chainguard/python:3.12-dev AS inference-builder
 WORKDIR /workspace
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite://
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN python -m venv --without-pip /venv
 COPY requirements-inference.txt ./
-RUN pip install --no-cache-dir -r requirements-inference.txt \
-    && groupadd -g 10001 ep && useradd -u 10001 -g ep -M ep
-COPY app/config.py ./app/config.py
-COPY app/retrieval ./app/retrieval
-COPY app/inference_service.py ./app/inference_service.py
-USER 10001:10001
+RUN pip --python /venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision \
+    && pip --python /venv/bin/python install --no-cache-dir -r requirements-inference.txt
+
+# Minimal non-root runtime containing only Python, application and installed wheels.
+FROM cgr.dev/chainguard/python:3.12 AS inference
+WORKDIR /workspace
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 TOKENIZERS_PARALLELISM=false DATABASE_URL=sqlite:// HF_HOME=/tmp/huggingface PATH="/venv/bin:$PATH"
+COPY --from=inference-builder --chown=nonroot:nonroot /venv /venv
+COPY --chown=nonroot:nonroot app/config.py ./app/config.py
+COPY --chown=nonroot:nonroot app/retrieval ./app/retrieval
+COPY --chown=nonroot:nonroot app/inference_service.py ./app/inference_service.py
 EXPOSE 8000
 CMD ["python", "-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
