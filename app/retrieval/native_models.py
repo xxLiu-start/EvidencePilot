@@ -3,13 +3,19 @@
 Only dense CLS embeddings and binary cross-encoder scores are supported.
 Sparse and ColBERT weights are deliberately not loaded.
 """
+from pathlib import Path
+
+
 class NativeEncoder:
     def __init__(self, path, device, fp16, rerank=False):
         import torch
         from transformers import AutoTokenizer, AutoModel, AutoModelForSequenceClassification
+        path = str(Path(path).resolve(strict=True))
+        if not Path(path).is_dir():
+            raise ValueError("Model must be an existing local directory")
         self.torch = torch
         self.device = device
-        self.tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=False)
+        self.tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=False)  # nosec B615 - existing local directory only
         cls = AutoModelForSequenceClassification if rerank else AutoModel
         self.model = cls.from_pretrained(path, local_files_only=True, trust_remote_code=False,
                                          use_safetensors=True).to(device).eval()
