@@ -46,12 +46,12 @@ CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "
 
 # Install CPU-only PyTorch and inference dependencies in a throwaway builder.
 FROM cgr.dev/chainguard/python:latest-dev AS inference-builder
-WORKDIR /workspace
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /home/nonroot/workspace
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH="/home/nonroot/venv/bin:$PATH"
 RUN python -m venv --without-pip /home/nonroot/venv
 COPY requirements-inference.txt ./
-RUN pip --python /venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision \
-    && pip --python /venv/bin/python install --no-cache-dir -r requirements-inference.txt
+RUN pip --python /home/nonroot/venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision \
+    && pip --python /home/nonroot/venv/bin/python install --no-cache-dir -r requirements-inference.txt
 
 # Minimal non-root runtime containing only Python, application and installed wheels.
 FROM cgr.dev/chainguard/python:latest AS inference
