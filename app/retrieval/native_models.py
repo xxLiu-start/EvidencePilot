@@ -15,7 +15,7 @@ class NativeEncoder:
             raise ValueError("Model must be an existing local directory")
         self.torch = torch
         self.device = device
-        self.tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=False)  # nosec B615 - existing local directory only
+        self.tokenizer = AutoTokenizer.from_pretrained(path, local_files_only=True, trust_remote_code=False, use_fast=False)  # nosec B615 - existing local directory only
         cls = AutoModelForSequenceClassification if rerank else AutoModel
         self.model = cls.from_pretrained(path, local_files_only=True, trust_remote_code=False,
                                          use_safetensors=True).to(device).eval()
