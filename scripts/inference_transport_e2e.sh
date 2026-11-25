@@ -23,7 +23,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=ep-test-ca \\
   -addext "keyUsage=critical,keyCertSign,cRLSign" \\
   -keyout "$root/ca.key" -out "$root/ca.crt" 2>/dev/null
 openssl req -new -newkey rsa:2048 -nodes -subj /CN=inference -keyout "$root/server.key" -out "$root/server.csr" 2>/dev/null
-printf 'subjectAltName=DNS:inference\nextendedKeyUsage=serverAuth\n' > "$root/ext"
+printf 'basicConstraints=critical,CA:FALSE\nsubjectAltName=DNS:inference\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature,keyEncipherment\n' > "$root/ext"
 openssl x509 -req -in "$root/server.csr" -CA "$root/ca.crt" -CAkey "$root/ca.key" -CAcreateserial -days 1 -extfile "$root/ext" -out "$root/server.crt" 2>/dev/null
 # Only throwaway CI credentials; readable by the non-root container user.
 chmod 644 "$root/server.key" "$root/server.crt" "$root/ca.crt"
