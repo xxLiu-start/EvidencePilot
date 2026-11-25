@@ -15,19 +15,10 @@ from uuid import uuid4
 FIXTURE = r"""
 import hashlib, json
 from pathlib import Path
-from tokenizers import Tokenizer
-from tokenizers.models import WordLevel
-from tokenizers.pre_tokenizers import Whitespace
-from tokenizers.processors import TemplateProcessing
-from transformers import BertConfig, BertModel, BertForSequenceClassification, PreTrainedTokenizerFast
+from transformers import BertConfig, BertModel, BertForSequenceClassification, BertTokenizer
 
 vocab = {"[PAD]":0,"[UNK]":1,"[CLS]":2,"[SEP]":3,"hello":4,"world":5}
-tok = Tokenizer(WordLevel(vocab, unk_token="[UNK]"))
-tok.pre_tokenizer = Whitespace()
-tok.post_processor = TemplateProcessing(single="[CLS] $A [SEP]", pair="[CLS] $A [SEP] $B:1 [SEP]:1",
-    special_tokens=[("[CLS]",2),("[SEP]",3)])
-tokenizer = PreTrainedTokenizerFast(tokenizer_object=tok, pad_token="[PAD]", unk_token="[UNK]",
-    cls_token="[CLS]", sep_token="[SEP]", model_input_names=["input_ids","attention_mask","token_type_ids"])
+tokenizer = None
 for kind, revision, size, heads, klass in [
     ("embedding", "1"*40, 1024, 8, BertModel),
     ("reranker", "2"*40, 32, 4, BertForSequenceClassification),
@@ -37,6 +28,8 @@ for kind, revision, size, heads, klass in [
     config = BertConfig(vocab_size=len(vocab), hidden_size=size, num_attention_heads=heads,
         num_hidden_layers=1, intermediate_size=64, max_position_embeddings=128, num_labels=1)
     klass(config).save_pretrained(root, safe_serialization=True)
+    (root/"vocab.txt").write_text("\\n".join(vocab.keys())+"\\n")
+    tokenizer = BertTokenizer(vocab_file=str(root/"vocab.txt"))
     tokenizer.save_pretrained(root)
     for item in root.iterdir():
         item.chmod(0o644)
