@@ -18,9 +18,9 @@ cleanup() {
 }
 trap cleanup EXIT
 chmod 755 "$root"
-openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=ep-test-ca \\
-  -addext "basicConstraints=critical,CA:TRUE" \\
-  -addext "keyUsage=critical,keyCertSign,cRLSign" \\
+openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=ep-test-ca \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign" \
   -keyout "$root/ca.key" -out "$root/ca.crt" 2>/dev/null
 openssl req -new -newkey rsa:2048 -nodes -subj /CN=inference -keyout "$root/server.key" -out "$root/server.csr" 2>/dev/null
 printf 'basicConstraints=critical,CA:FALSE\nsubjectAltName=DNS:inference\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature,keyEncipherment\n' > "$root/ext"
