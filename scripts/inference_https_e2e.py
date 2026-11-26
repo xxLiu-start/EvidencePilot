@@ -105,7 +105,7 @@ def main():
         try:
             run("docker","network","create","--internal",network,stdout=subprocess.DEVNULL)
             run("docker","run","--rm","--network","none","--user",f"{os.getuid()}:{os.getgid()}","-v",tmp+":/fixture",
-                "evidencepilot-inference:ci","-c",FIXTURE)
+                "--entrypoint","/home/nonroot/venv/bin/python","evidencepilot-inference:ci","-c",FIXTURE)
             run("openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1",
                 "-subj","/CN=ep-test-ca","-keyout",str(root/"ca.key"),"-out",str(root/"ca.crt"),
                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
