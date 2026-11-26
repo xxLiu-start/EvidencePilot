@@ -107,12 +107,12 @@ def main():
             run("docker","run","--rm","--network","none","-v",tmp+":/fixture",
                 "--entrypoint","/home/nonroot/venv/bin/python","evidencepilot-inference:ci","-c",FIXTURE)
             run("openssl","req","-x509","-newkey","rsa:2048","-nodes","-days","1",
-                "-subj","/CN=ep-test-ca","-keyout",str(root/"ca.key"),"-out",str(root/"ca.crt"),
+                "-subj","/CN=ep-test-ca","-addext","basicConstraints=critical,CA:TRUE","-addext","keyUsage=critical,keyCertSign,cRLSign","-keyout",str(root/"ca.key"),"-out",str(root/"ca.crt"),
                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
             run("openssl","req","-newkey","rsa:2048","-nodes","-subj","/CN=inference",
                 "-keyout",str(root/"tls.key"),"-out",str(root/"tls.csr"),
                 stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-            (root/"ext").write_text("subjectAltName=DNS:inference\nextendedKeyUsage=serverAuth\n")
+            (root/"ext").write_text("basicConstraints=critical,CA:FALSE\nsubjectAltName=DNS:inference\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature,keyEncipherment\n")
             run("openssl","x509","-req","-in",str(root/"tls.csr"),"-CA",str(root/"ca.crt"),
                 "-CAkey",str(root/"ca.key"),"-CAcreateserial","-days","1","-extfile",str(root/"ext"),
                 "-out",str(root/"tls.crt"),stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
