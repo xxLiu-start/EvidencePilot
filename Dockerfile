@@ -53,7 +53,7 @@ RUN python -m venv --without-pip /home/nonroot/venv \
     && python -c 'import sys; open("/tmp/python-abi", "w").write("%d.%d" % sys.version_info[:2])' \
     && pip --python /home/nonroot/venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision
 COPY requirements-inference.txt ./
-RUN python -m pip --python /home/nonroot/venv/bin/python install --no-cache-dir -r requirements-inference.txt \
+RUN pip --python /home/nonroot/venv/bin/python install --no-cache-dir -r requirements-inference.txt \
     && /home/nonroot/venv/bin/python -c 'import torch, transformers, tokenizers, safetensors; print(torch.__version__, transformers.__version__, tokenizers.__version__)'
 
 # Minimal non-root runtime containing only Python, application and installed wheels.
