@@ -13,9 +13,12 @@ def main():
     parser.add_argument("--language", default="en")
     parser.add_argument("--split", choices=("dev", "testA"), default="dev")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--max-queries", type=int, default=0, help="Deterministic prefix for a bounded smoke benchmark; 0 uses the full split")
     args = parser.parse_args()
 
     rows = load_dataset("miracl/miracl", args.language, split=args.split)
+    if args.max_queries > 0:
+        rows = rows.select(range(min(args.max_queries, len(rows))))
     corpus, queries, qrels = {}, [], []
     for row in rows:
         qid = str(row["query_id"])
