@@ -67,7 +67,7 @@ COPY --chown=nonroot:nonroot app/config.py ./app/config.py
 COPY --chown=nonroot:nonroot app/retrieval ./app/retrieval
 COPY --chown=nonroot:nonroot app/inference_service.py ./app/inference_service.py
 # Verify imports in the actual runtime image, not only in the builder.
-RUN ["/home/nonroot/venv/bin/python", "-c", "import sys, torch, transformers, tokenizers, safetensors; from app.inference_service import app; assert sys.version_info[:2] == (3, 12); print('runtime inference imports verified', transformers.__version__, tokenizers.__version__)"]
+RUN ["/home/nonroot/venv/bin/python", "-c", "import sys, torch, transformers, tokenizers, safetensors; from app.inference_service import app; expected=open('/tmp/python-abi').read(); actual='%d.%d' % sys.version_info[:2]; assert actual == expected, (expected, actual); print('runtime inference imports verified', transformers.__version__, tokenizers.__version__)"]
 ENTRYPOINT ["/home/nonroot/venv/bin/python"]
 EXPOSE 8000
 CMD ["-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
