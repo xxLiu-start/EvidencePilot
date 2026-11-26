@@ -67,6 +67,9 @@ jobs:
       - name: Verify actual BGE-M3 and separate reranker inference
         run: python -m scripts.model_acceptance | tee reports/bge_m3/model-smoke.log
       - name: Export official MIRACL English development candidate pool
+        env:
+          HF_HUB_OFFLINE: "0"
+          HF_DATASETS_OFFLINE: "0"
         run: |
           python -m scripts.export_miracl --language en --split dev --max-queries 50 --output "$RUNNER_TEMP/miracl-en-dev"
       - name: Evaluate BM25, BGE-M3 Dense, Hybrid and reranker
