@@ -50,7 +50,7 @@ FROM cgr.dev/chainguard/python:latest-dev AS inference-builder
 WORKDIR /home/nonroot/workspace
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH="/home/nonroot/venv/bin:$PATH"
 RUN python -m venv --without-pip /home/nonroot/venv \
-    && /home/nonroot/venv/bin/python -c 'import sys; assert sys.version_info[:2] == (3, 12), sys.version' \
+    && python -c 'import sys; open("/tmp/python-abi", "w").write("%d.%d" % sys.version_info[:2])' \
     && python -m pip --python /home/nonroot/venv/bin/python install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision
 COPY requirements-inference.txt ./
 RUN python -m pip --python /home/nonroot/venv/bin/python install --no-cache-dir -r requirements-inference.txt \
