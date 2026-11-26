@@ -1,7 +1,8 @@
 """Native Transformers inference for reviewed BGE encoder bundles.
 
-Only dense CLS embeddings and binary cross-encoder scores are supported.
-Sparse and ColBERT weights are deliberately not loaded.
+BGE-M3 Dense uses the official CLS pooling + L2 normalization path. Sparse
+and ColBERT heads are deliberately not loaded. Reranking uses the separate
+BGE-reranker-v2-m3 sequence-classification checkpoint.
 """
 from pathlib import Path
 
@@ -23,13 +24,15 @@ class NativeEncoder:
             self.model.half()
         if rerank and self.model.config.num_labels != 1:
             raise ValueError("Expected a single-logit cross encoder")
-        if not rerank and self.model.config.hidden_size != 1024:
-            raise ValueError("Expected 1024-dimensional dense encoder")
+        if not rerank and (self.model.config.model_type != "xlm-roberta"
+                            or self.model.config.hidden_size != 1024):
+            raise ValueError("Expected the 1024-dimensional XLM-R BGE-M3 backbone")
 
     def encode(self, texts, batch_size, max_length, **kwargs):
         inputs = self.tokenizer(texts, padding=True, truncation=True, max_length=max_length,
                                 return_tensors="pt").to(self.device)
         with self.torch.inference_mode():
+            # Matches FlagEmbedding BGEM3Model.dense_embedding(pooling="cls").
             vectors = self.model(**inputs).last_hidden_state[:, 0].float()
             vectors = self.torch.nn.functional.normalize(vectors, dim=-1)
         return {"dense_vecs": vectors.cpu().numpy()}
