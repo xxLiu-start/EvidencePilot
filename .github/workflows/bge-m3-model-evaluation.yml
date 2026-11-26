@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: bge-m3-evaluation-\${{ github.event.pull_request.number || github.ref }}
+  group: bge-m3-evaluation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
