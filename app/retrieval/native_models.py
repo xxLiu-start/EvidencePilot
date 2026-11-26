@@ -24,8 +24,7 @@ class NativeEncoder:
             self.model.half()
         if rerank and self.model.config.num_labels != 1:
             raise ValueError("Expected a single-logit cross encoder")
-        if not rerank and (self.model.config.model_type != "xlm-roberta"
-                            or self.model.config.hidden_size != 1024):
+        if not rerank and self.model.config.hidden_size != 1024:
             raise ValueError("Expected the 1024-dimensional XLM-R BGE-M3 backbone")
 
     def encode(self, texts, batch_size, max_length, **kwargs):
