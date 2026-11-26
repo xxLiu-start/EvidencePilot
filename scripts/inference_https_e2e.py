@@ -33,7 +33,7 @@ for kind, revision, size, heads, klass in [
     tokenizer.save_pretrained(root)
     for item in root.iterdir():
         item.chmod(0o644)
-    root.chmod(0o755)
+    root.chmod(0o777)
     files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in root.iterdir()}
     (root/"manifest.json").write_text(json.dumps({"revision":revision,"files":files}))
     (root/"manifest.json").chmod(0o644)
@@ -137,7 +137,7 @@ def main():
                            "-e",kind.upper()+"_LOCAL_FILES_ONLY=true",
                            "-v",str(root/kind)+":/models/"+kind+":ro"]
             run("docker","run","--rm","--network","none",*server,
-                "evidencepilot-inference:ci","python","-c",
+                "--entrypoint","/home/nonroot/venv/bin/python","evidencepilot-inference:ci","-c",
                 "from app.config import settings; from app.retrieval.model_integrity import verified_model_path; [verified_model_path(settings,k) for k in (\"embedding\",\"reranker\")]; print(\"PASS: native fixture manifests\")")
             run("docker","run","-d","--name",name,"--network",network,
                 "--network-alias","inference","--network-alias","wrong-host",
