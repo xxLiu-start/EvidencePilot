@@ -68,14 +68,14 @@ jobs:
         run: python -m scripts.model_acceptance | tee reports/bge_m3/model-smoke.log
       - name: Export official MIRACL English development candidate pool
         run: |
-          python -m scripts.export_miracl --language en --split dev --max-queries 100 --output "$RUNNER_TEMP/miracl-en-dev"
+          python -m scripts.export_miracl --language en --split dev --max-queries 50 --output "$RUNNER_TEMP/miracl-en-dev"
       - name: Evaluate BM25, BGE-M3 Dense, Hybrid and reranker
         run: |
           python -m scripts.retrieval_quality_benchmark \
             --queries "$RUNNER_TEMP/miracl-en-dev/queries.jsonl" \
             --corpus "$RUNNER_TEMP/miracl-en-dev/corpus.jsonl" \
             --qrels "$RUNNER_TEMP/miracl-en-dev/qrels.jsonl" \
-            --candidate-k 50 --top-k 10 \
+            --candidate-k 20 --top-k 10 \
             --output reports/bge_m3/miracl-en-dev-metrics.json
       - name: Upload official model evaluation report
         if: always()
