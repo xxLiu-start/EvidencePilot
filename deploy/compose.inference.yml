@@ -1,0 +1,128 @@
+# Requires Docker Compose >= 2.24.4 for !override.
+# Supply reviewed model bundles, certificate files and a random service token.
+x-business-inference: &business-inference
+  INFERENCE_MODE: remote
+  INFERENCE_URL: https://inference:8000
+  INFERENCE_CA_FILE: /run/secrets/inference_ca
+  EMBEDDING_MODEL: /models/embedding
+  EMBEDDING_REVISION: ${EMBEDDING_REVISION:?set pinned embedding revision}
+  RERANKER_MODEL: /models/reranker
+  RERANKER_REVISION: ${RERANKER_REVISION:?set pinned reranker revision}
+
+services:
+  migration:
+    build:
+      target: business
+  outbox-dispatcher:
+    build:
+      target: business
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+  api:
+    build:
+      target: business
+    environment:
+      <<: *business-inference
+    networks: [default, inference_private]
+    secrets: [inference_token, inference_ca]
+    volumes: !override
+      - ./.env:/run/secrets/evidencepilot.env:ro
+      - ./data/cache/web:/workspace/data/cache/web
+      - ./data/benchmark:/workspace/data/benchmark:ro
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      inference:
+        condition: service_healthy
+  research-worker:
+    build:
+      target: business
+    environment:
+      <<: *business-inference
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    networks: [default, inference_private]
+    secrets: [inference_token, inference_ca]
+    volumes: !override
+      - ./.env:/run/secrets/evidencepilot.env:ro
+      - ./data/cache/web:/workspace/data/cache/web
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    depends_on:
+      inference:
+        condition: service_healthy
+  grafana:
+    volumes:
+      - ./deploy/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./deploy/grafana/dashboards:/var/lib/grafana/dashboards:ro
+  prometheus:
+    networks: [default, inference_private]
+    secrets: [inference_metrics_token, inference_ca]
+    volumes: !override
+      - ./deploy/prometheus.inference.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/inference-alerts.yml:/etc/prometheus/inference-alerts.yml:ro
+      - prometheus_data:/prometheus
+  inference:
+    profiles: [apps]
+    build:
+      context: .
+      target: inference
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite://
+      ENVIRONMENT: production
+      INFERENCE_MODE: local
+      EMBEDDING_MODEL: /models/embedding
+      EMBEDDING_REVISION: ${EMBEDDING_REVISION:?set pinned embedding revision}
+      EMBEDDING_MANIFEST_SHA256: ${EMBEDDING_MANIFEST_SHA256:?set trusted embedding manifest}
+      EMBEDDING_LOCAL_FILES_ONLY: "true"
+      RERANKER_MODEL: /models/reranker
+      RERANKER_REVISION: ${RERANKER_REVISION:?set pinned reranker revision}
+      RERANKER_MANIFEST_SHA256: ${RERANKER_MANIFEST_SHA256:?set trusted reranker manifest}
+      RERANKER_LOCAL_FILES_ONLY: "true"
+      HF_HOME: /tmp/huggingface
+    command: ["-m", "uvicorn", "app.inference_service:app", "--host", "0.0.0.0", "--port", "8000", "--ssl-keyfile", "/run/secrets/inference_tls_key", "--ssl-certfile", "/run/secrets/inference_tls_cert", "--no-access-log", "--limit-concurrency", "16"]
+    networks: [inference_private]
+    secrets: [inference_token, inference_metrics_token, inference_ca, inference_tls_key, inference_tls_cert]
+    volumes:
+      - type: bind
+        source: ${EMBEDDING_BUNDLE_DIR:?set local embedding bundle}
+        target: /models/embedding
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${RERANKER_BUNDLE_DIR:?set local reranker bundle}
+        target: /models/reranker
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: ${INFERENCE_MEMORY_LIMIT:-8g}
+    cpus: ${INFERENCE_CPUS:-4}
+    pids_limit: 256
+    healthcheck:
+      test: ["CMD", "python", "-c", "import ssl,urllib.request; urllib.request.urlopen('https://inference:8000/health',context=ssl.create_default_context(cafile='/run/secrets/inference_ca'),timeout=5)"]
+      interval: 15s
+      timeout: 8s
+      start_period: 180s
+      retries: 10
+
+networks:
+  inference_private:
+    internal: true
+
+secrets:
+  inference_metrics_token:
+    file: ${INFERENCE_METRICS_TOKEN_FILE:?set separate metrics token file}
+  inference_token:
+    file: ${INFERENCE_TOKEN_FILE:?set token file}
+  inference_ca:
+    file: ${INFERENCE_CA_PATH:?set CA file}
+  inference_tls_key:
+    file: ${INFERENCE_TLS_KEY_PATH:?set TLS key file}
+  inference_tls_cert:
+    file: ${INFERENCE_TLS_CERT_PATH:?set TLS certificate file}

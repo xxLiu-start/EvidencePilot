@@ -84,7 +84,10 @@ def dispatch_once(
                     else:
                         delay = min(2 ** event.attempts, 300)
                         event.next_attempt_at = datetime.now(timezone.utc) + timedelta(seconds=delay)
-        db.commit()
+            # Flush and commit under the tenant that owns these outbox rows.
+            # Switching the RLS GUC before a deferred flush hides earlier rows.
+            db.commit()
+            db.expunge_all()
     return {"published": published, "dead_lettered": failed}
 
 

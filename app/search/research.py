@@ -9,13 +9,14 @@ from sqlalchemy import select
 
 from app.config import settings
 from app.db.models import ClaimRecord, WebSearchRecord
+from app.db.session import cache_scope
 from app.evidence.extraction import extract_evidence, save_evidences
 from app.evidence.schema import Evidence
 from app.llm_client import LLMError
-from app.search.cache import CacheMiss, write_json
+from app.search.cache import CacheMiss, write_json, scoped_cache_config
 from app.search.parser import PageError, fetch_page, normalize_url
 from app.search.query_generator import QueryPlan, generate_queries
-from app.search.web_search import SearchError, get_web_search_client
+from app.search.web_search import SearchError, WebSearchClient, get_web_search_client
 
 
 def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
@@ -33,6 +34,7 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
             db.flush()
         records[claim.claim_id] = record
     db.commit()
+    run_id = str(uuid4())
     traces = []
     if fixed_plan is None:
         plan, trace = generate_queries(claims, max_queries=max_queries, client=client)
@@ -41,7 +43,9 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
         plan = QueryPlan.model_validate(fixed_plan)
         if len(plan.queries) > max_queries or any(q.claim_id not in records for q in plan.queries):
             raise ValueError("Fixed plan has unknown claims or exceeds the query limit")
-    searcher = search_client if search_client is not None else get_web_search_client()
+    cache_config = scoped_cache_config(db, settings)
+    searcher = search_client if search_client is not None else (
+        WebSearchClient(cache_config) if db.info.get('tenant_id') else get_web_search_client())
     urls, errors, seen, evidence, pages = {}, [], set(), [], []
     claims_by_id = {c.claim_id: c for c in claims}
     for query in plan.queries:
@@ -70,13 +74,13 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
                 if (claim_id, page.content_hash) in seen:
                     continue
                 seen.add((claim_id, page.content_hash))
-                extracted, trace = extract_evidence(claims_by_id[claim_id], page, client=client)
+                extracted, trace = extract_evidence(claims_by_id[claim_id], page, client=client,
+                    identity_scope=(cache_scope(db) + ':' + run_id) if db.info.get('tenant_id') else None)
                 traces.append(asdict(trace))
                 save_evidences(db, extracted)
                 evidence.extend(extracted)
         except (PageError, CacheMiss, LLMError) as exc:
             errors.append({"source_url": url, "category": getattr(exc, "category", type(exc).__name__)})
-    run_id = str(uuid4())
     tenant_id = db.info.get("tenant_id")
     selected_project_id = db.info.get("selected_project_id")
     if selected_project_id is None:
@@ -88,18 +92,22 @@ def run_web_research(db, claims, *, max_queries=4, max_results=3, max_pages=4,
               "status": "complete" if evidence and not errors else "partial" if evidence else "no_evidence",
               "queries": plan.model_dump()["queries"], "pages": pages,
               "evidences": [e.model_dump(mode="json") for e in evidence], "errors": errors, "traces": traces}
-    write_json(Path(settings.web_cache_dir) / "research" / (run_id + ".json"), result)
+    write_json(Path(cache_config.web_cache_dir) / "research" / (run_id + ".json"), result)
     return result
 
 
 def replay_snapshot(db, run_id):
     from uuid import UUID
-    path = Path(settings.web_cache_dir) / "research" / (str(UUID(run_id)) + ".json")
+    try:
+        cache_config = scoped_cache_config(db, settings)
+    except PermissionError:
+        raise CacheMiss("Research snapshot is not available in this project") from None
+    path = Path(cache_config.web_cache_dir) / "research" / (str(UUID(run_id)) + ".json")
     if not path.is_file():
         raise CacheMiss("No fixed research snapshot")
     snapshot = json.loads(path.read_text(encoding="utf-8"))
     tenant_id = db.info.get("tenant_id")
-    allowed_projects = {str(value) for value in (db.info.get("project_ids") or ())}
+    allowed_projects = {str(value) for value in (db.info.get("selected_project_ids") or db.info.get("project_ids") or ())}
     if not tenant_id or snapshot.get("tenant_id") != str(tenant_id):
         raise CacheMiss("Research snapshot is not available in this tenant")
     if snapshot.get("project_id") not in allowed_projects:

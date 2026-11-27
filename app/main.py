@@ -41,9 +41,12 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
                     raise RuntimeError("Database migration version is missing")
         if settings.environment == "production":
             validate_postgres_rls_runtime(engine)
-        with SessionLocal() as db:
-            get_bm25_store(engine).rebuild(db)
-            import_reports(db)
+        # Production has no global tenant context at startup. Build scoped
+        # BM25 lazily; never import global offline artifacts through the runtime role.
+        if settings.environment != "production":
+            with SessionLocal() as db:
+                get_bm25_store(engine).rebuild(db)
+                import_reports(db)
         yield
     finally:
         reasoning.close()
@@ -68,6 +71,8 @@ app.include_router(feedback.router, prefix="/api/v1", dependencies=[Depends(get_
 app.include_router(evaluations.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(evidences.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 app.include_router(human_reviews.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(projects.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
+app.include_router(audit.router, prefix="/api/v1", dependencies=[Depends(get_request_context)])
 
 
 @app.middleware("http")

@@ -1,0 +1,192 @@
+name: security acceptance
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-keycloak-browser-sso:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-runtime.txt
+            requirements-frontend.txt
+      - name: Install application and browser dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-runtime.txt -r requirements-frontend.txt playwright
+          python -m playwright install --with-deps chromium
+      - name: Real Keycloak and browser acceptance
+        run: python -m scripts.security_sso_e2e
+
+  security-scans:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-runtime.txt
+            requirements-frontend.txt
+      - name: Install runtime and security scanners
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-runtime.txt -r requirements-frontend.txt bandit pip-audit
+      - name: Static security scan
+        run: |
+          mkdir -p security-results
+          result=0
+          bandit -r app frontend -ll -ii -f json -o security-results/bandit.json || result=$?
+          python -c 'import json; d=json.load(open("security-results/bandit.json")); print(json.dumps([{k:r.get(k) for k in ("filename","line_number","test_id","issue_text","issue_severity")} for r in d["results"]],indent=2))'
+          exit "$result"
+      - name: Installed dependency vulnerability scan
+        if: always()
+        run: |
+          mkdir -p security-results
+          result=0
+          pip-audit --format json --output security-results/pip-audit.json || result=$?
+          if test -f security-results/pip-audit.json; then
+            python -c 'import json; d=json.load(open("security-results/pip-audit.json")); print(json.dumps([{"package":p["name"],"version":p["version"],"vulnerabilities":[{"id":v["id"],"fix_versions":v.get("fix_versions",[])} for v in p.get("vulns",[])]} for p in d.get("dependencies",[]) if p.get("vulns")],indent=2))'
+          fi
+          exit "$result"
+      - name: Upload security findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-findings
+          path: security-results/
+          if-no-files-found: error
+
+  transformers-upgrade-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Resolve candidate dependency stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-runtime.txt -r requirements-frontend.txt pytest pytest-asyncio pip-audit
+          python -m pip check
+      - name: Verify real inference library imports
+        run: |
+          python -c 'import transformers; from transformers import AutoModel, AutoModelForSequenceClassification, AutoTokenizer; from app.retrieval.native_models import NativeEncoder; print(transformers.__version__)'
+      - name: Candidate regression tests
+        env:
+          DATABASE_URL: sqlite://
+          ENVIRONMENT: test
+          AUTH_ENABLED: "false"
+        run: python -m pytest -q
+      - name: Candidate vulnerability scan
+        if: always()
+        run: |
+          mkdir -p candidate-security-results
+          python -m pip freeze > candidate-security-results/installed.txt
+          python -m pip_audit --format json --output candidate-security-results/pip-audit.json
+      - name: Upload candidate results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: transformers-upgrade-candidate
+          path: candidate-security-results/
+          if-no-files-found: error
+
+  isolated-runtime-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build isolated images
+        id: build-images
+        run: |
+          docker build --target business -t evidencepilot-business:ci .
+          docker build --target inference -t evidencepilot-inference:ci .
+      - name: Verify business imports and absence of model libraries
+        run: |
+          docker run --rm -e DATABASE_URL=sqlite:// evidencepilot-business:ci -c 'import os, importlib.util; import app.main, app.queue.tasks; assert os.getuid() != 0; assert all(importlib.util.find_spec(m) is None for m in ("torch","transformers","FlagEmbedding","peft"))'
+          docker run --rm evidencepilot-inference:ci -c 'import os, importlib.util; import app.inference_service; assert os.getuid() != 0; assert importlib.util.find_spec("sqlalchemy") is None'
+      - name: Actual private-network TLS and fault recovery acceptance
+        run: bash scripts/inference_transport_e2e.sh
+      - name: Cross-container TLS and native fixture acceptance
+        run: python -m scripts.inference_https_e2e
+      - name: Validate isolated Compose overlay
+        if: always()
+        run: |
+          cp .env.example .env
+          export EMBEDDING_REVISION=$(printf '%040d' 1) RERANKER_REVISION=$(printf '%040d' 2)
+          export EMBEDDING_MANIFEST_SHA256=$(printf '%064d' 1) RERANKER_MANIFEST_SHA256=$(printf '%064d' 2)
+          export EMBEDDING_BUNDLE_DIR=/tmp/embedding RERANKER_BUNDLE_DIR=/tmp/reranker
+          export INFERENCE_METRICS_TOKEN_FILE=/tmp/metrics-token INFERENCE_TOKEN_FILE=/tmp/token INFERENCE_CA_PATH=/tmp/ca INFERENCE_TLS_KEY_PATH=/tmp/key INFERENCE_TLS_CERT_PATH=/tmp/cert
+          docker compose -f docker-compose.yml -f deploy/compose.inference.yml --profile apps config --quiet
+      - name: Validate Prometheus config and rules
+        if: always()
+        run: |
+          docker run --rm --entrypoint /bin/promtool -v "$PWD/deploy:/etc/prometheus:ro" prom/prometheus:v2.55.1 check rules /etc/prometheus/inference-alerts.yml
+      - name: Generate image SBOMs and scan business image
+        if: always() && steps.build-images.outcome == 'success'
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-business:ci
+          format: cyclonedx
+          output: business-sbom.json
+      - name: Generate inference image SBOM
+        if: always() && steps.build-images.outcome == 'success'
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-inference:ci
+          format: cyclonedx
+          output: inference-sbom.json
+      - name: Gate business image on high and critical vulnerabilities
+        if: always() && steps.build-images.outcome == 'success'
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-business:ci
+          format: json
+          output: business-vulnerabilities.json
+          severity: HIGH,CRITICAL
+          trivy-config: deploy/trivy.yaml
+          exit-code: '1'
+      - name: Gate inference image on high and critical vulnerabilities
+        if: always() && steps.build-images.outcome == 'success'
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          image-ref: evidencepilot-inference:ci
+          format: json
+          output: inference-vulnerabilities.json
+          severity: HIGH,CRITICAL
+          trivy-config: deploy/trivy.yaml
+          exit-code: '1'
+      - name: Print actionable vulnerability findings
+        if: always()
+        run: |
+          python -c 'import glob,json; print(json.dumps([{"image":p,"target":r.get("Target"),"id":v.get("VulnerabilityID"),"package":v.get("PkgName"),"installed":v.get("InstalledVersion"),"fixed":v.get("FixedVersion")} for p in glob.glob("*-vulnerabilities.json") for r in json.load(open(p)).get("Results",[]) for v in r.get("Vulnerabilities",[])],indent=2))'
+      - name: Publish image evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isolated-runtime-security
+          path: |
+            *-sbom.json
+            *-vulnerabilities.json
+          if-no-files-found: error

@@ -92,7 +92,7 @@ class WebSearchClient:
             category = "invalid_response"
             raise SearchError(category) from None
         finally:
-            logger.info("web_search %s", json.dumps({"query": query, "elapsed_ms": (time.perf_counter() - start) * 1000,
+            logger.info("web_search %s", json.dumps({"query_sha256": digest(query), "elapsed_ms": (time.perf_counter() - start) * 1000,
                                                      "attempts": attempts, "error_category": category}))
 
 

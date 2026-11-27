@@ -24,6 +24,7 @@ from app.db.models import (DocumentChunk, DocumentRecord, EvidenceRecord, Evalua
 from app.db.session import apply_rls_context, get_db
 
 from app.config import settings
+from app.auth.introspection import validate_introspection, assert_active
 
 
 _bearer = HTTPBearer(auto_error=False)
@@ -43,7 +44,7 @@ class Principal:
 
 @lru_cache(maxsize=8)
 def _jwks_client(url: str) -> PyJWKClient:
-    return PyJWKClient(url, cache_keys=True, timeout=5)
+    return PyJWKClient(url, cache_keys=False, lifespan=60, timeout=5)
 
 
 def validate_auth_configuration() -> None:
@@ -53,6 +54,7 @@ def validate_auth_configuration() -> None:
         return
     if not settings.oidc_issuer or not settings.oidc_audience or not settings.oidc_jwks_url:
         raise RuntimeError("OIDC_ISSUER, OIDC_AUDIENCE and OIDC_JWKS_URL are required")
+    validate_introspection(settings)
     issuer = urlsplit(settings.oidc_issuer)
     jwks = urlsplit(settings.oidc_jwks_url)
     for value, parsed in (("OIDC_ISSUER", issuer), ("OIDC_JWKS_URL", jwks)):
@@ -93,6 +95,7 @@ def verify_access_token(token: str) -> Principal:
         )
         if not isinstance(claims.get("sub"), str) or not claims["sub"].strip():
             raise InvalidTokenError("Missing subject")
+        assert_active(settings, token, claims)
         audiences = claims.get("aud", [])
         if isinstance(audiences, str):
             audiences = [audiences]
@@ -104,6 +107,10 @@ def verify_access_token(token: str) -> Principal:
             email=claims.get("email") if isinstance(claims.get("email"), str) else None,
             tenant_id=claims.get("tenant_id") if isinstance(claims.get("tenant_id"), str) else None,
         )
+    except HTTPException:
+        raise
+    except jwt.PyJWKClientConnectionError:
+        raise HTTPException(status_code=503, detail="Identity provider temporarily unavailable") from None
     except (InvalidTokenError, KeyError, ValueError, jwt.PyJWTError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="Invalid or expired access token",
@@ -174,7 +181,7 @@ def _development_context(db: Session) -> tuple[User, Tenant, TenantMembership]:
         db.add(ProjectMembership(project_id=project.id, user_id=user.id, role="SUPER_ADMIN", is_active=True))
     # Development databases and test fixtures may predate the Alembic ownership
     # migration. Attach only unowned legacy rows to the local development scope.
-    for model in (ResearchTask, DocumentRecord, DocumentChunk, EvidenceRecord, TaskFeedback, EvaluationResult):
+    for model in (ResearchTask, DocumentRecord, DocumentChunk, TaskFeedback, EvaluationResult):
         db.execute(update(model).where(model.tenant_id.is_(None)).values(tenant_id=tenant.id))
         db.execute(update(model).where(
             model.tenant_id == tenant.id, model.project_id.is_(None)

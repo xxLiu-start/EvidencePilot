@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from streamlit.testing.v1 import AppTest
 
 from app.db.models import WebContent
-from app.db.session import Base, get_db
+from app.db.session import Base, get_db, get_cached_content
 from app.main import app
+from app.auth.oidc import get_request_context, get_current_principal
 from frontend.api_client import APIClient, APIError
 from scripts.adaptive_scenarios import run_scenario
 
@@ -25,6 +26,7 @@ def db(tmp_path):
 
 
 def test_evidence_is_bound_to_task_not_shared_claim_id_and_detects_changed_body(db):
+    get_request_context(db, get_current_principal(None), None)
     first = run_scenario(db, "sufficient_evidence")["state"]
     second = run_scenario(db, "sufficient_evidence")["state"]
     app.dependency_overrides[get_db] = lambda: db
@@ -39,7 +41,7 @@ def test_evidence_is_bound_to_task_not_shared_claim_id_and_detects_changed_body(
         original = client.get(f"/api/v1/tasks/{one}/evidences/{identifier}").json()
         assert original["provenance_valid"] and original["filename"]
         assert original["supporting_text"] in original["original"]["body"]
-        db.get(WebContent, original["content_hash"]).body += " changed"
+        get_cached_content(db, original["content_hash"]).body += " changed"
         db.commit()
         changed = client.get(f"/api/v1/tasks/{one}/evidences/{identifier}").json()
         assert not changed["provenance_valid"] and changed["original"]["body"] is None
@@ -49,6 +51,7 @@ def test_evidence_is_bound_to_task_not_shared_claim_id_and_detects_changed_body(
 
 
 def test_web_evidence_original_is_saved_snapshot_without_refetch(db, monkeypatch):
+    get_request_context(db, get_current_principal(None), None)
     state = run_scenario(db, "missing_evidence")["state"]
     app.dependency_overrides[get_db] = lambda: db
     monkeypatch.setattr(httpx.Client, "get", lambda *a, **k: pytest.fail("Evidence reads must not refetch a webpage"))

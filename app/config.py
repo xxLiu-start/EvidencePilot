@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     oidc_issuer: str = ""
     oidc_audience: str = ""
     oidc_jwks_url: str = ""
+    oidc_introspection_url: str = ""
+    oidc_introspection_client_id: str = ""
+    oidc_introspection_client_secret: SecretStr = Field(default=SecretStr(""), repr=False)
     llm_api_key: SecretStr = Field(default=SecretStr(""), repr=False)
     llm_base_url: str = ""
     llm_model: str = ""
@@ -46,8 +49,16 @@ class Settings(BaseSettings):
     document_max_upload_bytes: int = Field(default=20_000_000, gt=0, le=100_000_000)
     document_max_chunk_size: int = Field(default=2_000, ge=1, le=10_000)
     document_max_pages: int = Field(default=1_000, ge=1, le=10_000)
+    inference_mode: Literal["local", "remote"] = "local"
+    inference_url: str = ""
+    inference_ca_file: str = ""
+    inference_metrics_token: SecretStr = Field(default=SecretStr(""), repr=False)
+    inference_token: SecretStr = Field(default=SecretStr(""), repr=False)
+    inference_max_retries: int = Field(default=1, ge=0, le=2)
+    inference_timeout_seconds: float = Field(default=20, gt=0, le=120)
     embedding_model: str = "BAAI/bge-m3"
     embedding_revision: str = "main"
+    embedding_manifest_sha256: str = ""
     embedding_device: str = "cpu"
     embedding_use_fp16: bool = False
     embedding_batch_size: int = Field(default=16, gt=0)
@@ -56,6 +67,7 @@ class Settings(BaseSettings):
     embedding_local_files_only: bool = False
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     reranker_revision: str = "main"
+    reranker_manifest_sha256: str = ""
     reranker_device: str = "cpu"
     reranker_use_fp16: bool = False
     reranker_batch_size: int = Field(default=4, gt=0)
@@ -65,6 +77,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
+        secrets_dir="/run/secrets",
         extra="ignore"
     )
 

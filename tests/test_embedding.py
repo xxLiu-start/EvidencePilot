@@ -80,22 +80,19 @@ def test_empty_embedding_inputs_rejected(texts):
 
 
 def test_loader_downloads_only_inference_files_and_loads_local_snapshot(monkeypatch, tmp_path):
-    import sys
     from unittest.mock import Mock
 
     download = Mock(return_value=str(tmp_path))
     constructor = Mock(return_value="loaded-model")
     monkeypatch.setattr("huggingface_hub.snapshot_download", download)
-    monkeypatch.setitem(sys.modules, "FlagEmbedding", SimpleNamespace(BGEM3FlagModel=constructor))
+    monkeypatch.setattr("app.retrieval.native_models.NativeEncoder", constructor)
     config = Settings(database_url="sqlite://", embedding_local_files_only=True)
     assert _load_model(config) == "loaded-model"
     assert download.call_args.kwargs["local_files_only"] is True
     patterns = download.call_args.kwargs["allow_patterns"]
-    assert "pytorch_model.bin" in patterns and "tokenizer.json" in patterns
+    assert "pytorch_model.bin" not in patterns and "model.safetensors" in patterns and "tokenizer.json" in patterns
     assert all("onnx" not in pattern and pattern != "*" for pattern in patterns)
-    assert constructor.call_args.args == (str(tmp_path),)
-    assert constructor.call_args.kwargs["normalize_embeddings"] is True
-    assert constructor.call_args.kwargs["devices"] == "cpu"
+    assert constructor.call_args.args == (str(tmp_path), "cpu", False)
     download.reset_mock()
     local_config = Settings(database_url="sqlite://", embedding_model=str(tmp_path))
     assert _load_model(local_config) == "loaded-model"

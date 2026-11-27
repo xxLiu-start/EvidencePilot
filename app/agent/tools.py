@@ -15,6 +15,7 @@ from sqlalchemy import select
 
 from app.config import Settings, settings
 from app.connectors.web import WebSearchConnector
+from app.db.session import cache_scope, get_cached_content
 from app.db.models import AgentAllowedSource, EvidenceRecord, ToolExecutionReceipt, WebContent, WebSource
 from app.memory.checkpoints import fence_tool_commit
 from app.evidence.extraction import extract_evidence, save_evidences
@@ -175,7 +176,7 @@ def rag_retrieve_tool(db, context: ToolContext, query: str, top_k=5):
         if len(chunk.text) < 12:
             continue
         content_hash = digest(chunk.text)
-        if db.get(WebContent, content_hash) is None:
+        if get_cached_content(db, content_hash) is None:
             # Reuse the existing immutable body store for document snapshots too.
             db.add(WebContent(content_hash=content_hash, body=chunk.text, cache_path=""))
             db.flush()
@@ -202,7 +203,7 @@ def open_source_tool(db, context: ToolContext, url: str):
     source = db.scalar(select(WebSource).where(WebSource.canonical_url == canonical))
     if source is None or db.get(AgentAllowedSource, (context.task_id, source.id)) is None:
         raise ValueError("Source was not searched and cached by this task")
-    content = db.get(WebContent, source.content_hash)
+    content = get_cached_content(db, source.content_hash)
     if content is None or digest(content.body) != source.content_hash:
         raise ValueError("Cached source content is missing or invalid")
     # No GET is issued here: only this task's previously validated cache is opened.
@@ -211,7 +212,8 @@ def open_source_tool(db, context: ToolContext, url: str):
                       source.retrieved_at.isoformat(), source.content_hash, cache_hit=True)
     claim = ClaimInput(claim_id=context.claim["id"], claim_text=context.claim["claim"])
     evidences, _ = extract_evidence(claim, page, client=context.client, max_evidences=2,
-                                   timeout_seconds=context.remaining())
+                                   timeout_seconds=context.remaining(),
+                                   identity_scope=(cache_scope(db) + ':' + str(context.task_id)) if db.info.get('tenant_id') else None)
     result = ToolResult(ok=bool(evidences), source_ids=[str(source.id)],
                       evidence_ids=[str(e.evidence_id) for e in evidences],
                       summary=f"Validated {len(evidences)} verbatim excerpts from one task-authorized cached source.",

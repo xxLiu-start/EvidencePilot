@@ -8,8 +8,8 @@ def access_token_from_identity(user) -> str | None:
     if not getattr(user, "is_logged_in", False):
         return None
     tokens = getattr(user, "tokens", None)
-    getter = getattr(tokens, "get", None)
-    if not callable(getter):
+    try:
+        access_token = tokens["access"]
+    except (KeyError, TypeError, AttributeError):
         return None
-    access_token = getter("access")
     return access_token if isinstance(access_token, str) and access_token.strip() else None

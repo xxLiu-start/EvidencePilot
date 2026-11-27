@@ -7,6 +7,7 @@ from uuid import NAMESPACE_URL, uuid5
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from sqlalchemy import select
 
+from app.db.session import cache_scope, get_cached_content
 from app.db.models import ClaimRecord, DocumentChunk, EvidenceRecord, WebContent, WebSource
 from app.evidence.schema import Evidence
 from app.llm_client import LLMError, get_llm_client
@@ -26,7 +27,7 @@ class ExtractionDraft(BaseModel):
     evidences: list[QuoteDraft] = Field(max_length=5)
 
 
-def extract_evidence(claim, page, *, client=None, max_evidences=3, timeout_seconds=None, excerpt=None):
+def extract_evidence(claim, page, *, client=None, max_evidences=3, timeout_seconds=None, excerpt=None, identity_scope=None):
     inference = client if client is not None else get_llm_client()
     if excerpt is not None and excerpt not in page.body:
         raise ValueError("Extraction window must be a contiguous source excerpt")
@@ -54,6 +55,7 @@ def extract_evidence(claim, page, *, client=None, max_evidences=3, timeout_secon
             continue
         seen.add(key)
         identifier = uuid5(NAMESPACE_URL, json.dumps([
+            *([identity_scope] if identity_scope is not None else []),
             claim.claim_id, claim.claim_text, page.source_url, page.content_hash, *key
         ], ensure_ascii=False))
         result.append(Evidence(
@@ -76,7 +78,7 @@ def save_evidences(db, evidences, *, before_commit=None):
             claim = db.scalar(select(ClaimRecord).where(
                 ClaimRecord.claim_id == evidence.claim_id, ClaimRecord.claim_text == evidence.claim_text
             ))
-            content = db.get(WebContent, evidence.content_hash)
+            content = get_cached_content(db, evidence.content_hash)
             if evidence.source_type == "web":
                 source = db.scalar(select(WebSource).where(WebSource.canonical_url == evidence.source_url))
                 valid_source = source is not None and source.content_hash == evidence.content_hash

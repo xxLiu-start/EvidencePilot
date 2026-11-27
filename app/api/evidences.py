@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.tasks import require_task
+from app.db.session import cache_scope, get_cached_content
 from app.db.models import AgentRun, ClaimRecord, DocumentChunk, DocumentRecord, EvidenceRecord, WebContent, WebSource
 from app.db.session import get_db
 from app.search.cache import digest
@@ -44,7 +45,7 @@ def serialize(db, row, claim, *, include_source=False):
         "page": chunk.page if chunk else None, "section": chunk.section if chunk else None,
         "version": chunk.version if chunk else None}
     if include_source:
-        content = db.get(WebContent, row.content_hash)
+        content = get_cached_content(db, row.content_hash)
         source = db.scalar(select(WebSource).where(WebSource.canonical_url == row.source_url)) if row.source_url else None
         intact = bool(content and digest(content.body) == row.content_hash)
         value["original"] = {"kind": "cached_webpage" if row.source_type == "web" else "document_chunk",

@@ -1,0 +1,25 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/xxLiu-start/EvidencePilot/blob/security/cache-sso-acceptance/deploy/container.openvex.json",
+  "author": "EvidencePilot Security Engineering",
+  "timestamp": "2026-11-24T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2026-119586"
+      },
+      "products": [
+        {
+          "@id": "pkg:apk/wolfi/sqlite-libs"
+        },
+        {
+          "@id": "pkg:apk/chainguard/sqlite-libs"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "The advisory describes command injection in the SQLite command-line shell .recover command, not the SQLite shared library. The EvidencePilot Business and Inference runtime images include the SQLite shared library as a Python runtime dependency but do not install or execute the sqlite3 CLI or its .recover command. This assessment is limited to the sqlite-libs package in these runtime images. If a future image adds the sqlite3 CLI, this VEX statement must be re-evaluated and must not be applied to that component."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Text, DateTime, Integer, BigInteger, Float, Boolean, ForeignKey, UniqueConstraint, JSON, event
+from sqlalchemy import String, Text, DateTime, Integer, BigInteger, Float, Boolean, ForeignKey, ForeignKeyConstraint, UniqueConstraint, JSON, event
 from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, Session
@@ -201,7 +201,9 @@ def _track_chunk_changes(session, flush_context) -> None:
 
 class ClaimRecord(Base):
     __tablename__ = "claims"
-    __table_args__ = (UniqueConstraint("claim_id", "claim_text"),)
+    cache_scope: Mapped[str] = mapped_column(String(36), nullable=False, default="offline", server_default="offline", index=True)
+    __table_args__ = (UniqueConstraint("cache_scope", "claim_id", "claim_text"),
+                      UniqueConstraint("cache_scope", "id"),)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     claim_id: Mapped[str] = mapped_column(Text, nullable=False)
     claim_text: Mapped[str] = mapped_column(Text, nullable=False)
@@ -209,6 +211,7 @@ class ClaimRecord(Base):
 
 class WebContent(Base):
     __tablename__ = "web_contents"
+    cache_scope: Mapped[str] = mapped_column(String(36), primary_key=True, default="offline", server_default="offline")
     content_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     cache_path: Mapped[str] = mapped_column(Text, nullable=False)
@@ -216,11 +219,14 @@ class WebContent(Base):
 
 class WebSource(Base):
     __tablename__ = "web_sources"
+    cache_scope: Mapped[str] = mapped_column(String(36), nullable=False, default="offline", server_default="offline", index=True)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    canonical_url: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    __table_args__ = (UniqueConstraint("cache_scope", "canonical_url"),
+                      ForeignKeyConstraint(["cache_scope", "content_hash"], ["web_contents.cache_scope", "web_contents.content_hash"]),)
+    canonical_url: Mapped[str] = mapped_column(Text, nullable=False)
     fetched_url: Mapped[str] = mapped_column(Text, nullable=False)
     title: Mapped[str] = mapped_column(Text, nullable=False)
-    content_hash: Mapped[str] = mapped_column(ForeignKey("web_contents.content_hash"), nullable=False, index=True)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     retrieved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     source_type: Mapped[str] = mapped_column(String(20), nullable=False, default="web")
@@ -229,8 +235,10 @@ class WebSource(Base):
 
 class WebSearchRecord(Base):
     __tablename__ = "web_searches"
+    cache_scope: Mapped[str] = mapped_column(String(36), nullable=False, default="offline", server_default="offline", index=True)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    claim_record_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("claims.id"), nullable=False, index=True)
+    __table_args__ = (ForeignKeyConstraint(["cache_scope", "claim_record_id"], ["claims.cache_scope", "claims.id"]),)
+    claim_record_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     query: Mapped[str] = mapped_column(Text, nullable=False)
     elapsed_ms: Mapped[float] = mapped_column(Float, nullable=False)
     cache_hit: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -239,13 +247,19 @@ class WebSearchRecord(Base):
 
 class EvidenceRecord(Base):
     __tablename__ = "evidences"
+    cache_scope: Mapped[str] = mapped_column(String(36), nullable=False, default="offline", server_default="offline", index=True)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=True, index=True)
     project_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
-    claim_record_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("claims.id"), nullable=False, index=True)
+    __table_args__ = (
+        ForeignKeyConstraint(["cache_scope", "claim_record_id"], ["claims.cache_scope", "claims.id"]),
+        ForeignKeyConstraint(["cache_scope", "content_hash"], ["web_contents.cache_scope", "web_contents.content_hash"]),
+        ForeignKeyConstraint(["cache_scope", "source_url"], ["web_sources.cache_scope", "web_sources.canonical_url"]),
+    )
+    claim_record_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     source_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    source_url: Mapped[str | None] = mapped_column(ForeignKey("web_sources.canonical_url"), nullable=True)
-    content_hash: Mapped[str] = mapped_column(ForeignKey("web_contents.content_hash"), nullable=False)
+    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("documents.id"), nullable=True)
     chunk_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document_chunks.id"), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

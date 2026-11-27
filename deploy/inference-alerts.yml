@@ -1,0 +1,39 @@
+groups:
+  - name: evidencepilot-inference
+    rules:
+      - alert: InferenceUnavailable
+        expr: up{job="evidencepilot-inference"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Inference metrics target unavailable
+      - alert: InferenceErrorRate
+        expr: |
+          sum(rate(evidencepilot_inference_requests_total{outcome="error"}[5m]))
+          / clamp_min(sum(rate(evidencepilot_inference_requests_total[5m])), 0.000001) > 0.01
+          and sum(increase(evidencepilot_inference_requests_total[5m])) >= 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Inference error rate exceeds one percent
+      - alert: InferenceOverloaded
+        expr: |
+          sum(rate(evidencepilot_inference_requests_total{outcome="overloaded"}[5m]))
+          / clamp_min(sum(rate(evidencepilot_inference_requests_total[5m])), 0.000001) > 0.05
+          and sum(increase(evidencepilot_inference_requests_total[5m])) >= 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Inference overload rate exceeds five percent
+      - alert: InferenceHighLatency
+        expr: |
+          histogram_quantile(0.95, sum by (le,kind) (rate(evidencepilot_inference_duration_seconds_bucket[5m]))) > 5
+          and on(kind) sum by(kind) (increase(evidencepilot_inference_duration_seconds_count[5m])) >= 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Inference p95 exceeds five seconds

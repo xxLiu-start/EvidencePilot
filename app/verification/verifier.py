@@ -11,6 +11,7 @@ from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import select
 
 from app.config import settings
+from app.db.session import cache_scope, get_cached_content
 from app.db.models import ClaimRecord, DocumentChunk, EvidenceAssessment, EvidenceRecord, HumanReview, WebContent, WebSource
 from app.evidence.coverage import EvidenceStatus
 from app.llm_client import LLMError
@@ -46,7 +47,7 @@ def load_claim_evidence(db, claim, evidence_ids):
         record = db.get(ClaimRecord, row.claim_record_id)
         if record is None or record.claim_id != claim["id"] or record.claim_text != claim["claim"]:
             continue
-        content = db.get(WebContent, row.content_hash)
+        content = get_cached_content(db, row.content_hash)
         if content is None or digest(content.body) != row.content_hash:
             continue
         if content.body[row.quote_start:row.quote_end] != row.supporting_text:
